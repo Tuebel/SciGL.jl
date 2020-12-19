@@ -1,0 +1,10 @@
+name = "SciGL"
+uuid = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
+authors = ["Tim Redick <t.redick@irt.rwth-aachen.de>"]
+version = "0.1.0"
+
+[deps]
+GLAbstraction = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
+GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
+GeometryTypes = "4d00f742-c7ba-57c2-abde-4428a4b178cb"
+ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
