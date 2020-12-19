@@ -6,6 +6,7 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
+	"containerUser": "vscode",
 	"extensions": [
 		"epivision.vscode-file-header",
 		"julialang.language-julia",
