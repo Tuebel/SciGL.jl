@@ -1,7 +1,3 @@
-# @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
-# Copyright (c) 2020, Institute of Automatic Control - RWTH Aachen University
-# All rights reserved. 
-
 import GLFW
 using ModernGL, GeometryTypes
 # We're going to use only one feature of GLAbstraction---a slightly
@@ -64,9 +60,7 @@ glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW)
 # The vertex shader
 vertex_source = """
 #version 150
-
 in vec2 position;
-
 void main()
 {
     gl_Position = vec4(position, 0.0, 1.0);
@@ -76,9 +70,7 @@ void main()
 # The fragment shader
 fragment_source = """
 # version 150
-
 out vec4 outColor;
-
 void main()
 {
     outColor = vec4(1.0, 1.0, 1.0, 1.0);

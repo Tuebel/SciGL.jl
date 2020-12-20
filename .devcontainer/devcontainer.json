@@ -6,25 +6,27 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	"containerUser": "vscode",
 	"extensions": [
 		"epivision.vscode-file-header",
 		"julialang.language-julia",
+		"foxundermoon.shell-format"
 	],
 	"postCreateCommand": [
 		"julia",
 		".devcontainer/postcreate.jl",
 	],
 	"runArgs": [
+		// NVIDIA docker for CUDA
 		"--gpus",
 		"all",
+		// Forward Display for OpenGL
 		"--env=DISPLAY",
-		// "--env=QT_X11_NO_MITSHM=1",
+		"--env=QT_X11_NO_MITSHM=1",
 		"--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
 	],
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"julia.environmentPath": "/workspaces/julianv",
+		"julia.environmentPath": "/workspaces/scigl.jl",
 		"powerHeader.commentMode": "line",
 		"powerHeader.template": "file://$WORKSPACE_FOLDER/copyright_template.txt",
 		"terminal.integrated.shell.linux": "/bin/bash"
