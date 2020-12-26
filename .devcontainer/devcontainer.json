@@ -9,7 +9,7 @@
 	"extensions": [
 		"epivision.vscode-file-header",
 		"julialang.language-julia",
-		"foxundermoon.shell-format"
+		"ms-toolsai.jupyter"
 	],
 	"postCreateCommand": [
 		"julia",
@@ -22,7 +22,7 @@
 		// Forward Display for OpenGL
 		"--env=DISPLAY",
 		"--env=QT_X11_NO_MITSHM=1",
-		"--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
+		"--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
 	],
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
