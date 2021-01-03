@@ -1,133 +1,97 @@
-import GLFW
-using ModernGL, GeometryTypes
-# We're going to use only one feature of GLAbstraction---a slightly
-# more "julian" version of glShaderSource. There are many other places
-# where it offers simplifications, but in this tutorial we're being
-# deliberately low-level.
-using GLAbstraction
+# Here, we illustrate a more "julian" implementation that leverages
+# some of the advantages of GLAbstraction
+using ModernGL, GLAbstraction, GLFW
+# using GeometryBasics
 
-# A more comprehensive setting of GLFW window hints. Setting all
-# window hints reduces platform variance.
-# In future files, we'll make use of GLWindow to handle this automatically.
-window_hint = [
-    (GLFW.SAMPLES,      4),
-    (GLFW.DEPTH_BITS,   0),
+const GLA = GLAbstraction
 
-    (GLFW.ALPHA_BITS,   8),
-    (GLFW.RED_BITS,     8),
-    (GLFW.GREEN_BITS,   8),
-    (GLFW.BLUE_BITS,    8),
-    (GLFW.STENCIL_BITS, 0),
-    (GLFW.AUX_BUFFERS,  0),
-    (GLFW.CONTEXT_VERSION_MAJOR, 3),# minimum OpenGL v. 3
-    (GLFW.CONTEXT_VERSION_MINOR, 0),# minimum OpenGL v. 3.0
-    (GLFW.OPENGL_PROFILE, GLFW.OPENGL_ANY_PROFILE),
-    (GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE),
-]
-
-for (key, value) in window_hint
-    GLFW.WindowHint(key, value)
-end
-
-# Create the window
-window = GLFW.CreateWindow(800, 600, "Drawing polygons 1")
+# Create the window. This sets all the hints and makes the context current.
+window = GLFW.Window(name="Drawing polygons 5", resolution=(800, 600))
+# We assign the created window as the "current" context in GLAbstraction to which all GL objects are "bound", this is to avoid using GL objects in the wrong context, but actually currently no real checks are made except initially that at least there is a context initialized.
+# Think of this as a way of bookkeeping.
 GLFW.MakeContextCurrent(window)
-# Retain keypress events
-GLFW.SetInputMode(window, GLFW.STICKY_KEYS, GL_TRUE)
+GLA.set_context!(window)
 
-# Create the Vertex Array Object (VAO) and make it current
-# Note that while the tutorial describes this after the attributes (below),
-# we need to make vao current before calling glVertexAttribPointer.
-# You should also do this before creating any element arrays (see
-# drawing_polygons4.jl)
-vao = Ref(GLuint(0))
-glGenVertexArrays(1, vao)
-glBindVertexArray(vao[])
-
-# The vertices of our triangle
-vertices = Point2f0[(0, 0.5), (0.5, -0.5), (-0.5, -0.5)] # note Float32
-
-# Create the Vertex Buffer Object (VBO)
-vbo = Ref(GLuint(0))   # initial value is irrelevant, just allocate space
-glGenBuffers(1, vbo)
-glBindBuffer(GL_ARRAY_BUFFER, vbo[])
-glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW)
-
-# The shaders. Here we do everything manually, but life will get
-# easier with GLAbstraction. See drawing_polygons5.jl for such an
-# implementation.
-
-# The vertex shader
-vertex_source = """
+# The vertex shader---note the `vert` in front of """
+vertex_shader = GLA.vert"""
 #version 150
-in vec2 position;
+
+in vec3 position;
+in vec3 normal;
+
+out vec3 Color;
+
 void main()
 {
-    gl_Position = vec4(position, 0.0, 1.0);
+    Color = normal;
+    gl_Position = vec4(position, 1.0);
 }
 """
 
 # The fragment shader
-fragment_source = """
+fragment_shader = GLA.frag"""
 # version 150
+
+in vec3 Color;
+
 out vec4 outColor;
+
 void main()
 {
-    outColor = vec4(1.0, 1.0, 1.0, 1.0);
+    outColor = vec4(Color, 1.0);
 }
 """
 
-# Compile the vertex shader
-vertex_shader = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertex_shader, vertex_source)  # nicer thanks to GLAbstraction
-glCompileShader(vertex_shader)
-# Check that it compiled correctly
-status = Ref(GLint(0))
-glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, status)
-if status[] != GL_TRUE
-    buffer = Array(UInt8, 512)
-    glGetShaderInfoLog(vertex_shader, 512, C_NULL, buffer)
-    @error "$(unsafe_string(pointer(buffer), 512))"
-end
+# First we combine these two shaders into the program that will be used to render
+prog = GLA.Program(vertex_shader, fragment_shader)
 
-# Compile the fragment shader
-fragment_shader = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragment_shader, fragment_source)
-glCompileShader(fragment_shader)
-# Check that it compiled correctly
-status = Ref(GLint(0))
-glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, status)
-if status[] != GL_TRUE
-    buffer = Array(UInt8, 512)
-    glGetShaderInfoLog(fragment_shader, 512, C_NULL, buffer)
-    @error "$(unsafe_string(pointer(buffer), 512))"
-end
+# Now we define the geometry that we will render
+# The positions of the vertices in our rectangle
+vertex_positions = Point{2,Float32}[(-0.5,  0.5),     # top-left
+                                    (0.5,  0.5),     # top-right
+                                    (0.5, -0.5),     # bottom-right
+                                    (-0.5, -0.5)]     # bottom-left
 
-# Connect the shaders by combining them into a program
-shader_program = glCreateProgram()
-glAttachShader(shader_program, vertex_shader)
-glAttachShader(shader_program, fragment_shader)
-glBindFragDataLocation(shader_program, 0, "outColor") # optional
+# The colors assigned to each vertex
+vertex_colors = Vec3f0[(1, 0, 0),                     # top-left
+                       (0, 1, 0),                     # top-right
+                       (0, 0, 1),                     # bottom-right
+                       (1, 1, 1)]                     # bottom-left
 
-glLinkProgram(shader_program)
-glUseProgram(shader_program)
+# Specify how vertices are arranged into faces
+# Face{N,T} type specifies a face with N vertices, with index type
+# T (you should choose UInt32), and index-offset O. If you're
+# specifying faces in terms of julia's 1-based indexing, you should set
+# O=0. (If you instead number the vertices starting with 0, set
+# O=-1.)
+elements = TriangleFace{UInt32}[(0, 1, 2),          # the first triangle
+                          			(2, 3, 0)]          # the second triangle
 
-# Link vertex data to attributes
-pos_attribute = glGetAttribLocation(shader_program, "position")
-glVertexAttribPointer(pos_attribute, length(eltype(vertices)),
-                      GL_FLOAT, GL_FALSE, 0, C_NULL)
-glEnableVertexAttribArray(pos_attribute)
 
-# Draw while waiting for a close event
+# This geometry now has to be uploaded into OpenGL Buffers and attached to the correct points in a VertexArray, to be used in the above program. 
+# We first generate the Buffers and their BufferAttachmentInfos, for each of the buffers, from the corresponding names and data 
+buffers = GLA.generate_buffers(prog, GLA.GEOMETRY_DIVISOR, posi=vertex_positions, color=vertex_colors)
+
+# The GEOMETRY_DIVISOR distinguishes that this is geometry data and not possible uniform data used in instanced vertexarrays
+
+# Now we create a VertexArray from these buffers and use the elements as the indices
+
+vao = GLA.VertexArray(buffers, elements)
+
+# Draw until we receive a close event
 glClearColor(0,0,0,0)
 while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT)
-    glDrawArrays(GL_TRIANGLES, 0, length(vertices))
+    draw(model)
+    # GLA.bind(prog)
+    # GLA.bind(vao)
+    # GLA.draw(vao)
+    # GLA.unbind(vao) # optional in this case
+    # GLA.unbind(prog) # optional in this case
     GLFW.SwapBuffers(window)
     GLFW.PollEvents()
     if GLFW.GetKey(window, GLFW.KEY_ESCAPE) == GLFW.PRESS
         GLFW.SetWindowShouldClose(window, true)
     end
 end
-
 GLFW.DestroyWindow(window)  # needed if you're running this from the REPL
