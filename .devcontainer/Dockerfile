@@ -1,6 +1,6 @@
 # @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
-# Copyright (c) 2020, Institute of Automatic Control - RWTH Aachen University
-# All rights reserved.
+# Copyright (c) 2020, Tim Redick
+# All rights reserved. 
 
 # Multi Stage Build: First pull julia image and copy the artifacts to the cudagl image
 FROM julia:buster AS julia_img
