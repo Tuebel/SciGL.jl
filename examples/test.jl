@@ -17,36 +17,30 @@ vertex_shader = GLA.vert"""
 #version 330 core
 in vec3 normal;
 in vec3 position;
+in vec3 color;
 
-uniform mat3 model_M;
-uniform vec3 model_v;
-// uniform mat3 view_M;
-// uniform vec3 view_v;
-// uniform mat4 projection_matrix;
-
+out vec3 frag_color;
 out vec3 world_normal;
-out float depth;
-out vec3 world_position;
+out vec4 world_position;
 
-// TODO replace
-out vec3 color;
+uniform mat4 model_matrix;
+// uniform mat4 projection_matrix;
+// uniform mat4 view_matrix;
 
 void main()
 {
-  // normals in world coordinates
-  // TODO replace with model_M & model_v
-  // world_normal = normalize(mat3(transpose(inverse(model_matrix))) * normal);
-  color = normal;
+  world_normal = normalize(mat3(transpose(inverse(model_matrix))) * normal);
   
-  // As in CoordinateTransformations.AffineMaps
-  vec3 world_pos = model_M * position + model_v;
-  // vec3 view_pos  = view_M * world_position + view_v;
+  world_position = model_matrix * vec4(position, 1.0);
+  // vec4 view_pos  = view_matrix * world_position;
+  // TODO
+  gl_Position = world_position;
   // gl_Position = projection_matrix * view_pos;
-  gl_Position = vec4(world_pos, 1.0);
-  // gl_Position = vec4(position, 1.0);
 
-  // for depth rendering in fragement shader
-  // depth = view_pos.z;
+
+  // TODO
+  // frag_color = color;
+  frag_color = normal;
 }
 """
 
@@ -54,13 +48,15 @@ void main()
 fragment_shader = GLA.frag"""
 # version 150
 
-in vec3 color;
+in vec3 frag_color;
+in vec3 world_normal;
+in vec3 world_position;
 
-out vec4 outColor;
+out vec4 out_color;
 
 void main()
 {
-    outColor = vec4(color, 1.0);
+    out_color = vec4(frag_color, 1.0);
 }
 """
 
@@ -71,7 +67,7 @@ prog = GLA.Program(vertex_shader, fragment_shader)
 model = Model3D("examples/meshes/cube.obj", prog)
 
 # Default pose
-t = Translation(0.5, 0, 0)
+t = Translation(0.3, -0.2, 0)
 r = UnitQuaternion(1, 0, 0, 0)
 R = LinearMap(r)
 # Active: rotate then translate

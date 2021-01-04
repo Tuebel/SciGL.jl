@@ -5,6 +5,22 @@ Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to
 I try to incorporate existing Julia packages wherever possible.
 The next section contains a list and use cases of the packages
 
+## Shader naming conventions
+**Uniforms**:
+- `mat4 model_matrix`: affine transformation matrix to transform model to world coordinates
+- `mat4 view_matrix`: affine transformation matrix to transform world to view coordinates
+- `mat4 projection_matrix`: perspective transformation matrix from view to clip coordinates
+
+**Vertex Shader Inputs**:
+- `vec3 position`: vertex position in model coordinates
+- `vec3 normal`: vertex normal in model coordinates
+- `vec3 color`: vertex color in model coordinates
+
+**Fragment Shader Inputs**:
+- `vec3 frag_color`: color of the fragment
+- `vec3 world_normal`: normal vector of the fragment in world coordinates
+- `vec3 world_position`: position of the fragment in world coordinates
+
 ## Package Dependencies
 - [CoordinateTransformations](https://github.com/JuliaGeometry/CoordinateTransformations.jl): Representing and chaining transformations like rotations, translations, and perspective transfromations.
   [Rotations](https://github.com/JuliaGeometry/Rotations.jl) are handled by the equally named package.
