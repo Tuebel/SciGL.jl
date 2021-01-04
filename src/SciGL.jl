@@ -1,3 +1,5 @@
+__precompile__()
+
 module SciGL
 
 # Dependencies
@@ -9,14 +11,18 @@ using MeshIO
 using Rotations
 using StaticArrays
 
-# This lib
-include("Model3D.jl")
-include("TransformationExtensions.jl")
+# lib includes
+include("Scene.jl")
+include("Transformations.jl")
+include("Camera.jl")
+include("MeshModel.jl")
 
 # Export types
-export Model3D
+export MeshModel
+export Pose, SceneObject, SceneType
 
 # Export functions
-export draw
+export AffineMap, Matrix, SMatrix
+export draw, to_gpu
 
 end # module

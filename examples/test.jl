@@ -64,20 +64,19 @@ void main()
 prog = GLA.Program(vertex_shader, fragment_shader)
 
 # Now we load the model
-model = Model3D("examples/meshes/cube.obj", prog)
-
+mesh = MeshModel("examples/meshes/cube.obj", prog)
 # Default pose
-t = Translation(0.3, -0.2, 0)
-r = UnitQuaternion(1, 0, 0, 0)
-R = LinearMap(r)
-# Active: rotate then translate
-pose = t ∘ R
+# pose = Pose(UnitQuaternion(0.7,0.7,0.7,0.7), Translation(0.3, -0.2, 0))
+pose = Pose(UnitQuaternion(1.0, 0.0, 0.0, 0.0), Translation(0.0, 0.0, 0.0))
+# Warp in SceneObject
+object = SceneObject(mesh, pose, prog)
 
 # Draw until we receive a close event
 glClearColor(0,0,0,0)
 while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT)
-    draw(model, pose)
+    to_gpu(object)
+    draw(object)
     GLFW.SwapBuffers(window)
     GLFW.PollEvents()
     if GLFW.GetKey(window, GLFW.KEY_ESCAPE) == GLFW.PRESS

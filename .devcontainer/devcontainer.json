@@ -9,7 +9,8 @@
 	"extensions": [
 		"epivision.vscode-file-header",
 		"julialang.language-julia",
-		"ms-toolsai.jupyter"
+		"ms-toolsai.jupyter",
+		"streetsidesoftware.code-spell-checker"
 	],
 	"postCreateCommand": [
 		"julia",
