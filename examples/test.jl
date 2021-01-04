@@ -1,7 +1,7 @@
 # Here, we illustrate a more "julian" implementation that leverages
 # some of the advantages of GLAbstraction
-using ModernGL, GLAbstraction, GLFW
-# using GeometryBasics
+using ModernGL, GLAbstraction, GLFW, SciGL
+using CoordinateTransformations, Rotations
 
 const GLA = GLAbstraction
 
@@ -14,17 +14,39 @@ GLA.set_context!(window)
 
 # The vertex shader---note the `vert` in front of """
 vertex_shader = GLA.vert"""
-#version 150
-
-in vec3 position;
+#version 330 core
 in vec3 normal;
+in vec3 position;
 
-out vec3 Color;
+uniform mat3 model_M;
+uniform vec3 model_v;
+// uniform mat3 view_M;
+// uniform vec3 view_v;
+// uniform mat4 projection_matrix;
+
+out vec3 world_normal;
+out float depth;
+out vec3 world_position;
+
+// TODO replace
+out vec3 color;
 
 void main()
 {
-    Color = normal;
-    gl_Position = vec4(position, 1.0);
+  // normals in world coordinates
+  // TODO replace with model_M & model_v
+  // world_normal = normalize(mat3(transpose(inverse(model_matrix))) * normal);
+  color = normal;
+  
+  // As in CoordinateTransformations.AffineMaps
+  vec3 world_pos = model_M * position + model_v;
+  // vec3 view_pos  = view_M * world_position + view_v;
+  // gl_Position = projection_matrix * view_pos;
+  gl_Position = vec4(world_pos, 1.0);
+  // gl_Position = vec4(position, 1.0);
+
+  // for depth rendering in fragement shader
+  // depth = view_pos.z;
 }
 """
 
@@ -32,62 +54,34 @@ void main()
 fragment_shader = GLA.frag"""
 # version 150
 
-in vec3 Color;
+in vec3 color;
 
 out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(Color, 1.0);
+    outColor = vec4(color, 1.0);
 }
 """
 
 # First we combine these two shaders into the program that will be used to render
 prog = GLA.Program(vertex_shader, fragment_shader)
 
-# Now we define the geometry that we will render
-# The positions of the vertices in our rectangle
-vertex_positions = Point{2,Float32}[(-0.5,  0.5),     # top-left
-                                    (0.5,  0.5),     # top-right
-                                    (0.5, -0.5),     # bottom-right
-                                    (-0.5, -0.5)]     # bottom-left
+# Now we load the model
+model = Model3D("examples/meshes/cube.obj", prog)
 
-# The colors assigned to each vertex
-vertex_colors = Vec3f0[(1, 0, 0),                     # top-left
-                       (0, 1, 0),                     # top-right
-                       (0, 0, 1),                     # bottom-right
-                       (1, 1, 1)]                     # bottom-left
-
-# Specify how vertices are arranged into faces
-# Face{N,T} type specifies a face with N vertices, with index type
-# T (you should choose UInt32), and index-offset O. If you're
-# specifying faces in terms of julia's 1-based indexing, you should set
-# O=0. (If you instead number the vertices starting with 0, set
-# O=-1.)
-elements = TriangleFace{UInt32}[(0, 1, 2),          # the first triangle
-                          			(2, 3, 0)]          # the second triangle
-
-
-# This geometry now has to be uploaded into OpenGL Buffers and attached to the correct points in a VertexArray, to be used in the above program. 
-# We first generate the Buffers and their BufferAttachmentInfos, for each of the buffers, from the corresponding names and data 
-buffers = GLA.generate_buffers(prog, GLA.GEOMETRY_DIVISOR, posi=vertex_positions, color=vertex_colors)
-
-# The GEOMETRY_DIVISOR distinguishes that this is geometry data and not possible uniform data used in instanced vertexarrays
-
-# Now we create a VertexArray from these buffers and use the elements as the indices
-
-vao = GLA.VertexArray(buffers, elements)
+# Default pose
+t = Translation(0.5, 0, 0)
+r = UnitQuaternion(1, 0, 0, 0)
+R = LinearMap(r)
+# Active: rotate then translate
+pose = t ∘ R
 
 # Draw until we receive a close event
 glClearColor(0,0,0,0)
 while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT)
-    draw(model)
-    # GLA.bind(prog)
-    # GLA.bind(vao)
-    # GLA.draw(vao)
-    # GLA.unbind(vao) # optional in this case
-    # GLA.unbind(prog) # optional in this case
+    draw(model, pose)
     GLFW.SwapBuffers(window)
     GLFW.PollEvents()
     if GLFW.GetKey(window, GLFW.KEY_ESCAPE) == GLFW.PRESS
