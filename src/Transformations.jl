@@ -10,7 +10,12 @@ import Base.|>
 
 |>(x,y,f) = f(x, y)
 
-decompose(a::AbstractAffineMap) = Matrix(a.linear), Vector(a.translation)
+"""
+    decompose(a::AbstractAffineMap)
+Extract the linear map and translation as matrix and vector.
+They are of type Float32 for OpenGL
+"""
+decompose(a::AbstractAffineMap) = Matrix{Float32}(a.linear), Vector{Float32}(a.translation)
 
 # Convert to AffineMap
 
@@ -31,12 +36,14 @@ CoordinateTransformations.AffineMap(p::Pose) = AffineMap(p.R, p.t)
 """
     Matrix(M::AbstractMatrix, v::AbstractVector)
 Converts a linear map and a translation vector to an augmented affine transformation matrix.
+The matrix is of type Float32 for OpenGL
 """
-Base.Matrix(M::AbstractMatrix, v::AbstractVector) = Matrix([M v; 0 0 0 1])
+Base.Matrix(M::AbstractMatrix, v::AbstractVector) = Matrix{Float32}([M v; 0 0 0 1])
 
 """
     Matrix(a::AffineMap)
 Converts an AffineMap to an affine transformation matrix.
+The matrix is of type Float32 for OpenGL
 """
 Base.Matrix(a::AbstractAffineMap) = decompose(a)... |> Matrix
 
@@ -51,12 +58,10 @@ Base.Matrix(p::Pose) = AffineMap(p) |> Matrix
     SMatrix(a::AffineMap)
 Converts an AffineMap to a static affine transformation matrix.
 """
-StaticArrays.SMatrix(a::AbstractAffineMap) = Matrix(a) |> SMatrix{4,4}
+StaticArrays.SMatrix(a::AbstractAffineMap) = Matrix(a) |> SMatrix{4,4,Float32}
 
 """
     SMatrix(p::pose)
 Converts a Pose to an static affine transformation matrix.
 """
-StaticArrays.SMatrix(p::Pose) = Matrix(p) |> SMatrix{4,4}
-
-# TODO force floats
+StaticArrays.SMatrix(p::Pose) = Matrix(p) |> SMatrix{4,4,Float32}
