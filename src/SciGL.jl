@@ -1,6 +1,5 @@
-__precompile__()
-
 module SciGL
+__precompile__()
 
 # Dependencies
 using CoordinateTransformations
@@ -8,6 +7,7 @@ using GeometryBasics
 using GLAbstraction
 using FileIO
 using MeshIO
+using LinearAlgebra
 using Rotations
 using StaticArrays
 
@@ -18,11 +18,19 @@ include("Camera.jl")
 include("MeshModel.jl")
 
 # Export types
+export CvCamera
+export GLOrthoCamera
 export MeshModel
-export Pose, SceneObject, SceneType
+export Pose
+export SceneObject
+export SceneType
 
 # Export functions
-export AffineMap, Matrix, SMatrix
-export draw, to_gpu
+export AffineMap
+export Matrix
+export SMatrix
+export draw
+export lookat
+export to_gpu
 
 end # module

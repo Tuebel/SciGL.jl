@@ -22,6 +22,8 @@ RUN chmod +x /tmp/miniconda.sh && \
   rm /tmp/miniconda.sh
 ENV PATH="/root/miniconda3/bin:${PATH}"
 RUN conda install -c conda-forge jupyterlab -y
-COPY install_ijulia.jl /tmp/install_ijulia.jl
-RUN julia /tmp/install_ijulia.jl && \
-  rm /tmp/install_ijulia.jl
+# Convenient Julia packages and config
+COPY install_packages.jl /tmp/install_packages.jl
+RUN julia /tmp/install_packages.jl && \
+  rm /tmp/install_packages.jl
+COPY startup.jl /root/.julia/config/startup.jl

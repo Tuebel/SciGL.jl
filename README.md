@@ -10,6 +10,7 @@ The next section contains a list and use cases of the packages
 - `mat4 model_matrix`: affine transformation matrix to transform model to world coordinates
 - `mat4 view_matrix`: affine transformation matrix to transform world to view coordinates
 - `mat4 projection_matrix`: perspective transformation matrix from view to clip coordinates
+> **Warning** all matrix and vector uniforms must be StaticArrays of type `Float32`
 
 **Vertex Shader Inputs**:
 - `vec3 position`: vertex position in model coordinates
@@ -17,9 +18,11 @@ The next section contains a list and use cases of the packages
 - `vec3 color`: vertex color in model coordinates
 
 **Fragment Shader Inputs**:
-- `vec3 frag_color`: color of the fragment
+- `vec3 model_color`: color of the fragment
+- `vec3 model_normal`:  normal vector of the fragment in model coordinates
+- `vec4 view_position`: position vector of the fragment in view coordinates
 - `vec3 world_normal`: normal vector of the fragment in world coordinates
-- `vec3 world_position`: position of the fragment in world coordinates
+- `vec4 world_position`: position of the fragment in world coordinates
 
 ## Package Dependencies
 - [CoordinateTransformations](https://github.com/JuliaGeometry/CoordinateTransformations.jl): Representing and chaining transformations like rotations, translations, and perspective transfromations.
