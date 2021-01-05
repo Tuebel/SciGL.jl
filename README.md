@@ -20,6 +20,8 @@ The next section contains a list and use cases of the packages
 **Fragment Shader Inputs**:
 - `vec3 model_color`: color of the fragment
 - `vec3 model_normal`:  normal vector of the fragment in model coordinates
+- `vec4 model_position`: position vector of the fragment in model coordinates
+- `vec3 view_normal`: normal vector of the fragment in view coordinates
 - `vec4 view_position`: position vector of the fragment in view coordinates
 - `vec3 world_normal`: normal vector of the fragment in world coordinates
 - `vec4 world_position`: position of the fragment in world coordinates
