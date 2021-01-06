@@ -2,7 +2,7 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved.
 
-abstract type Camera <: SceneType end
+abstract type Camera end
 
 """
 A Camera parametrized like OpenCV.
@@ -50,7 +50,7 @@ struct GLOrthoCamera <: Camera
 end
 
 """
-    OrthgraphicCamera(c::CvCamera)
+    OrthgraphicCamera(c::CvCamera):SceneObject{VertexArray}
 extracts the orthographic scaling from the OpenCV camera
 """
 OrthgraphicCamera(c::CvCamera) = GLOrthoCamera(0, c.width, 0, c.height, c.near, c.far)
@@ -170,14 +170,9 @@ lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up::SVector{3}) 
     to_gpu(so::SceneObject{Camera})
 Transfers the view and projection matrices to the OpenGL program
 """
-function to_gpu(so::SceneObject{T}) where {T <: Camera}
-    GLAbstraction.bind(so.program)
-    GLAbstraction.gluniform(so.program, :view_matrix, view_matrix(so))
-    GLAbstraction.gluniform(so.program, :projection_matrix, projection_matrix(so.object))
-    GLAbstraction.unbind(so.program)
+function to_gpu(so::SceneObject{T}, program::GLAbstraction.AbstractProgram) where {T <: Camera}
+    GLAbstraction.bind(program)
+    GLAbstraction.gluniform(program, :view_matrix, view_matrix(so))
+    GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(so.object))
+    GLAbstraction.unbind(program)
 end
-
-
-const WIDTH = 800
-const HEIGHT = 600
-cv_cam = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)

@@ -1,5 +1,6 @@
-module SciGL
 __precompile__()
+
+module SciGL
 
 # Dependencies
 using CoordinateTransformations
@@ -12,20 +13,20 @@ using Rotations
 using StaticArrays
 
 # lib includes
+include("BaseExtensions.jl")
 include("Scene.jl")
 include("Transformations.jl")
 include("Camera.jl")
-include("MeshModel.jl")
 include("Shaders.jl")
+include("MeshModel.jl")
 
-# Export types
+# Scene types
 export CvCamera
 export GLOrthoCamera
-export MeshModel
 export Pose
 export SceneObject
-export SceneType
 
+# Shaders
 export DepthFrag
 export ModelNormalFrag
 export NormalFrag
@@ -33,10 +34,8 @@ export SilhouetteFrag
 export SimpleVert
 
 # Export functions
-export AffineMap
-export Matrix
-export SMatrix
 export draw
+export load_mesh
 export lookat
 export to_gpu
 
