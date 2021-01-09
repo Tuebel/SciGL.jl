@@ -76,8 +76,10 @@ uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
 version = "0.9.6"
 
 [[FixedPointNumbers]]
-deps = ["Statistics"]
-git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
+deps = ["Random", "Statistics"]
+git-tree-sha1 = "627ff3538692303edfabba0489bdf0efb430e78c"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaMath/FixedPointNumbers.jl"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
 
