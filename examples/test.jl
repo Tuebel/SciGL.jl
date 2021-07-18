@@ -10,7 +10,7 @@ const WIDTH = 800
 const HEIGHT = 600
 
 # Create the window. This sets all the hints and makes the context current.
-window = context_fullscreen(WIDTH, HEIGHT)
+window = context_window(WIDTH, HEIGHT)
 
 # Compile shader program
 normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)

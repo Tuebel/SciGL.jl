@@ -34,11 +34,29 @@ The next section contains a list and use cases of the packages
 - [MeshIO](https://github.com/JuliaIO/MeshIO.jl): Load mesh files like *.obj*, *.ply*, and *.stl*.
   It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this packages is also included.
 
-# CudaGL.jl devcontainer
+# OpenGL.jl devcontainer
 Recommended: Install the vscode [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin and load the [devcontainer](https://code.visualstudio.com/docs/remote/containers).
 Alternatively install julia locally, activate and instantia the SciGL.jl environment.
 
+## Docker + GPU
+On Ubuntu 20.04 and other recent Linux distros, NVIDIA allows for on-demand switching between dedicated and integrated graphics.
+This allows to save electricity by only using the dedicated GPU when required.
+A choice of Intel or NVIDIA GPUs can be made by (un)commenting the specific lines of the `runArgs` and `containerEnv` in [devcontainer.json](.devcontainer/devcontainer.json).
+Alternatively, you could run julia with the environment variables set:
+```shell
+# NVIDIA GPU
+__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia julia script.
+# Integrated graphics
+__GLX_VENDOR_LIBRARY_NAME=mesa julia script.jl
+```
+You can verify whether the NVIDIA GPU is used in a Julia program by the following command on the host:
+```shell
+nvidia-smi | grep julia
+```
+
 ## Debug in vscode
+Later versions of the Julia extension seem to have fixed the issue.
+
 The vscode julia debugger crashes when loading the native OpenGL functions.
 Enabling the **Compiled Mode** as described [here](https://www.julia-vscode.org/docs/stable/userguide/debugging/) seems to be a workaround.
 
