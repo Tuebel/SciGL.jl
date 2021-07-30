@@ -18,6 +18,7 @@
 		".devcontainer/postcreate.jl",
 	],
 	"runArgs": [
+		// Graphics devices only work on native Linux host, comment on Windows
 		// Intel
 		"--device=/dev/dri:/dev/dri",
 		// Comment if nvidia-docker is unavailable
@@ -26,7 +27,11 @@
 		"--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
 	],
 	"containerEnv": {
+		// Native Linux host
 		"DISPLAY": "${localEnv:DISPLAY}",
+		// Windows host
+		// "DISPLAY": "host.docker.internal:0.0",
+
 		"QT_X11_NO_MITSHM": "1",
 		// If NVIDIA Prime Profile On-Demand is active, uncomment both to use NVIDIA GPU
 		// Integrated graphics are used otherwise
