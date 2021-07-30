@@ -28,16 +28,7 @@ RUN julia /tmp/install_packages.jl && \
   rm /tmp/install_packages.jl
 COPY startup.jl /root/.julia/config/startup.jl
 
-# setup non-root user
-ARG USERNAME=julia
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && apt-get update \
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
-
-# Settings
-CMD ["bash"]
+# Non-root user cannot be mapped by rootless Docker.
+# Moreover, non-root user will cause gitlab-ci to fail.
+RUN cp /etc/skel/.bashrc /root && \
+    echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /root/.bashrc
