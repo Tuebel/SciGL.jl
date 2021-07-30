@@ -54,6 +54,41 @@ You can verify whether the NVIDIA GPU is used in a Julia program by the followin
 nvidia-smi | grep julia
 ```
 
+## Docker + GUI in Windows
+[Install](https://docs.docker.com/docker-for-windows/wsl/) Docker with the Windows Subsystem for Linux (WSL2) backend.
+Unfortunately [GPU support for WSL2](https://www.docker.com/blog/wsl-2-gpu-support-is-here/) is only available for Windows Insiders.
+Thus, you will need to install an x-server, for example [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+
+- Make sure that VcXsrv can communicate through the firewall.
+- Uncheck "native opengl"
+- Check "Disable Access Control"
+
+Moreover, you will have to modify [.devcontainer/devcontainer.json] since GPU passthrough is not possible:
+```json
+"runArgs": [
+  // Graphics devices only work on native Linux host, comment on Windows
+  // Intel
+  // "--device=/dev/dri:/dev/dri",
+  // Comment if nvidia-docker is unavailable
+  // "--gpus=all",
+  // Write to X11 server of host
+  // "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
+],
+"containerEnv": {
+  // Native Linux host
+  // "DISPLAY": "${localEnv:DISPLAY}",
+  // Windows host
+  "DISPLAY": "host.docker.internal:0.0",
+  "LIBGL_ALWAYS_INDIRECT": "0",
+
+  "QT_X11_NO_MITSHM": "1",
+  // If NVIDIA Prime Profile On-Demand is active, uncomment both to use NVIDIA GPU
+  // Integrated graphics are used otherwise
+  "__NV_PRIME_RENDER_OFFLOAD": "1",
+  "__GLX_VENDOR_LIBRARY_NAME": "nvidia",
+},
+```
+
 ## Debug in vscode
 Later versions of the Julia extension seem to have fixed the issue.
 

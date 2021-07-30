@@ -31,6 +31,7 @@
 		"DISPLAY": "${localEnv:DISPLAY}",
 		// Windows host
 		// "DISPLAY": "host.docker.internal:0.0",
+		// "LIBGL_ALWAYS_INDIRECT": "0",
 
 		"QT_X11_NO_MITSHM": "1",
 		// If NVIDIA Prime Profile On-Demand is active, uncomment both to use NVIDIA GPU
