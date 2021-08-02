@@ -8,9 +8,11 @@
 	},
 	"extensions": [
 		"epivision.vscode-file-header",
+		"gruntfuggly.todo-tree",
 		"julialang.language-julia",
+		"mhutchie.git-graph",
 		"ms-toolsai.jupyter",
-		"streetsidesoftware.code-spell-checker"
+		"streetsidesoftware.code-spell-checker",
 	],
 	"postCreateCommand": [
 		"julia",
@@ -41,6 +43,7 @@
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"julia.environmentPath": "${containerWorkspaceFolder}",
+		"powerHeader.autoInsert.enable": true,
 		"powerHeader.commentMode": "line",
 		"powerHeader.template": "file://${containerWorkspaceFolder}/copyright_template.txt",
 		"terminal.integrated.defaultProfile.linux": "bash",	},
