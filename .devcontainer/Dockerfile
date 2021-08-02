@@ -30,5 +30,4 @@ COPY startup.jl /root/.julia/config/startup.jl
 
 # Non-root user cannot be mapped by rootless Docker.
 # Moreover, non-root user will cause gitlab-ci to fail.
-RUN cp /etc/skel/.bashrc /root && \
-    echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /root/.bashrc
+RUN cp /etc/skel/.bashrc /root
