@@ -42,6 +42,7 @@
 	},
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
+		"editor.formatOnSave": true,
 		"julia.environmentPath": "${containerWorkspaceFolder}",
 		"powerHeader.autoInsert.enable": true,
 		"powerHeader.commentMode": "line",

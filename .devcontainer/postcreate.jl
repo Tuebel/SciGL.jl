@@ -7,11 +7,11 @@
 using Pkg
 
 function has_manifest_file()
-    return isfile(joinpath(pwd(),"Manifest.toml")) || isfile(joinpath(pwd(),"JuliaManifest.toml"))
+    return isfile(joinpath(pwd(), "Manifest.toml")) || isfile(joinpath(pwd(), "JuliaManifest.toml"))
 end
 
 function has_project_file()
-    return isfile(joinpath(pwd(),"Project.toml")) || isfile(joinpath(pwd(),"JuliaProject.toml"))
+    return isfile(joinpath(pwd(), "Project.toml")) || isfile(joinpath(pwd(), "JuliaProject.toml"))
 end
 
 function is_package()
