@@ -3,3 +3,4 @@
 # All rights reserved. 
 .empty
 .ipynb_checkpoints
+*.code-workspace

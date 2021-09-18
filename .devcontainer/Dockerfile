@@ -39,5 +39,5 @@ RUN julia /tmp/install_packages.jl
 
 # Convenient Julia packages and config
 COPY install_packages.jl /tmp/install_packages.jl
-COPY startup.jl /root/.julia/config/startup.jl
+COPY startup.jl /home/vscode/.julia/config/startup.jl
 RUN julia /tmp/install_packages.jl
