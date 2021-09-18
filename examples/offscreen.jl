@@ -69,7 +69,7 @@ while !GLFW.WindowShouldClose(window)
     img = gpu_data(framebuffer, 1)
     img = img[:,end:-1:1]
     imshow(canvas, transpose(img))
-    sleep(2.5)
+    sleep(0.5)
 end
 
 # needed if you're running this from the REPL

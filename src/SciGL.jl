@@ -26,6 +26,7 @@ include("Transformations.jl")
 include("Camera.jl")
 include("Shaders.jl")
 include("MeshModel.jl")
+include("FrameBuffer.jl")
 
 # Scene types
 export CvCamera
