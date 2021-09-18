@@ -19,7 +19,6 @@ using StaticArrays
 
 # lib includes
 include("BaseExtensions.jl")
-include("ForGLAbstraction.jl")
 include("Scene.jl")
 include("RenderContexts.jl")
 include("Transformations.jl")
