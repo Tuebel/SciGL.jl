@@ -257,7 +257,7 @@ version = "1.0.10+0"
 
 [[GLAbstraction]]
 deps = ["FixedPointNumbers", "ModernGL", "Printf", "StaticArrays", "ThreadPools"]
-git-tree-sha1 = "872d18a838673abec6840009060b41718d25e94f"
+git-tree-sha1 = "500e950c6a009a6f7132092aedba5c54b5b7d38e"
 repo-rev = "master"
 repo-url = "https://github.com/Tuebel/GLAbstraction.jl.git"
 uuid = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
@@ -559,9 +559,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
-git-tree-sha1 = "c253236b0ed414624b083e6b72bfe891fbd2c7af"
+git-tree-sha1 = "5455aef09b40e5020e1520f551fa3135040d4ed0"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2021.1.1+1"
+version = "2021.1.1+2"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -706,9 +706,9 @@ uuid = "a223df75-4e93-5b7c-acf9-bdd599c0f4de"
 version = "0.8.3"
 
 [[RecipesBase]]
-git-tree-sha1 = "b3fb709f3c97bfc6e948be68beeecb55a0b340ae"
+git-tree-sha1 = "44a75aa7a527910ee3d1751d1f0e4148698add9e"
 uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.1.1"
+version = "1.1.2"
 
 [[Reexport]]
 git-tree-sha1 = "5f6c21241f0f655da3952fd60aa18477cf96c220"
