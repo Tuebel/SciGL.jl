@@ -17,11 +17,13 @@ normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
 silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
-# Init mesh
-monkey = load_mesh("examples/meshes/monkey.obj", normal_prog) |> SceneObject
-
-# Init Camera
+# Init scene
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
+cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
+cube.pose.t = Translation(3, 0, 0)
+monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+monkey.pose.t = Translation(0, 0, 0)
+scene = Scene(camera, [cube, monkey])
 
 # Key callbacks GLFW.GetKey does not seem to work
 GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin
@@ -44,17 +46,11 @@ while !GLFW.WindowShouldClose(window)
     # draw
     clear_buffers()
     if floor(Int, time() / 5) % 3 == 0
-        to_gpu(camera,  normal_prog)
-        to_gpu(monkey,  normal_prog)
-        draw(monkey,    normal_prog)
+        draw(normal_prog, scene)
     elseif floor(Int, time() / 5) % 3 == 1
-        to_gpu(camera,  silhouette_prog)
-        to_gpu(monkey,  silhouette_prog)
-        draw(monkey,    silhouette_prog)
+        draw(silhouette_prog, scene)
     else
-        to_gpu(camera,  depth_prog)
-        to_gpu(monkey,  depth_prog)
-        draw(monkey,    depth_prog)
+        draw(depth_prog, scene)
     end
     GLFW.SwapBuffers(window)
 end

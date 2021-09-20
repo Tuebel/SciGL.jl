@@ -5,11 +5,11 @@
 
 """
     load_mesh(mesh, program)
-Simplifies loading a VertexArray from a Mesh.
+Simplifies loading a Mesh into a VertexArray on the gpu.
 """
-function load_mesh(mesh::Mesh, program::GLAbstraction.AbstractProgram)
+function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
     # finds the order of the variables in the shader program and automatically assigns them correctly
-    # the name of the buffer must match the variable name in the sahder program
+    # the name of the buffer must match the variable name in the shader program
     buffers = GLAbstraction.generate_buffers(
         program, GLAbstraction.GEOMETRY_DIVISOR,
         position=mesh.position,
@@ -19,31 +19,31 @@ function load_mesh(mesh::Mesh, program::GLAbstraction.AbstractProgram)
 end
 
 """
-    load_mesh(mesh_file, program)
-Simplifies loading a VertexArray from a mesh file.
+    load_mesh(program, mesh_file)
+Simplifies loading a Mesh into a VertexArray on the gpu.
 """
-load_mesh(mesh_file::AbstractString, program::GLAbstraction.AbstractProgram) = load_mesh(load(mesh_file), program)
+load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString) = load_mesh(program, load(mesh_file))
 
 """
-    to_gpu(so, program)
+    to_gpu(program, scene_object)
 Transfers the model matrix to the OpenGL program
 """
-function to_gpu(so::SceneObject{T}, program::GLAbstraction.AbstractProgram) where{T<:GLAbstraction.VertexArray}
+function to_gpu(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T <: GLAbstraction.VertexArray}
     GLAbstraction.bind(program)
-    GLAbstraction.gluniform(program, :model_matrix, SMatrix(so.pose))
+    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose))
     GLAbstraction.unbind(program)
 end
 
 """
-    draw(so, program)
+    draw(program, scene_object)
 Draws the model via the given shader Program.
 **Warning:** the location of the unions in the must match those of the program used for the construction of the VertexArray.  
 Call `to_gpu` to update the pose in the shader program before this function.
 """
-function draw(so::SceneObject{T}, program::GLAbstraction.AbstractProgram) where{T<:GLAbstraction.VertexArray}
+function draw(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T <: GLAbstraction.VertexArray}
     GLAbstraction.bind(program)
-    GLAbstraction.bind(so.object)
-    GLAbstraction.draw(so.object)
-    GLAbstraction.unbind(so.object)
+    GLAbstraction.bind(scene_object.object)
+    GLAbstraction.draw(scene_object.object)
+    GLAbstraction.unbind(scene_object.object)
     GLAbstraction.unbind(program)
 end

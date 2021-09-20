@@ -2,8 +2,6 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved.
 
-abstract type Camera end
-
 """
 A Camera parametrized like OpenCV.
 The convention is as in OpenCV: x-rigth, y-down, **z-forward**
@@ -167,10 +165,10 @@ Calculates the Rotation to look at the object along negative z with up defining 
 lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up::SVector{3}) = lookat_opengl(camera.pose, object.pose, up)
 
 """
-    to_gpu(so::SceneObject{Camera})
+    to_gpu(program, so::SceneObject{Camera})
 Transfers the view and projection matrices to the OpenGL program
 """
-function to_gpu(so::SceneObject{T}, program::GLAbstraction.AbstractProgram) where {T <: Camera}
+function to_gpu(program::GLAbstraction.AbstractProgram, so::SceneObject{T}) where {T <: Camera}
     GLAbstraction.bind(program)
     GLAbstraction.gluniform(program, :view_matrix, view_matrix(so))
     GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(so.object))

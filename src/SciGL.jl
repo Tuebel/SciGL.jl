@@ -32,6 +32,7 @@ export CvCamera
 export GLOrthoCamera
 export Pose
 export SceneObject
+export Scene
 
 # Shaders
 export DepthFrag
