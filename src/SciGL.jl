@@ -4,7 +4,7 @@ module SciGL
 
 # Dependencies
 # TODO not use whole libs
-using ColorTypes: AbstractRGBA, RGB, RGBA, red, blue, green, alpha
+using ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
 using CoordinateTransformations
 using FixedPointNumbers: N0f8, Normed
 using GeometryBasics
