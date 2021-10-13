@@ -4,7 +4,7 @@ module SciGL
 
 # Dependencies
 # TODO not use whole libs
-using ColorTypes: AbstractRGBA, RGB, RGBA, red, blue, green, alpha
+using ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
 using CoordinateTransformations
 using FixedPointNumbers: N0f8, Normed
 using GeometryBasics
@@ -19,19 +19,20 @@ using StaticArrays
 
 # lib includes
 include("BaseExtensions.jl")
-include("ForGLAbstraction.jl")
 include("Scene.jl")
 include("RenderContexts.jl")
 include("Transformations.jl")
 include("Camera.jl")
 include("Shaders.jl")
 include("MeshModel.jl")
+include("FrameBuffer.jl")
 
 # Scene types
 export CvCamera
 export GLOrthoCamera
 export Pose
 export SceneObject
+export Scene
 
 # Shaders
 export DepthFrag

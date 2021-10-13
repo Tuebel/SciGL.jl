@@ -2,10 +2,6 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved.
 
-color_framebuffer(width::Integer, height::Integer) = framebuffer = GLAbstraction.FrameBuffer((width, height), (RGB{Normed{UInt8,8}}, GLAbstraction.DepthStencil{GLAbstraction.Float24,N0f8}));
-
-depth_framebuffer(width::Integer, height::Integer) = framebuffer = GLAbstraction.FrameBuffer((width, height), (Gray{Float32}, GLAbstraction.DepthStencil{GLAbstraction.Float24,N0f8}));
-
 """
 Set the context as current in GLFW and GLAbstractions
 """

@@ -25,7 +25,7 @@ silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init mesh
-monkey = load_mesh("examples/meshes/monkey.obj", normal_prog) |> SceneObject
+monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
 
 # Init Camera
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
@@ -54,22 +54,22 @@ while !GLFW.WindowShouldClose(window)
     # draw
     clear_buffers()
     if floor(Int, time() / 5) % 3 == 0
-        to_gpu(camera,  normal_prog)
-        to_gpu(monkey,  normal_prog)
-        draw(monkey,    normal_prog)
+        to_gpu(normal_prog, camera)
+        to_gpu(normal_prog, monkey)
+        draw(normal_prog,   monkey)
     elseif floor(Int, time() / 5) % 3 == 1
-        to_gpu(camera,  silhouette_prog)
-        to_gpu(monkey,  silhouette_prog)
-        draw(monkey,    silhouette_prog)
+        to_gpu(silhouette_prog, camera)
+        to_gpu(silhouette_prog, monkey)
+        draw(silhouette_prog,   monkey)
     else
-        to_gpu(camera,  depth_prog)
-        to_gpu(monkey,  depth_prog)
-        draw(monkey,    depth_prog)
+        to_gpu(depth_prog,  camera)
+        to_gpu(depth_prog,  monkey)
+        draw(depth_prog,    monkey)
     end
     img = gpu_data(framebuffer, 1)
     img = img[:,end:-1:1]
     imshow(canvas, transpose(img))
-    sleep(2.5)
+    sleep(0.5)
 end
 
 # needed if you're running this from the REPL
