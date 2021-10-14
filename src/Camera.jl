@@ -123,12 +123,12 @@ projection_matrix(c::GLOrthoCamera) = orthographic_matrix(c)
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-function lookat_opencv(camera::Pose, object::Pose, up::SVector{3})
+function lookat_opencv(camera::Pose, object::Pose, up=[0 1 0])
     cam_t = SVector{3}(camera.t.translation)
     object_t = SVector{3}(object.t.translation)
     # OpenCV: look along positive z
     z = normalize(object_t - cam_t)
-    x = normalize(cross(z, up))
+    x = normalize(cross(z, SVector{3}(up)))
     y = normalize(cross(z, x))
     return RotMatrix3{Float32}([x y z])
 end
@@ -137,12 +137,12 @@ end
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along negative z with up defining the upwards direction
 """
-function lookat_opengl(camera::Pose, object::Pose, up::SVector{3})
+function lookat_opengl(camera::Pose, object::Pose, up=[0 1 0])
     cam_t = SVector{3}(camera.t.translation)
     object_t = SVector{3}(object.t.translation)
     # OpenGL: look along positive z
     z = normalize(cam_t - object_t)
-    x = normalize(cross(up, z))
+    x = normalize(cross(SVector{3}(up), z))
     y = normalize(cross(z, x))
     return RotMatrix3{Float32}([
         transpose(x);
@@ -155,14 +155,14 @@ end
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-lookat(camera::SceneObject{CvCamera}, object::SceneObject, up::SVector{3}) = lookat_opencv(camera.pose, object.pose, up)
+lookat(camera::SceneObject{CvCamera}, object::SceneObject, up=[0 1 0]) = lookat_opencv(camera.pose, object.pose, up)
 
 
 """
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along negative z with up defining the upwards direction
 """
-lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up::SVector{3}) = lookat_opengl(camera.pose, object.pose, up)
+lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up=[0 1 0]) = lookat_opengl(camera.pose, object.pose, up)
 
 """
     to_gpu(program, so::SceneObject{Camera})

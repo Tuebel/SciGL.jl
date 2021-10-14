@@ -4,7 +4,7 @@
 
 using ModernGL, GLAbstraction, GLFW
 using SciGL
-using CoordinateTransformations, Rotations, StaticArrays
+using CoordinateTransformations, Rotations
 
 const WIDTH = 800
 const HEIGHT = 600
@@ -41,7 +41,7 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
     # update camera pose
     camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
-    camera.pose.R = lookat(camera, monkey, SVector{3}([0 1 0]))
+    camera.pose.R = lookat(camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()

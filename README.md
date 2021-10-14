@@ -31,6 +31,8 @@ The next section contains a list and use cases of the packages
   [Rotations](https://github.com/JuliaGeometry/Rotations.jl) are handled by the equally named package.
 - [GLAbstractions](https://github.com/JuliaGL/GLAbstraction.jl): Takes some of the low level OpenGL pain away.
   Manages the context, compiles shaders and handles the buffers.
+- [ModernGL](https://github.com/JuliaGL/ModernGL.jl): Used by GLAbstractions to interface with the OpenGL driver.
+- [GLFW](https://github.com/JuliaGL/GLFW.jl): OpenGL context handling.
 - [MeshIO](https://github.com/JuliaIO/MeshIO.jl): Load mesh files like *.obj*, *.ply*, and *.stl*.
   It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this packages is also included.
 
