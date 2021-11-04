@@ -37,7 +37,7 @@ mutable struct Scene
 end
 
 """
-SceneObject(object, program)
+    SceneObject(object, program)
 Creates a SceneObject with an identity rotation & zero translation
 """
 SceneObject(object::T; pose=Pose(one(UnitQuaternion), Translation(0, 0, 0))) where {T} = SceneObject(object, pose)

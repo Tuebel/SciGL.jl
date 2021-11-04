@@ -2,7 +2,7 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
-using ModernGL, GLAbstraction, GLFW
+using GLAbstraction, GLFW
 using SciGL
 using CoordinateTransformations, Rotations
 # TODO remove from package depencies
