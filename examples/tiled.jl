@@ -57,22 +57,22 @@ while !GLFW.WindowShouldClose(window)
     camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
     camera.pose.R = lookat(camera, monkey, [0 1 0])
     # draw
+    activate_full(tiles)
+    clear_buffers()
+
     activate_tile(tiles, 1)
     to_gpu(silhouette_prog, camera)
     to_gpu(silhouette_prog, monkey)
-    clear_buffers()
     draw(silhouette_prog, monkey)
 
     activate_tile(tiles, 2)
     to_gpu(depth_prog, camera)
     to_gpu(depth_prog, monkey)
-    clear_buffers()
     draw(depth_prog, monkey)
 
     activate_tile(tiles, 3)
     to_gpu(normal_prog, camera)
     to_gpu(normal_prog, monkey)
-    clear_buffers()
     draw(normal_prog, monkey)
 
     # copy to cpu

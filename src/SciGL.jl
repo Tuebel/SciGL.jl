@@ -59,6 +59,7 @@ export to_gpu
 # Tiled rendering
 export Tiles
 
+export activate_full
 export activate_tile
 export view_tile
 export full_size

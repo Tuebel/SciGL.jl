@@ -88,3 +88,8 @@ function activate_tile(tiles::Tiles, id::Int)
     glScissor(x_0, y_0, tiles.tile_width, tiles.tile_height)
     glEnable(GL_SCISSOR_TEST)
 end
+
+function activate_full(tiles::Tiles)
+    glViewport(0, 0, full_size(tiles)...)
+    glDisable(GL_SCISSOR_TEST)
+end
