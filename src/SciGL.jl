@@ -26,6 +26,7 @@ include("Camera.jl")
 include("Shaders.jl")
 include("MeshModel.jl")
 include("FrameBuffer.jl")
+include("Tiles.jl")
 
 # Scene types
 export CvCamera
@@ -54,5 +55,12 @@ export load_mesh
 export lookat
 export set_clear_color
 export to_gpu
+
+# Tiled rendering
+export Tiles
+
+export activate_tile
+export view_tile
+export full_size
 
 end # module
