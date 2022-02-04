@@ -27,6 +27,7 @@ include("Shaders.jl")
 include("MeshModel.jl")
 include("FrameBuffer.jl")
 include("Tiles.jl")
+include("Sync.jl")
 
 # Scene types
 export CvCamera
@@ -63,5 +64,9 @@ export activate_full
 export activate_tile
 export view_tile
 export full_size
+
+# Synchronized rendering of tiles
+export RenderId
+export sync_render!
 
 end # module
