@@ -22,8 +22,7 @@ tiles = Tiles(3, WIDTH, HEIGHT)
 SciGL.tile_indices(tiles, 3)
 
 # Draw to framebuffer
-fb_size = full_size(tiles)
-framebuffer = color_framebuffer(fb_size...)
+framebuffer = color_framebuffer(size(tiles)...)
 GLAbstraction.bind(framebuffer)
 cpu_data = gpu_data(framebuffer, 1)
 img = view_tile(cpu_data, tiles, 1)

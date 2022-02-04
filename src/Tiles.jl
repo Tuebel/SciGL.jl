@@ -16,8 +16,17 @@ struct Tiles
     y_tiles::Int64
 end
 
-Base.length(t::Tiles) = t.n_tiles
-Base.size(t::Tiles) = (t.x_tiles, t.y_tiles)
+"""
+    length(tiles)
+Number of tiles.
+"""
+Base.length(tiles::Tiles) = tiles.n_tiles
+
+"""
+    size(tiles)
+Size of the full rendered image.
+"""
+Base.size(tiles::Tiles) = (tiles.x_tiles * tiles.tile_width, tiles.y_tiles * tiles.tile_height)
 
 """
     Tiles n_tiles::Int, width::Int, height
@@ -45,11 +54,6 @@ function tiles_size(n_tiles::Int, width::Int, height::Int)
     (min_x, min_y)
 end
 
-"""
-    full_size(tiles)
-Size of the texture which all tiles are rendered in.
-"""
-full_size(tiles::Tiles) = (tiles.x_tiles * tiles.tile_width, tiles.y_tiles * tiles.tile_height)
 
 """
     gl_tile_indices(tiles, id)
@@ -92,7 +96,11 @@ function activate_tile(tiles::Tiles, id::Int)
     glEnable(GL_SCISSOR_TEST)
 end
 
-function activate_full(tiles::Tiles)
-    glViewport(0, 0, full_size(tiles)...)
+"""
+    activate_all(tiles)
+Activates the viewport and scissors for all tiles.
+"""
+function activate_all(tiles::Tiles)
+    glViewport(0, 0, size(tiles)...)
     glDisable(GL_SCISSOR_TEST)
 end

@@ -20,8 +20,7 @@ tiles = Tiles(3, WIDTH, HEIGHT)
 SciGL.tile_indices(tiles, 3)
 
 # Draw to framebuffer
-fb_size = full_size(tiles)
-framebuffer = color_framebuffer(fb_size...)
+framebuffer = color_framebuffer(size(tiles)...)
 GLAbstraction.bind(framebuffer)
 
 # Buffer settings
@@ -58,7 +57,7 @@ while !GLFW.WindowShouldClose(window)
     scene.camera.pose.R = lookat(camera, monkey, [0 1 0])
 
     # draw
-    activate_full(tiles)
+    activate_all(tiles)
     clear_buffers()
 
     activate_tile(tiles, 1)

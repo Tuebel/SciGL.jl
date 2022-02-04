@@ -35,7 +35,7 @@ function sync_render!(tiles::Tiles, callback::Base.Callable)
     channel = Channel{RenderId}() do channel
         while isopen(channel)
             # Clear buffers to prevent stencil glitches
-            activate_full(tiles)
+            activate_all(tiles)
             clear_buffers()
             # Render until all tiles are occupied
             for _ in 1:length(tiles)
