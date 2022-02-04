@@ -31,16 +31,16 @@ abstract type Camera end
 A scene should consist of only one camera and several meshes.
 In the future, lights could be supported for rendering RGB images.
 """
-mutable struct Scene
-    camera::SceneObject{T} where {T <: Camera}
-    meshes::AbstractVector{SceneObject{T}} where {T <: GLAbstraction.VertexArray}
+struct Scene{T<:Camera,U<:SceneObject{<:GLAbstraction.VertexArray}}
+    camera::SceneObject{T}
+    meshes::Vector{U}
 end
 
 """
     SceneObject(object, program)
 Creates a SceneObject with an identity rotation & zero translation
 """
-SceneObject(object::T; pose=Pose(one(UnitQuaternion), Translation(0, 0, 0))) where {T} = SceneObject(object, pose)
+SceneObject(object::T; pose = Pose(one(UnitQuaternion), Translation(0, 0, 0))) where {T} = SceneObject(object, pose)
 
 """
     draw(program, scene_object)
