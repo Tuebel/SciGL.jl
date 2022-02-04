@@ -56,18 +56,18 @@ while !GLFW.WindowShouldClose(window)
     if floor(Int, time() / 5) % 3 == 0
         to_gpu(normal_prog, camera)
         to_gpu(normal_prog, monkey)
-        draw(normal_prog,   monkey)
+        draw(normal_prog, monkey)
     elseif floor(Int, time() / 5) % 3 == 1
         to_gpu(silhouette_prog, camera)
         to_gpu(silhouette_prog, monkey)
-        draw(silhouette_prog,   monkey)
+        draw(silhouette_prog, monkey)
     else
-        to_gpu(depth_prog,  camera)
-        to_gpu(depth_prog,  monkey)
-        draw(depth_prog,    monkey)
+        to_gpu(depth_prog, camera)
+        to_gpu(depth_prog, monkey)
+        draw(depth_prog, monkey)
     end
     img = gpu_data(framebuffer, 1)
-    img = img[:,end:-1:1]
+    img = img[:, end:-1:1]
     imshow(canvas, transpose(img))
     sleep(0.5)
 end
