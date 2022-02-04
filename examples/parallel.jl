@@ -6,7 +6,7 @@ using GLAbstraction, GLFW
 using SciGL
 using CoordinateTransformations, Rotations
 # TODO remove from package depencies
-using Images, ImageView
+using ImageView
 
 const WIDTH = 800
 const HEIGHT = 600
