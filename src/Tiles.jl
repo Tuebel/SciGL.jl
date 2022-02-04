@@ -76,11 +76,11 @@ Create a view of the Matrix `M` for the given tile id.
 """
 function view_tile(M::AbstractMatrix, tiles::Tiles, id::Int)
     x, y = gl_tile_indices(tiles, id)
-    x_0 = x * tiles.tile_width + 1
-    y_0 = y * tiles.tile_height + 1
-    x_1 = x_0 + tiles.tile_width - 1
-    y_1 = y_0 + tiles.tile_height - 1
-    view(M, x_0:x_1, y_0:y_1)
+    x0 = x * tiles.tile_width + 1
+    y0 = y * tiles.tile_height + 1
+    x1 = x0 + tiles.tile_width - 1
+    y1 = y0 + tiles.tile_height - 1
+    view(M, x0:x1, y0:y1)
 end
 
 """
@@ -89,10 +89,10 @@ Set the viewport and scissors to the given tile id.
 """
 function activate_tile(tiles::Tiles, id::Int)
     x, y = gl_tile_indices(tiles, id)
-    x_0 = x * tiles.tile_width
-    y_0 = y * tiles.tile_height
-    glViewport(x_0, y_0, tiles.tile_width, tiles.tile_height)
-    glScissor(x_0, y_0, tiles.tile_width, tiles.tile_height)
+    x0 = x * tiles.tile_width
+    y0 = y * tiles.tile_height
+    glViewport(x0, y0, tiles.tile_width, tiles.tile_height)
+    glScissor(x0, y0, tiles.tile_width, tiles.tile_height)
     glEnable(GL_SCISSOR_TEST)
 end
 

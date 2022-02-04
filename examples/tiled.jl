@@ -73,7 +73,6 @@ while !GLFW.WindowShouldClose(window)
     img = gpu_data(framebuffer, 1)
 
     # view only a single image from the texture
-    img = img[:, end:-1:1]
     if floor(Int, time() / 5) % 3 == 0
         img = view_tile(img, tiles, 1)
     elseif floor(Int, time() / 5) % 3 == 1
@@ -81,7 +80,9 @@ while !GLFW.WindowShouldClose(window)
     else
         img = view_tile(img, tiles, 3)
     end
-    imshow(canvas, transpose(img))
+    img = @view img[:, end:-1:1]
+    img = transpose(img)
+    imshow(canvas, img)
     sleep(0.1)
 end
 

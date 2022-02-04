@@ -66,7 +66,9 @@ export view_tile
 export full_size
 
 # Synchronized rendering of tiles
-export RenderId
-export sync_render!
+export render_channel
+export draw_to_cpu_async
+export draw_to_cpu_sync
+export draw_to_cpu_tiles
 
 end # module

@@ -14,17 +14,11 @@ const HEIGHT = 600
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
 
-# Setup and check tiles
-tiles = Tiles(3, WIDTH, HEIGHT)
-SciGL.tile_indices(tiles, 3)
-
 # Draw to framebuffer
-framebuffer = color_framebuffer(size(tiles)...)
+framebuffer = color_framebuffer(WIDTH, HEIGHT)
 GLAbstraction.bind(framebuffer)
-cpu_data = gpu_data(framebuffer, 1)
-global_img = view_tile(cpu_data, tiles, 1)
+global_img = gpu_data(framebuffer, 1)
 img_lock = ReentrantLock()
-
 
 # Buffer settings
 enable_depth_stencil()
@@ -50,19 +44,17 @@ GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin
     println("Registered $key")
 end)
 
-# channel, cond = sync_render(tiles, render_cb)
-channel = render_channel(tiles, framebuffer)
-println(channel)
-
+# This is where the magic happens 
+channel = render_channel()
 
 # Render the camera pose to the cpu
-function render_loop(program, scene, channel)
+function render_loop(program, scene, framebuffer, channel)
     println("Render loop thread id ", Threads.threadid())
     while true
         tim = time()
         scene.camera.pose.t = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
         scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
-        img = draw_to_cpu_tiles(program, scene, channel, (WIDTH, HEIGHT))
+        img = draw_to_cpu_sync(program, scene, framebuffer, channel)
         lock(img_lock)
         try
             copy!(global_img, img)
@@ -72,11 +64,11 @@ function render_loop(program, scene, channel)
     end
 end
 
-normal_task = Threads.@spawn render_loop(normal_prog, deepcopy(scene), channel)
-silhouette_task = Threads.@spawn render_loop(silhouette_prog, deepcopy(scene), channel)
-depth_task = Threads.@spawn render_loop(silhouette_prog, deepcopy(scene), channel)
+# Deepcopy the scene to avoid race conditions
+normal_task = Threads.@spawn render_loop(normal_prog, deepcopy(scene), framebuffer, channel)
+silhouette_task = Threads.@spawn render_loop(silhouette_prog, deepcopy(scene), framebuffer, channel)
+depth_task = Threads.@spawn render_loop(depth_prog, deepcopy(scene), framebuffer, channel)
 
-# TODO looks like two threads try to render to the same tile
 while !GLFW.WindowShouldClose(window)
     lock(img_lock)
     try
