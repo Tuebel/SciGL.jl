@@ -16,6 +16,9 @@ struct Tiles
     y_tiles::Int64
 end
 
+Base.length(t::Tiles) = t.n_tiles
+Base.size(t::Tiles) = (t.x_tiles, t.y_tiles)
+
 """
     Tiles n_tiles::Int, width::Int, height
 For tiled rendering, containing `n` tiles of size `width`×`height`. 
