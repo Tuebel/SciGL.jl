@@ -50,7 +50,7 @@ end
     set_clear_color(color)
 Set a color which is used for glClear(GL_COLOR_BUFFER_BIT), default is black
 """
-function set_clear_color(color::AbstractRGBA = RGBA(0, 0, 0, 0))
+function set_clear_color(color::AbstractRGBA = RGBA(0, 0, 0, 1))
     glClearColor(red(color), green(color), blue(color), alpha(color))
 end
 
