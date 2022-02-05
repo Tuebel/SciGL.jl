@@ -2,6 +2,7 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using BenchmarkTools
 using ColorTypes
 using CoordinateTransformations, Rotations
 using GLAbstraction, GLFW
@@ -10,14 +11,13 @@ using SciGL
 
 const WIDTH = 100
 const HEIGHT = 100
-const BENCHMARK = true
+const BENCHMARK = false
 if BENCHMARK
-    using BenchmarkTools
     # Benchmark task not included
     const N_TASKS = 10
 else
     using ImageView
-    const N_TASKS = 4
+    const N_TASKS = 3
 end
 
 # Create the GLFW window. This sets all the hints and makes the context current.
@@ -74,26 +74,26 @@ function render(program, scene, channel)
     if !BENCHMARK
         lock(img_lock)
         try
-            copy!(global_img, gray_img)
+            copy!(global_img, img)
         finally
             unlock(img_lock)
         end
     end
 end
 
-function render_loop()
+function render_loop(program)
     println("Render loop, thread id ", Threads.threadid())
     while !GLFW.WindowShouldClose(window)
-        render(normal_prog, deepcopy(scene), channel)
+        render(program, deepcopy(scene), channel)
     end
 end
 
-tasks = []
-for _ in 1:N_TASKS
-    push!(tasks, Threads.@spawn render_loop())
-end
-
 if !BENCHMARK
+    tasks = []
+    push!(tasks, Threads.@spawn render_loop(normal_prog))
+    push!(tasks, Threads.@spawn render_loop(depth_prog))
+    push!(tasks, Threads.@spawn render_loop(silhouette_prog))
+
     # ImageView
     guidict = imshow(rand(HEIGHT, WIDTH))
     canvas = guidict["gui"]["canvas"]
@@ -110,9 +110,11 @@ if !BENCHMARK
         end
         sleep(0.1)
     end
-end
-
-if BENCHMARK
+else
+    tasks = []
+    for _ in 1:N_TASKS
+        push!(tasks, Threads.@spawn render_loop(normal_prog))
+    end
     # Benchmark needs to run in a separate thread, otherwise we would deadlock
     benchmark_task = Threads.@spawn begin
         @benchmark render(normal_prog, deepcopy(scene), channel)

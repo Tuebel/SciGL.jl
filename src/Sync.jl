@@ -4,6 +4,17 @@
 using GLAbstraction
 using GLFW
 
+# Conclusion: Tiled rendering is about 1,5x faster than rendering into one texture but requires 6x more memory.
+# Tiled rendering is also harder to implement, for the sake of simplicity I would recommend starting with the Task based approach.
+
+# My guess is that the tiled renderer performs worse than the task based approach since all Tasks are forced to wait for the other ones.
+# In the former implementation each chain can run at its own pace.
+# Moreover this implementation has the disadvantage of Assuming exactly n_tiles tasks which have to follow a strict pattern to avoid deadlocks.
+
+# Benchmarks surprisingly show that both perform equally well.
+# All versions scale linearly with the number of tasks.
+# So probably most time is spent on rendering and copying the data.
+
 """
     render_channel()
 Synchronize the rendering by scheduling all render tasks on a single thread.
@@ -155,18 +166,6 @@ end
 
 run(future::TypedFuture) = future.fn()
 
-# My guess is that it performs worse than the single worker since all Tasks are forced to wait for the other ones.
-# In the former implementation each chain can run at its own pace.
-# Moreover this implementation has the disadvantage of Assuming exactly n_tiles tasks which have to follow a strict pattern to avoid deadlocks.
-
-# Benchmarks surprisingly show that both perform equally well.
-# The former version is marginally fast (~5%).
-# Both versions scale linearly with the number of tasks.
-# So my guess is that most time is spent on copying the data.
-
-# For large amounts of threads, the latter version uses only ~50% of the memory with 3x less allocations.
-# With small texture sizes and many threads, it is also ~50% faster.
-
 # Channel synchronizes calls to OpenGL driver
 # Run in main thread, do not spawn!
 function render_channel(tiles::Tiles, framebuffer::GLAbstraction.FrameBuffer)
@@ -178,7 +177,6 @@ function render_channel(tiles::Tiles, framebuffer::GLAbstraction.FrameBuffer)
             # Render until all tiles are occupied
             for i in 1:length(tiles)
                 activate_tile(tiles, i)
-                # TODO Clear all causes weird glitches
                 clear_buffers()
                 future = take!(channel)
                 futures[i] = future

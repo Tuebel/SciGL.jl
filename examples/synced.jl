@@ -2,6 +2,7 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using BenchmarkTools
 using ColorTypes
 using CoordinateTransformations, Rotations
 using GLAbstraction, GLFW
@@ -11,9 +12,7 @@ using SciGL
 const WIDTH = 100
 const HEIGHT = 100
 const BENCHMARK = true
-if BENCHMARK
-    using BenchmarkTools
-else
+if !BENCHMARK
     using ImageView
 end
 # Main / Benchmark task not included
