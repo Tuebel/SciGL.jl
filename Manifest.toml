@@ -39,6 +39,12 @@ version = "0.4.4"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BenchmarkTools]]
+deps = ["JSON", "Logging", "Printf", "Profile", "Statistics", "UUIDs"]
+git-tree-sha1 = "940001114a0147b6e4d10624276d56d531dd9b49"
+uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+version = "1.2.2"
+
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
@@ -229,7 +235,7 @@ version = "1.0.10+0"
 
 [[GLAbstraction]]
 deps = ["FixedPointNumbers", "ModernGL", "Printf", "StaticArrays", "ThreadPools"]
-git-tree-sha1 = "37e7bbcbbb205e1a6fcf954641f0eded71d2802a"
+git-tree-sha1 = "7e7b1ce96fc637e867a31c72f0d29718306595b3"
 repo-rev = "master"
 repo-url = "https://github.com/Tuebel/GLAbstraction.jl.git"
 uuid = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
@@ -372,6 +378,12 @@ deps = ["Preferences"]
 git-tree-sha1 = "abc9885a7ca2052a736a600f7fa66209f96506e1"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
 version = "1.4.1"
+
+[[JSON]]
+deps = ["Dates", "Mmap", "Parsers", "Unicode"]
+git-tree-sha1 = "8076680b162ada2a031f707ac7b4953e30667a37"
+uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+version = "0.21.2"
 
 [[JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -577,6 +589,12 @@ git-tree-sha1 = "9bc1871464b12ed19297fbc56c4fb4ba84988b0d"
 uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.47.0+0"
 
+[[Parsers]]
+deps = ["Dates"]
+git-tree-sha1 = "0b5cfbb704034b5b4c1869e36634438a047df065"
+uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+version = "2.2.1"
+
 [[Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b4f5d02549a10e20780a24fce72bea96b6329e29"
@@ -596,6 +614,10 @@ version = "1.2.3"
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[Profile]]
+deps = ["Printf"]
+uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 
 [[Quaternions]]
 deps = ["DualNumbers", "LinearAlgebra"]

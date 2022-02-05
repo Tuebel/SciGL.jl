@@ -8,7 +8,7 @@ using CoordinateTransformations, Rotations
 # TODO remove from package depencies
 using ImageView
 
-const WIDTH = 800
+const WIDTH = 801
 const HEIGHT = 600
 
 # Create the GLFW window. This sets all the hints and makes the context current.
