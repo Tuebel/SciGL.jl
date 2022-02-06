@@ -14,8 +14,8 @@ const HEIGHT = 600
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
-framebuffer = color_framebuffer(WIDTH, HEIGHT)
-
+# On Intel copying data from a texture or an RBO does not really make a difference
+framebuffer = color_framebuffer_rbo(WIDTH, HEIGHT)
 # create ImageView
 guidict = imshow(rand(HEIGHT, WIDTH))
 canvas = guidict["gui"]["canvas"]
@@ -67,7 +67,8 @@ while !GLFW.WindowShouldClose(window)
         to_gpu(depth_prog, monkey)
         draw(depth_prog, monkey)
     end
-    img = gpu_data(framebuffer, 1)
+    # Simplified interface, performance only slightly worse
+    img = gpu_data(framebuffer)
     img = img[:, end:-1:1]
     imshow(canvas, transpose(img))
     sleep(0.1)

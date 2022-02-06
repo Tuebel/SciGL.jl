@@ -46,10 +46,12 @@ export SimpleVert
 # Export functions
 export clear_buffers
 export color_framebuffer
+export color_framebuffer_rbo
 export context_fullscreen
 export context_offscreen
 export context_window
 export depth_framebuffer
+export depth_framebuffer_rbo
 export draw
 export enable_depth_stencil
 export load_mesh
