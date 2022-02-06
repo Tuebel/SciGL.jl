@@ -2,6 +2,7 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using Accessors
 using BenchmarkTools
 using ColorTypes
 using CoordinateTransformations, Rotations
@@ -12,11 +13,14 @@ using SciGL
 const WIDTH = 100
 const HEIGHT = 100
 const BENCHMARK = true
-if !BENCHMARK
+if BENCHMARK
+    # Main / Benchmark task not included
+    const N_TASKS = 10
+else
+    N_TASKS = 3
     using ImageView
 end
-# Main / Benchmark task not included
-const N_TASKS = 10
+
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
@@ -53,19 +57,20 @@ channel = render_channel()
 # Render the camera pose to the cpu
 function render(program, scene, framebuffer, channel, cpu_data)
     tim = time()
-    scene.camera.pose.t = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
-    scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
-    img = draw_to_cpu_sync(program, scene, framebuffer, channel, cpu_data)
+    scene = @set scene.camera.pose.t = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
+    scene = @set scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
+    img = draw_to_cpu(program, scene, framebuffer, channel, cpu_data)
     # Some computation
     gray_img = img .|> green .|> Gray
-    gray_img .|> Float64 .|> exp
+    # TODO this causes memory allocation
+    # gray_img .|> Float64 .|> exp
 end
 
 function render_loop(cpu_data)
     println("Render loop, thread id ", Threads.threadid())
     # Preallocate once
     while !GLFW.WindowShouldClose(window)
-        render(normal_prog, deepcopy(scene), framebuffer, channel, cpu_data)
+        render(normal_prog, scene, framebuffer, channel, cpu_data)
     end
 end
 
@@ -82,7 +87,7 @@ if !BENCHMARK
 
         println("Render loop, thread id ", Threads.threadid())
         while !GLFW.WindowShouldClose(window)
-            img = render(normal_prog, deepcopy(scene), framebuffer, channel, cpu_data)
+            img = render(normal_prog, scene, framebuffer, channel, cpu_data)
             img = @view img[:, end:-1:1]
             img = transpose(img)
             # imshow needs some sleep

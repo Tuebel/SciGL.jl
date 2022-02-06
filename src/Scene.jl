@@ -2,14 +2,23 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using CoordinateTransformations
+using Rotations
+
 """
     Pose
 Orientation and position of a scene object.
 """
-mutable struct Pose
-    R::Rotation
+struct Pose
     t::Translation
+    R::Rotation
 end
+
+"""
+    Pose(t_xyz, r_xyz)
+Pose from a translation vector and XYZ Euler angles.
+"""
+Pose(t_xyz::AbstractVector, r_xyz::AbstractVector) = Pose(Translation(t_xyz), RotXYZ(r_xyz...))
 
 """
     SceneObject
@@ -40,7 +49,7 @@ end
     SceneObject(object, program)
 Creates a SceneObject with an identity rotation & zero translation
 """
-SceneObject(object::T; pose = Pose(one(UnitQuaternion), Translation(0, 0, 0))) where {T} = SceneObject(object, pose)
+SceneObject(object::T; pose = Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
 
 """
     draw(program, scene_object)

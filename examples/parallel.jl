@@ -2,6 +2,7 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using Accessors
 using BenchmarkTools
 using ColorTypes
 using CoordinateTransformations, Rotations
@@ -11,7 +12,7 @@ using SciGL
 
 const WIDTH = 100
 const HEIGHT = 100
-const BENCHMARK = false
+const BENCHMARK = true
 if BENCHMARK
     # Benchmark task not included
     const N_TASKS = 10
@@ -65,16 +66,17 @@ println(channel)
 # Render the camera pose to the cpu
 function render(program, scene, channel)
     tim = time()
-    scene.camera.pose.t = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
-    scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
-    img = draw_to_cpu_tiles(program, scene, channel, (WIDTH, HEIGHT))
+    scene = @set scene.camera.pose.t = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
+    scene = @set scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
+    img = draw_to_cpu(program, scene, channel, (WIDTH, HEIGHT))
     # Some computation
     gray_img = img .|> green .|> Gray
-    gray_img .|> Float64 .|> exp
+    # TODO this causes memory allocation
+    # gray_img = gray_img .|> Float64 .|> exp
     if !BENCHMARK
         lock(img_lock)
         try
-            copy!(global_img, img)
+            copy!(global_img, gray_img)
         finally
             unlock(img_lock)
         end
@@ -84,7 +86,7 @@ end
 function render_loop(program)
     println("Render loop, thread id ", Threads.threadid())
     while !GLFW.WindowShouldClose(window)
-        render(program, deepcopy(scene), channel)
+        render(program, scene, channel)
     end
 end
 
@@ -117,7 +119,7 @@ else
     end
     # Benchmark needs to run in a separate thread, otherwise we would deadlock
     benchmark_task = Threads.@spawn begin
-        @benchmark render(normal_prog, deepcopy(scene), channel)
+        @benchmark render(normal_prog, scene, channel)
     end
     # fetch(benchmark_task)
 end

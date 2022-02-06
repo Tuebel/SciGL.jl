@@ -2,12 +2,13 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using Accessors
+using CoordinateTransformations, Rotations
 using GLAbstraction, GLFW
 using SciGL
-using CoordinateTransformations, Rotations
+using StaticArrays
 # TODO remove from package depencies
 using ImageView
-using StaticArrays
 
 const WIDTH = 800
 const HEIGHT = 600
@@ -52,9 +53,8 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
 
-    t = SVector(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
-    scene.camera.pose.t = Translation(t...)
-    scene.camera.pose.R = lookat(camera, monkey, [0 1 0])
+    scene = @set scene.camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
+    scene = @set scene.camera.pose.R = lookat(scene.camera, monkey, [0 1 0])
 
     # draw
     activate_all(tiles)

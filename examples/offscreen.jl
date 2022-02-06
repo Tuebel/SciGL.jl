@@ -2,9 +2,10 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using Accessors
+using CoordinateTransformations, Rotations
 using GLAbstraction, GLFW
 using SciGL
-using CoordinateTransformations, Rotations
 # TODO remove from package depencies
 using ImageView
 
@@ -48,8 +49,8 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
     # update camera pose
-    camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
-    camera.pose.R = lookat(camera, monkey, [0 1 0])
+    camera = @set camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
+    camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()
@@ -69,7 +70,7 @@ while !GLFW.WindowShouldClose(window)
     img = gpu_data(framebuffer, 1)
     img = img[:, end:-1:1]
     imshow(canvas, transpose(img))
-    sleep(0.5)
+    sleep(0.1)
 end
 
 # needed if you're running this from the REPL

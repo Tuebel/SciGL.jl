@@ -1,6 +1,7 @@
 # @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
 # Copyright (c) 2022, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
+
 using GLAbstraction
 using GLFW
 
@@ -17,8 +18,10 @@ using GLFW
 
 """
     render_channel()
-Synchronize the rendering by scheduling all render tasks on a single thread.
-Call this function form the main thread!
+Synchronize the rendering by scheduling each render `Task` on a single thread.
+This function has to be called from the same thread that the render context was created in.
+
+Has the worst performance of the implementations with moderate memory usage.
 """
 render_channel() =
     Channel{Task}() do channel
@@ -30,16 +33,16 @@ render_channel() =
     end
 
 ################### Intel ##################################################
-# BenchmarkTools.Trial: 1321 samples with 1 evaluation.
-#  Range (min … max):  445.771 μs … 14.892 ms  ┊ GC (min … max): 0.00% … 0.00%
-#  Time  (median):       3.477 ms              ┊ GC (median):    0.00%
-#  Time  (mean ± σ):     3.778 ms ±  1.147 ms  ┊ GC (mean ± σ):  1.40% ± 5.78%
+# BenchmarkTools.Trial: 1383 samples with 1 evaluation.
+#  Range (min … max):  240.952 μs … 15.821 ms  ┊ GC (min … max): 0.00% … 44.91%
+#  Time  (median):       3.417 ms              ┊ GC (median):    0.00%
+#  Time  (mean ± σ):     3.605 ms ±  1.724 ms  ┊ GC (mean ± σ):  0.88% ±  4.04%
 
-#                     ▃▅█▄▃▃▂▂                                    
-#   ▂▁▁▁▁▁▂▁▁▂▂▂▂▂▁▂▂▇█████████▆▄▅▃▄▃▄▃▃▄▃▃▂▃▂▂▂▂▂▂▂▂▂▃▂▂▂▂▂▂▁▁▂ ▃
-#   446 μs          Histogram: frequency by time         8.43 ms <
+#   ▇                ▃█▇▇▇▇▇▇▅▅▃▄▂▂▂▂▂▂▂▂▂  ▁                    ▁
+#   █▄▆▁▆▆▅▅▆▆▅▇▆▆▆████████████████████████▇█▇█▆▇▆█▆▆██▇▆▆▁▇▆▅▆▆ █
+#   241 μs        Histogram: log(frequency) by time      8.84 ms <
 
-#  Memory estimate: 143.28 KiB, allocs estimate: 249.
+#  Memory estimate: 65.04 KiB, allocs estimate: 238.
 
 ################### NVIDIA ##################################################
 # BenchmarkTools.Trial: 1886 samples with 1 evaluation.
@@ -62,19 +65,19 @@ draw_to_cpu_task(program::GLAbstraction.AbstractProgram, scene::Scene, framebuff
 
 draw_to_cpu_async(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}) = put!(channel, draw_to_cpu_task(program, scene, framebuffer))
 
-draw_to_cpu_sync(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}) = fetch(draw_to_cpu_async(program, scene, framebuffer, channel))
+draw_to_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}) = fetch(draw_to_cpu_async(program, scene, framebuffer, channel))
 
 ################### Intel ##################################################
-# BenchmarkTools.Trial: 1323 samples with 1 evaluation.
-#  Range (min … max):  429.025 μs …  12.084 ms  ┊ GC (min … max): 0.00% … 60.45%
-#  Time  (median):       3.525 ms               ┊ GC (median):    0.00%
-#  Time  (mean ± σ):     3.773 ms ± 991.107 μs  ┊ GC (mean ± σ):  0.91% ±  4.67%
+# BenchmarkTools.Trial: 1129 samples with 1 evaluation.
+#  Range (min … max):  203.266 μs … 66.146 ms  ┊ GC (min … max): 0.00% … 0.00%
+#  Time  (median):       3.839 ms              ┊ GC (median):    0.00%
+#  Time  (mean ± σ):     4.414 ms ±  3.044 ms  ┊ GC (mean ± σ):  0.77% ± 4.01%
 
-#                        █▇▄▄▁▂▁                                   
-#   ▂▁▁▁▁▁▁▁▁▁▁▂▂▂▂▂▂▃▅▆████████▇▅▄▃▃▄▄▄▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▂▁▁▁▁▂▂ ▃
-#   429 μs           Histogram: frequency by time         8.16 ms <
+#                 ▆▂█▄▃▄▁                                         
+#   █▁▁▂▁▁▂▂▁▂▂▃▃▇███████▆▅▅▄▄▄▄▄▂▂▂▃▂▃▂▃▂▂▂▁▂▂▂▂▂▂▂▁▁▂▁▂▂▁▁▁▁▁▁ ▃
+#   203 μs          Histogram: frequency by time         11.9 ms <
 
-#  Memory estimate: 104.17 KiB, allocs estimate: 247.
+#  Memory estimate: 25.91 KiB, allocs estimate: 235.
 
 ################### NVIDIA ##################################################
 # BenchmarkTools.Trial: 2049 samples with 1 evaluation.
@@ -98,19 +101,19 @@ draw_to_cpu_task(program::GLAbstraction.AbstractProgram, scene::Scene, framebuff
 
 draw_to_cpu_async(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}, cpu_data::AbstractMatrix) = put!(channel, draw_to_cpu_task(program, scene, framebuffer, cpu_data))
 
-draw_to_cpu_sync(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}, cpu_data::AbstractMatrix) = fetch(draw_to_cpu_async(program, scene, framebuffer, channel, cpu_data))
+draw_to_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}, cpu_data::AbstractMatrix) = fetch(draw_to_cpu_async(program, scene, framebuffer, channel, cpu_data))
 
 ################### Intel ##################################################
-# BenchmarkTools.Trial: 1846 samples with 1 evaluation.
-#  Range (min … max):  1.359 ms … 15.559 ms  ┊ GC (min … max): 0.00% … 0.00%
-#  Time  (median):     2.474 ms              ┊ GC (median):    0.00%
-#  Time  (mean ± σ):   2.689 ms ±  1.066 ms  ┊ GC (mean ± σ):  1.49% ± 5.42%
+# BenchmarkTools.Trial: 2265 samples with 1 evaluation.
+#  Range (min … max):  1.175 ms … 23.866 ms  ┊ GC (min … max): 0.00% … 84.18%
+#  Time  (median):     2.040 ms              ┊ GC (median):    0.00%
+#  Time  (mean ± σ):   2.197 ms ±  1.302 ms  ┊ GC (mean ± σ):  1.63% ±  4.74%
 
-#       ▁▂ ▆▃▂▅█▆▂▁ ▁                                           
-#   ▂▂▃▄█████████████▇▆▅▄▄▄▃▂▂▃▃▃▃▃▃▃▃▃▃▁▂▂▂▃▂▂▁▂▂▂▂▁▁▁▂▁▂▁▁▂▂ ▄
-#   1.36 ms        Histogram: frequency by time        6.82 ms <
+#     ▂▅█▇▅▄▅█▇▅▄▃▃▁                                           ▁
+#   ▇█████████████████▆▆▆▆▅▆▇▄▇▇▅▆▆▅▇▇▇█▇█▇▇▄▅▄▆▅▆▁▅▁▁▆▁▄▁▁▅▄▆ █
+#   1.17 ms      Histogram: log(frequency) by time      6.6 ms <
 
-#  Memory estimate: 630.16 KiB, allocs estimate: 910.
+#  Memory estimate: 210.88 KiB, allocs estimate: 675.
 
 ################### NVIDIA ##################################################
 # BenchmarkTools.Trial: 2789 samples with 1 evaluation.
@@ -166,8 +169,14 @@ end
 
 run(future::TypedFuture) = future.fn()
 
-# Channel synchronizes calls to OpenGL driver
-# Run in main thread, do not spawn!
+"""
+    render_channel()
+Synchronize the rendering by scheduling each `TypedFuture` on a single thread.
+Uses tiled rendering to transfer the data into a preallocated array.
+This function has to be called from the same thread that the render context was created in.
+
+Has the best performance of the implementations with high memory usage.
+"""
 function render_channel(tiles::Tiles, framebuffer::GLAbstraction.FrameBuffer)
     cpu_data = gpu_data(framebuffer, 1)
     T_val = typeof(cpu_data)
@@ -193,7 +202,7 @@ function render_channel(tiles::Tiles, framebuffer::GLAbstraction.FrameBuffer)
 end
 
 # draw and view_tile implement the dispatch and wait pattern for sync_render
-function draw_to_cpu_tiles(program::GLAbstraction.AbstractProgram, scene::Scene, channel::Channel{TypedFuture{T}}, render_size) where {T<:AbstractMatrix}
+function draw_to_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, channel::Channel{TypedFuture{T}}, render_size) where {T<:AbstractMatrix}
     render_fn() = begin
         draw(program, scene)
     end
