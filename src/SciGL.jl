@@ -28,6 +28,7 @@ include("MeshModel.jl")
 include("FrameBuffer.jl")
 include("Tiles.jl")
 include("Sync.jl")
+include("Cuda.jl")
 
 # Scene types
 export CvCamera
@@ -71,5 +72,8 @@ export full_size
 export render_channel
 export draw_to_cpu
 export draw_to_cpu_async
+
+# CUDA interp
+
 
 end # module
