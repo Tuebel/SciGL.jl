@@ -49,7 +49,7 @@ end
 Copy a 2D graphics resource to the host memory.
 """
 function Base.unsafe_copyto!(dest::Matrix{T}, src::CUarray) where {T}
-    src_ptr = Base.unsafe_convert(CuArrayPtr{T}, cu_array_ptr)
+    src_ptr = Base.unsafe_convert(CuArrayPtr{T}, src)
     width, height = size(dest)
     Mem.unsafe_copy2d!(pointer(dest), Mem.Host, src_ptr, Mem.Array, width, height)
 end
@@ -71,6 +71,17 @@ Copy a 2D texture to the CUDA device memory.
 CuMatrix type can differ from texture type if you know what you are doing (e.g. Flaot32 instead of Gray{Float32})
 """
 function Base.unsafe_copyto!(dest::CuMatrix{T}, src::GLAbstraction.Texture{U,2}) where {T,U}
+    ptr = cuda_array_ptr(src)
+    Base.unsafe_copyto!(dest, ptr)
+end
+
+"""
+    unsafe_copyto!(dest, src)
+Copy a 2D texture to the CPU host memory.
+CuMatrix type can differ from texture type if you know what you are doing (e.g. Flaot32 instead of Gray{Float32}).
+Prefer the GLAbstraction version which requires the same type for both
+"""
+function Base.unsafe_copyto!(dest::Matrix{T}, src::GLAbstraction.Texture{U,2}) where {T,U}
     ptr = cuda_array_ptr(src)
     Base.unsafe_copyto!(dest, ptr)
 end

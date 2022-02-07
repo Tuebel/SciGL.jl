@@ -15,10 +15,13 @@ const HEIGHT = 600
 window = context_window(WIDTH, HEIGHT)
 # On Intel copying data from a texture or an RBO does not really make a difference
 framebuffer = depth_framebuffer(WIDTH, HEIGHT)
+texture = framebuffer.attachments[1]
 
 # Fill undefined and then copy empty framebuffer -> should change
 cuarray = CuArray{Float32}(undef, (WIDTH, HEIGHT))
 display(maximum(cuarray))
+cpu_data = Matrix{Float32}(undef, WIDTH, HEIGHT)
+display(maximum(cpu_data))
 
 # Compile shader program
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
@@ -52,8 +55,10 @@ while !GLFW.WindowShouldClose(window)
     draw(depth_prog, monkey)
 
     # Maximum depth value should change for rotating monkey
-    Base.unsafe_copyto!(cuarray, framebuffer.attachments[1])
+    unsafe_copyto!(cuarray, texture)
     display(maximum(cuarray))
+    unsafe_copyto!(cpu_data, texture)
+    display(maximum(cpu_data))
     sleep(0.1)
 end
 
