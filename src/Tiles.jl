@@ -59,7 +59,7 @@ end
     gl_tile_indices(tiles, id)
 Calculates the OpenGL indices of the i-th tile.
 """
-gl_tile_indices(tiles::Tiles, id::Int) = mod((id - 1), tiles.x_tiles), trunc(Int64, (id - 1) / tiles.x_tiles)
+gl_tile_indices(tiles::Tiles, id::Int) = mod(id - 1, tiles.x_tiles), div(id - 1, tiles.x_tiles)
 
 """
     tile_indices(tiles, id)
