@@ -170,7 +170,7 @@ Map an OpenGL Texture to a CUDA Texture with an explicit type conversion.
 function CUDA.CuTexture(::Type{T}, texture::GLAbstraction.Texture{U,N}) where {T,U,N}
     ptr = SciGL.gltex_to_cuda_ptr(texture.id)
     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
-    array_buf = CUDA.Mem.ArrayBuffer{T,N}(typed_ptr, size(texture))
+    array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
     texture_array = SciGL.SciTextureArray(array_buf)
     CUDA.CuTexture(texture_array)
 end
