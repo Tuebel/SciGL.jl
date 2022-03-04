@@ -36,6 +36,16 @@ The next section contains a list and use cases of the packages
 - [MeshIO](https://github.com/JuliaIO/MeshIO.jl): Load mesh files like *.obj*, *.ply*, and *.stl*.
   It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this packages is also included.
 
+# HPC on Headless Server with VirtualGL
+Install [VirtualGL](https://virtualgl.org/) on the server which will be used to instantiate a render context without an attached display.
+There are also good [instructions](https://github.com/JuliaGL/GLVisualize.jl/issues/146#issuecomment-289242168) on the GLVisualize github.
+
+Once VirtualGL is running on the server, copy the file [.vscode/julia_vgl.sh] to the bin dir of your Julia installation.
+Make the script executable via `chmod +x /path/to/julia/bin/julia_vgl.sh` and then edit the following vscode setting for the remote:
+```json
+"julia.executablePath": "/path/to/julia/bin/julia_vgl.sh"
+```
+
 # OpenGL.jl devcontainer
 Recommended: Install the vscode [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin and load the [devcontainer](https://code.visualstudio.com/docs/remote/containers).
 Alternatively install julia locally, activate and instantia the SciGL.jl environment.
