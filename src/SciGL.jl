@@ -65,6 +65,9 @@ export Tiles
 
 export activate_all
 export activate_tile
+export coordinates
+export tile_length
+export tile_size
 export view_tile
 export full_size
 

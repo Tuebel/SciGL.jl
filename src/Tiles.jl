@@ -5,7 +5,7 @@ using ModernGL
 
 """
     Tiles
-For tiled rendering, containing n tiles of `x_tiles`×`y_tiles`. 
+For tiled rendering, containing `n_tiles` tiles of `x_tiles`×`y_tiles`. 
 Each tile has the dimensions `width`×`height`.
 """
 struct Tiles
@@ -17,31 +17,19 @@ struct Tiles
 end
 
 """
-    length(tiles)
-Number of tiles.
-"""
-Base.length(tiles::Tiles) = tiles.n_tiles
-
-"""
-    size(tiles)
-Size of the full rendered image.
-"""
-Base.size(tiles::Tiles) = (tiles.x_tiles * tiles.tile_width, tiles.y_tiles * tiles.tile_height)
-
-"""
     Tiles n_tiles::Int, width::Int, height
 For tiled rendering, containing `n` tiles of size `width`×`height`. 
 """
-function Tiles(n_tiles::Int, width::Int, height::Int)
-    (x_tiles, y_tiles) = tiles_size(n_tiles, width, height)
+function Tiles(n_tiles::Integer, width::Int, height::Int)
+    (x_tiles, y_tiles) = texture_size(n_tiles, width, height)
     Tiles(width, height, n_tiles, x_tiles, y_tiles)
 end
 
 """
-    tiles_size(n_tiles, width, height)
+    texture_size(n_tiles, width, height)
 Calculates the minimal size of a raster to render `n_tiles` of the size `(width, height)`.
 """
-function tiles_size(n_tiles::Int, width::Int, height::Int)
+function texture_size(n_tiles::Int, width::Int, height::Int)
     max_size = GLAbstraction.glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE)
     max_x = trunc(Int64, max_size / width)
     max_y = trunc(Int64, max_size / height)
@@ -54,12 +42,35 @@ function tiles_size(n_tiles::Int, width::Int, height::Int)
     (min_x, min_y)
 end
 
+"""
+    length(tiles)
+Number of tiles.
+"""
+Base.length(tiles::Tiles) = tiles.n_tiles
+
+"""
+    size(tiles)
+Size of the full rendered image / texture size.
+"""
+Base.size(tiles::Tiles) = (tiles.x_tiles * tiles.tile_width, tiles.y_tiles * tiles.tile_height)
+
+"""
+    tile_length(tiles)
+length= width * height of one tile.
+"""
+tile_length(tiles::Tiles) = tiles.tile_width * tiles.tile_height
+
+"""
+    tile_size(tiles)
+(width, height) of one tile.
+"""
+tile_size(tiles::Tiles) = (tiles.tile_width, tiles.tile_height)
 
 """
     gl_tile_indices(tiles, id)
 Calculates the OpenGL indices of the i-th tile.
 """
-gl_tile_indices(tiles::Tiles, id::Int) = mod(id - 1, tiles.x_tiles), div(id - 1, tiles.x_tiles)
+gl_tile_indices(tiles::Tiles, id::Integer) = rem(id - 1, tiles.x_tiles), div(id - 1, tiles.x_tiles)
 
 """
     tile_indices(tiles, id)
@@ -71,13 +82,36 @@ function tile_indices(tiles::Tiles, id::Int)
 end
 
 """
+    coordinates(tiles, id)
+Coordinates of the upper left tile corner.
+"""
+function coordinates(tiles::Tiles, id::Integer)
+    x, y = gl_tile_indices(tiles, id)
+    x0 = x * tiles.tile_width + 1
+    y0 = y * tiles.tile_height + 1
+    x0, y0
+end
+
+"""
+    coordinates(tiles, tile_id, iter)
+Coordinates of iter in the whole texture.
+`iter` would typically be thread_id:n_threads:width*height
+"""
+function coordinates(tiles::Tiles, tile_id::Integer, iter::Integer)
+    # Upper left corner indices
+    tile_left, tile_top = coordinates(tiles, tile_id)
+    # Starting 1 is included in the top lef coordinates
+    tile_x = rem(iter - 1, tiles.tile_width)
+    tile_y = div(iter - 1, tiles.tile_width)
+    tile_left + tile_x, tile_top + tile_y
+end
+
+"""
     view_tile(M, tiles, id)
 Create a view of the Matrix `M` for the given tile id.
 """
 function view_tile(M::AbstractMatrix, tiles::Tiles, id::Int)
-    x, y = gl_tile_indices(tiles, id)
-    x0 = x * tiles.tile_width + 1
-    y0 = y * tiles.tile_height + 1
+    x0, y0 = coordinates(tiles, id)
     x1 = x0 + tiles.tile_width - 1
     y1 = y0 + tiles.tile_height - 1
     view(M, x0:x1, y0:y1)
