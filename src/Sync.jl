@@ -58,6 +58,7 @@ render_channel() =
 
 draw_to_cpu_task(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer) =
     Task() do
+        GLAbstraction.bind(framebuffer)
         clear_buffers()
         draw(program, scene)
         gpu_data(framebuffer, 1)
@@ -93,6 +94,7 @@ draw_to_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::G
 
 draw_to_cpu_task(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, cpu_data::AbstractMatrix) =
     Task() do
+        GLAbstraction.bind(framebuffer)
         clear_buffers()
         draw(program, scene)
         unsafe_copyto!(cpu_data, framebuffer.attachments[1])
@@ -130,7 +132,7 @@ draw_to_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::G
 """
     TypedFuture
 Allows an asynchronous / decentralized workflow for dispatching a function on another task.
-The value needs to have the correct size to allow copy!
+The value needs to have the correct size to allow copyto!
 """
 struct TypedFuture{T}
     condition::Threads.Condition
@@ -160,14 +162,14 @@ function Base.put!(future::TypedFuture, v)
     # Pattern: https://docs.julialang.org/en/v1/base/multi-threading/#Base.Threads.Condition
     lock(future)
     try
-        copy!(future.value, v)
+        copyto!(future.value, v)
         notify(future)
     finally
         unlock(future)
     end
 end
 
-run(future::TypedFuture) = future.fn()
+Base.run(future::TypedFuture) = Base.invokelatest(future.fn)
 
 """
     render_channel()
