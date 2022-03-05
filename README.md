@@ -46,6 +46,10 @@ Make the script executable via `chmod +x /path/to/julia/bin/julia_vgl.sh` and th
 "julia.executablePath": "/path/to/julia/bin/julia_vgl.sh"
 ```
 
+## NVIDIA Prime On-Demand
+The same way, the headless rendering can be enabled by faking the julia executable, the NVIDIA card can be selected for the application.
+Simply use [.vscode/julia_nvidia.sh] with the instructions above.
+
 # OpenGL.jl devcontainer
 Recommended: Install the vscode [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin and load the [devcontainer](https://code.visualstudio.com/docs/remote/containers).
 Alternatively install julia locally, activate and instantia the SciGL.jl environment.

@@ -8,6 +8,7 @@
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 JULIA=$DIR/julia
-# VSCode does not like outputs here
+
+# VSCode reads the ouputs of julia -e using Pkg; println.(Pkg.depots())
 # echo "Julia with OpenGL support via VirtualGL, executable: $JULIA"
-DISPLAY=:0 vglrun -d /dev/dri/card0 $JULIA $*
+DISPLAY=:0 vglrun -d /dev/dri/card0 $JULIA "$@"
