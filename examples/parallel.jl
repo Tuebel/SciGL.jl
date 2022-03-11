@@ -34,7 +34,7 @@ end
 # TODO
 framebuffer = color_framebuffer(size(tiles)...)
 GLAbstraction.bind(framebuffer)
-cpu_data = gpu_data(framebuffer, 1)
+cpu_data = gpu_data(framebuffer)
 global_img = view_tile(cpu_data, tiles, 1)
 img_lock = ReentrantLock()
 

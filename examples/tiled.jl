@@ -22,7 +22,9 @@ SciGL.tile_indices(tiles, 3)
 
 # Draw to framebuffer
 framebuffer = color_framebuffer(size(tiles)...)
+texture = framebuffer.attachments[1]
 GLAbstraction.bind(framebuffer)
+cpu_data = typeof(gpu_data(framebuffer))(undef, WIDTH, HEIGHT)
 
 # Buffer settings
 enable_depth_stencil()
@@ -69,19 +71,13 @@ while !GLFW.WindowShouldClose(window)
     activate_tile(tiles, 3)
     draw(normal_prog, scene)
 
-    # copy to cpu
-    img = gpu_data(framebuffer, 1)
-
-    # view only a single image from the texture
-    if floor(Int, time() / 5) % 3 == 0
-        img = view_tile(img, tiles, 1)
-    elseif floor(Int, time() / 5) % 3 == 1
-        img = view_tile(img, tiles, 2)
-    else
-        img = view_tile(img, tiles, 3)
-    end
-    img = @view img[:, end:-1:1]
-    img = transpose(img)
+    # copy only the required part of the tiles to the CPU
+    id = time() ÷ 5 % 3 + 1 |> Int
+    GLAbstraction.unsafe_copyto!(cpu_data, framebuffer, tiles, id)
+    # Alternative: Copy all and the select the view#
+    # cpu_data = gpu_data(framebuffer)
+    # img = view_tile(cpu_data, tiles, 1)
+    img = cpu_data[:, end:-1:1] |> transpose
     imshow(canvas, img)
     sleep(0.1)
 end

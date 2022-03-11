@@ -138,3 +138,9 @@ function activate_all(tiles::Tiles)
     glViewport(0, 0, size(tiles)...)
     glDisable(GL_SCISSOR_TEST)
 end
+
+"""
+    unsafe_copyto!(dest, source, tiles)
+Convenience dispatch for copying the tile from the GPU source to the CPU dest.
+"""
+GLAbstraction.unsafe_copyto!(dest, source, tiles::Tiles, id::Integer) = unsafe_copyto!(dest, source, coordinates(tiles, id)...)

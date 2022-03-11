@@ -61,7 +61,7 @@ draw_to_cpu_task(program::GLAbstraction.AbstractProgram, scene::Scene, framebuff
         GLAbstraction.bind(framebuffer)
         clear_buffers()
         draw(program, scene)
-        gpu_data(framebuffer, 1)
+        gpu_data(framebuffer)
     end
 
 draw_to_cpu_async(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel{Task}) = put!(channel, draw_to_cpu_task(program, scene, framebuffer))
@@ -180,7 +180,7 @@ This function has to be called from the same thread that the render context was 
 Has the best performance of the implementations with high memory usage.
 """
 function render_channel(tiles::Tiles, framebuffer::GLAbstraction.FrameBuffer)
-    cpu_data = gpu_data(framebuffer, 1)
+    cpu_data = gpu_data(framebuffer)
     T_val = typeof(cpu_data)
     Channel{TypedFuture{T_val}}() do channel
         futures = Vector{TypedFuture{T_val}}(undef, length(tiles))

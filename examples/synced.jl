@@ -28,7 +28,7 @@ window = context_offscreen(WIDTH, HEIGHT)
 # Draw to framebuffer
 framebuffer = color_framebuffer(WIDTH, HEIGHT)
 GLAbstraction.bind(framebuffer)
-cpu_data = gpu_data(framebuffer, 1)
+cpu_data = gpu_data(framebuffer)
 img_lock = ReentrantLock()
 
 # Buffer settings
@@ -100,6 +100,6 @@ end
 
 if BENCHMARK
     # Preallocate once
-    benchmark_data = gpu_data(framebuffer, 1)
+    benchmark_data = gpu_data(framebuffer)
     @benchmark render(normal_prog, scene, framebuffer, channel, benchmark_data)
 end
