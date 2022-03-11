@@ -9,7 +9,7 @@ using CUDA
 using GLAbstraction, GLFW
 using SciGL
 
-const N_TASKS = 10
+const N_TASKS = 1000
 const WIDTH = 100
 const HEIGHT = 100
 
@@ -60,28 +60,26 @@ function render_to_sum(program::GLAbstraction.AbstractProgram, scene::Scene, tex
 end
 
 # Waiting on main task would deadlock
-bench_cuda(program::GLAbstraction.AbstractProgram, scene::Scene, texture::GLAbstraction.Texture, channel::Channel) =
+function bench_cuda(program::GLAbstraction.AbstractProgram, scene::Scene, texture::GLAbstraction.Texture, channel::Channel)
+    cu_mat = CuMatrix{Float32}(undef, size(texture))
     @sync begin
-        cu_mat = CuMatrix{Float32}(undef, size(texture))
-        for _ in 1:N_TASKS
+        Threads.@threads for _ in 1:N_TASKS
             Threads.@spawn begin
-                for _ in 1:100
-                    render_to_sum(program, scene, texture, channel, cu_mat)
-                end
+                render_to_sum(program, scene, texture, channel, cu_mat)
             end
         end
     end
+end
 
-bench_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel) =
+function bench_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, framebuffer::GLAbstraction.FrameBuffer, channel::Channel)
     @sync begin
-        for _ in 1:N_TASKS
+        Threads.@threads for _ in 1:N_TASKS
             Threads.@spawn begin
-                for _ in 1:100
-                    render_to_cpu_sum(program, scene, framebuffer, channel)
-                end
+                render_to_cpu_sum(program, scene, framebuffer, channel)
             end
         end
     end
+end
 
 @benchmark bench_cuda(depth_prog, scene, texture, channel)
 @benchmark bench_cpu(depth_prog, scene, framebuffer, channel)

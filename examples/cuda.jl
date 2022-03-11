@@ -52,7 +52,7 @@ display(maximum(cu_array))
 Returns (x, y) coordinate in the texture for a grid-stride loop style iter.
 Convention is taken form GLAbstraction → (width, height) and (x, y) indices.
 """
-@inline function texture_xy(tex_width::Integer, iter::Integer)
+function texture_xy(tex_width::Integer, iter::Integer)
     # Convention from GLAbstraction: Matrix(width, height)
     x = mod(iter - 1, tex_width) + 1
     y = div(iter - 1, tex_width) + 1
