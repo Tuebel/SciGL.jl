@@ -50,6 +50,9 @@ Make the script executable via `chmod +x /path/to/julia/bin/julia_vgl.sh` and th
 The same way, the headless rendering can be enabled by faking the julia executable, the NVIDIA card can be selected for the application.
 Simply use [.vscode/julia_nvidia.sh] with the instructions above.
 
+> **Tipp:** If you get an unknown CUDA Error (999) during OpenGL interop, you probably render to the integrated device instead of the NVIDIA card.
+> Then you need to use julia_nvidia.sh
+
 # OpenGL.jl devcontainer
 Recommended: Install the vscode [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin and load the [devcontainer](https://code.visualstudio.com/docs/remote/containers).
 Alternatively install julia locally, activate and instantia the SciGL.jl environment.
