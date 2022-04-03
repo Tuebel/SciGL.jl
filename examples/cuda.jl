@@ -44,7 +44,6 @@ cpu_data = Matrix{Float32}(undef, WIDTH, HEIGHT)
 # Maximum depth value should change for rotated monkey
 cu_tex = CUDA.CuTexture(Float32, texture)
 cu_array .= cu_tex
-# Should be ≈ 1.7
 display(maximum(cu_array))
 
 """
@@ -57,11 +56,12 @@ function texture_xy(tex_width::Integer, iter::Integer)
     x = mod(iter - 1, tex_width) + 1
     y = div(iter - 1, tex_width) + 1
     # Texture requires Float32 indices
-    Float32(x), Float32(y)
+    # Float32(x), Float32(y)
+    x, y
 end
 likelihood_sum(μ, z) = μ + z
 # Likelihood accumulator for textures to avoid copies
-function block_sum(block_sums::CuDeviceVector{T}, tex::CuDeviceTexture{<:Any,2}) where {T}
+function block_sum(block_sums::CuDeviceVector{T}, tex::AbstractArray{Float32,2}) where {T}
     thread_id = threadIdx().x
     block_id = blockIdx().x
     n_threads = blockDim().x  # block local threads
@@ -88,6 +88,15 @@ function block_sum(block_sums::CuDeviceVector{T}, tex::CuDeviceTexture{<:Any,2})
     end
     return nothing
 end
+
+THREADS = 128
+BLOCKS = cld(length(texture), THREADS)
+SHMEM = THREADS * sizeof(Float32)
+
+cu_tex = CUDA.CuTexture(Float32, texture)
+block_sums = CuVector{Float64}(undef, BLOCKS)
+
+@cuda threads = THREADS blocks = BLOCKS shmem = SHMEM block_sum(block_sums, cu_array)
 
 # WARN performance 1.5x better when manually setting the number of threads per block to 128 or 256 instead of using the scheme from the CUDA.jl docs
 

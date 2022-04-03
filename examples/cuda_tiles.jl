@@ -9,7 +9,7 @@ using CUDA
 using GLAbstraction, GLFW
 using SciGL
 
-const N_TASKS = 1000
+const N_TASKS = 500
 const WIDTH = 100
 const HEIGHT = 100
 
@@ -38,7 +38,7 @@ Calculates the sum of each tile in `tex`.
 For tiles of length N choose block_size=N, length(out)=N.
 The shared memory must have n_threads * sizeof(T) bytes.
 """
-function gpu_block_sum(tex::CuDeviceTexture{<:Any,2}, tiles::Tiles, out::CuDeviceVector{T}) where {T}
+function gpu_block_sum(tex::CuDeviceTexture{<:Any,2}, tiles::Tiles, out::CuDeviceVector{T}, fn) where {T}
     # aliases for readability
     thread_id = threadIdx().x
     block_id = blockIdx().x
@@ -49,7 +49,7 @@ function gpu_block_sum(tex::CuDeviceTexture{<:Any,2}, tiles::Tiles, out::CuDevic
     for i in thread_id:n_threads:tile_length(tiles)
         # Texture indices: N-Dims Float32
         x, y = coordinates(tiles, block_id, i) .|> Float32
-        @inbounds thread_sum += tex[x, y]
+        @inbounds thread_sum += fn(tex[x, y])
     end
     # Synchronized accumulation for block
     thread_sums = CuDynamicSharedArray(Float32, n_threads)
@@ -61,13 +61,13 @@ function gpu_block_sum(tex::CuDeviceTexture{<:Any,2}, tiles::Tiles, out::CuDevic
     return nothing
 end
 
-function cuda_evaluation(tex::GLAbstraction.Texture, tiles; n_threads = 256)
+function cuda_evaluation(tex::GLAbstraction.Texture, tiles; n_threads=256)
     # TODO Calculate optimal threads?
     cu_tex = CuTexture(Float32, tex)
     n_blocks = length(tiles)
     out = CuVector{Float64}(undef, n_blocks)
     shmem_size = n_threads * sizeof(eltype(out))
-    @cuda threads = n_threads blocks = n_blocks shmem = shmem_size gpu_block_sum(cu_tex, tiles, out)
+    @cuda threads = n_threads blocks = n_blocks shmem = shmem_size gpu_block_sum(cu_tex, tiles, out, exp)
     Array(out)
 end
 
@@ -82,7 +82,7 @@ function bench_serial(program, scenes, framebuffer, tiles)
     end
     # CUDA calculations
     texture = framebuffer.attachments[1]
-    sums = cuda_evaluation(texture, tiles)
+    # sums = cuda_evaluation(texture, tiles)
     nothing
 end
 
@@ -158,5 +158,5 @@ function serial_predict(scenes::AbstractVector{<:Scene})
 end
 
 # Only makes sense for large number of parallel samples, on my machine > 25
-@benchmark parallel_predict(scenes)
-@benchmark serial_predict(scenes)
+# @benchmark parallel_predict(scenes)
+# @benchmark serial_predict(scenes)
