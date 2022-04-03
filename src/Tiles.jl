@@ -130,7 +130,7 @@ Allows to iterate image coordinates as 3D array [x,y,tile] so that every full ti
 """
 function linear_idx(tiles::Tiles, i::Integer)
     x, y = cartesian_idx(tiles, i)
-    width, height = size(tiles)
+    width, _ = size(tiles)
     width * (y - 1) + x
 end
 
