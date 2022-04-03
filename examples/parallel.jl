@@ -12,7 +12,7 @@ using SciGL
 
 const WIDTH = 100
 const HEIGHT = 100
-const BENCHMARK = true
+const BENCHMARK = false
 if BENCHMARK
     # Benchmark task not included
     const N_TASKS = 10
@@ -35,7 +35,7 @@ end
 framebuffer = color_framebuffer(size(tiles)...)
 GLAbstraction.bind(framebuffer)
 cpu_data = gpu_data(framebuffer)
-global_img = view_tile(cpu_data, tiles, 1)
+global_img = view(cpu_data, tiles, 1)
 img_lock = ReentrantLock()
 
 

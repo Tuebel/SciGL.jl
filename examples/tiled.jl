@@ -18,7 +18,7 @@ window = context_offscreen(WIDTH, HEIGHT)
 
 # Setup and check tiles
 tiles = Tiles(3, WIDTH, HEIGHT)
-SciGL.tile_indices(tiles, 3)
+indices_3d = LinearIndices(tiles)
 
 # Draw to framebuffer
 framebuffer = color_framebuffer(size(tiles)...)
@@ -71,13 +71,16 @@ while !GLFW.WindowShouldClose(window)
     activate_tile(tiles, 3)
     draw(normal_prog, scene)
 
-    # copy only the required part of the tiles to the CPU
     id = time() ÷ 5 % 3 + 1 |> Int
+    # copy only the required part of the tiles to the CPU
     GLAbstraction.unsafe_copyto!(cpu_data, framebuffer, tiles, id)
     # Alternative: Copy all and the select the view#
     # cpu_data = gpu_data(framebuffer)
-    # img = view_tile(cpu_data, tiles, 1)
-    img = cpu_data[:, end:-1:1] |> transpose
+    # img = view(cpu_data, tiles, 1)
+    # Another alternative: Copy all, reshape to 3D and then select via last dimension, intended for CUDA Array programming
+    cpu_data = gpu_data(framebuffer)
+    img = cpu_data[indices_3d][:, :, id]
+    img = img[:, end:-1:1] |> transpose
     imshow(canvas, img)
     sleep(0.1)
 end

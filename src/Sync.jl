@@ -196,14 +196,14 @@ function render_channel(tiles::Tiles, framebuffer::GLAbstraction.FrameBuffer)
             # Fill the futures with data
             unsafe_copyto!(cpu_data, framebuffer.attachments[1])
             for i in 1:length(tiles)
-                img = view_tile(cpu_data, tiles, i)
+                img = view(cpu_data, tiles, i)
                 put!(futures[i], img)
             end
         end
     end
 end
 
-# draw and view_tile implement the dispatch and wait pattern for sync_render
+# draw and view implement the dispatch and wait pattern for sync_render
 function draw_to_cpu(program::GLAbstraction.AbstractProgram, scene::Scene, channel::Channel{TypedFuture{T}}, render_size) where {T<:AbstractMatrix}
     render_fn() = begin
         draw(program, scene)

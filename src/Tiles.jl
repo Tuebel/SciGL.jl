@@ -69,12 +69,14 @@ tile_size(tiles::Tiles) = (tiles.tile_width, tiles.tile_height)
 """
     gl_tile_indices(tiles, id)
 Calculates the OpenGL indices of the i-th tile.
+The number of the tile column / row not the coordinates in the image.
 """
 gl_tile_indices(tiles::Tiles, id::Integer) = rem(id - 1, tiles.x_tiles), div(id - 1, tiles.x_tiles)
 
 """
     tile_indices(tiles, id)
 Calculates the Julia indices of the i-th tile.
+The number of the tile column / row not the coordinates in the image.
 """
 function tile_indices(tiles::Tiles, id::Int)
     x, y = gl_tile_indices(tiles, id)
@@ -83,7 +85,7 @@ end
 
 """
     coordinates(tiles, id)
-Coordinates of the upper left tile corner.
+Image coordinates of the upper left tile corner.
 """
 function coordinates(tiles::Tiles, id::Integer)
     x, y = gl_tile_indices(tiles, id)
@@ -94,7 +96,7 @@ end
 
 """
     coordinates(tiles, tile_id, iter)
-Coordinates of iter in the whole texture.
+Image coordinates of iter in the whole texture.
 `iter` would typically be thread_id:n_threads:width*height
 """
 function coordinates(tiles::Tiles, tile_id::Integer, iter::Integer)
@@ -107,10 +109,50 @@ function coordinates(tiles::Tiles, tile_id::Integer, iter::Integer)
 end
 
 """
-    view_tile(M, tiles, id)
+    cartesian_idx(tiles, i)
+Image coordinates for a linear index `i`.
+"""
+function cartesian_idx(tiles::Tiles, i::Integer)
+    tile_id = (i - 1) ÷ tile_length(tiles) + 1
+    iter = (i - 1) % tile_length(tiles) + 1
+    coordinates(tiles, tile_id, iter)
+end
+
+"""
+    CartesianIndex(tiles, i)
+Image coordinates for a linear index `i`.
+"""
+Base.CartesianIndex(tiles::Tiles, i::Integer) = cartesian_idx(tiles, i) |> CartesianIndex
+
+"""
+    linear_idx(tiles, i)
+Allows to iterate image coordinates as 3D array [x,y,tile] so that every full tile is iterated after each other.
+"""
+function linear_idx(tiles::Tiles, i::Integer)
+    x, y = cartesian_idx(tiles, i)
+    width, height = size(tiles)
+    width * (y - 1) + x
+end
+
+"""
+    LinearIndices(tiles)
+Allows to iterate image coordinates as 3D array [x,y,tile] so that every full tile is iterated after each other.
+"""
+function Base.LinearIndices(tiles::Tiles)
+    res = Array{Int64}(undef, tile_size(tiles)..., length(tiles))
+    for i in 1:length(tiles)*tile_length(tiles)
+        res[i] = linear_idx(tiles, i)
+    end
+    res
+    # WARN this just results in 
+    #LinearIndices(res)
+end
+
+"""
+    view(M, tiles, id)
 Create a view of the Matrix `M` for the given tile id.
 """
-function view_tile(M::AbstractMatrix, tiles::Tiles, id::Int)
+function Base.view(M::AbstractMatrix, tiles::Tiles, id::Int)
     x0, y0 = coordinates(tiles, id)
     x1 = x0 + tiles.tile_width - 1
     y1 = y0 + tiles.tile_height - 1
