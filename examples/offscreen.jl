@@ -6,7 +6,6 @@ using Accessors
 using CoordinateTransformations, Rotations
 using GLAbstraction, GLFW
 using SciGL
-# TODO remove from package depencies
 using ImageView
 
 const WIDTH = 801
