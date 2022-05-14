@@ -129,9 +129,14 @@ function CUDA.CUDA_RESOURCE_DESC(texarr::SciTextureArray)
     return resDesc_ref
 end
 
+# TODO This note is from https://github.com/JuliaGPU/CUDA.jl/blob/master/src/texture.jl but I could not get ArrayBuffer working with CuArray because of illegal conversions
+# NOTE: the API for texture support is not final yet. some thoughts:
+#
+# - instead of CuTextureArray, use CuArray with an ArrayBuffer. This array could then
+#   adapt to a CuTexture, or do the same for CuDeviceArray.
+
 CUDA.CuTexture(x::SciTextureArray{T,N}; kwargs...) where {T,N} =
     CuTexture{T,N,typeof(x)}(x; kwargs...)
-
 
 """
     CuTexture(texture)
@@ -141,7 +146,7 @@ Color types seem to cause problems with some Kernels.
 function CUDA.CuTexture(texture::GLAbstraction.Texture{T,N}) where {T,N}
     ptr = SciGL.gltex_to_cuda_ptr(texture)
     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
-    array_buf = CUDA.Mem.ArrayBuffer{T,N}(typed_ptr, size(texture))
+    array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
     texture_array = SciGL.SciTextureArray(array_buf)
     CUDA.CuTexture(texture_array)
 end
