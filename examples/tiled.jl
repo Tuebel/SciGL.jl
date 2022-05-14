@@ -55,7 +55,7 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
 
-    scene = @set scene.camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
+    scene = @set scene.camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
     scene = @set scene.camera.pose.R = lookat(scene.camera, monkey, [0 1 0])
 
     # draw

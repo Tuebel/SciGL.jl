@@ -57,7 +57,7 @@ channel = render_channel()
 # Render the camera pose to the cpu
 function render(program, scene, framebuffer, channel, cpu_data)
     tim = time()
-    scene = @set scene.camera.pose.t = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
+    scene = @set scene.camera.pose.t = Translation(1.3 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
     scene = @set scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
     img = draw_to_cpu(program, scene, framebuffer, channel, cpu_data)
     # Some computation

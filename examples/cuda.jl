@@ -9,8 +9,8 @@ using CUDA
 using GLAbstraction, GLFW
 using SciGL
 
-const WIDTH = 100
-const HEIGHT = 100
+const WIDTH = 2000
+const HEIGHT = 2000
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
@@ -24,7 +24,7 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj") |> SceneObject
 # Init Camera
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
-camera = @set camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
+camera = @set camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
 camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
 # Buffer settings
 enable_depth_stencil()
@@ -42,9 +42,13 @@ cu_array = CuArray{Float32}(undef, (WIDTH, HEIGHT))
 cpu_data = Matrix{Float32}(undef, WIDTH, HEIGHT)
 
 # Maximum depth value should change for rotated monkey
-cu_tex = CUDA.CuTexture(Float32, texture)
-cu_array .= cu_tex
-display(maximum(cu_array))
+CUDA.@time begin
+    cu_tex = CUDA.CuTexture(Float32, texture)
+    cu_array .= cu_tex
+end
+# display(maximum(cu_array))
+# A bit faster
+CUDA.@time unsafe_copyto!(cu_array, texture)
 
 """
     pixel_xy(width, iter)
