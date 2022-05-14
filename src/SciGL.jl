@@ -26,6 +26,7 @@ include("Camera.jl")
 include("Shaders.jl")
 include("MeshModel.jl")
 include("FrameBuffer.jl")
+include("Layers.jl")
 include("Tiles.jl")
 include("Sync.jl")
 include("Cuda.jl")
@@ -70,12 +71,12 @@ export tile_length
 export tile_size
 export full_size
 
+# Layered rendering
+export activate_layer
+
 # Synchronized rendering of tiles
 export render_channel
 export draw_to_cpu
 export draw_to_cpu_async
-
-# CUDA interp
-
 
 end # module

@@ -6,7 +6,7 @@ using CUDA:
     CU_GRAPHICS_REGISTER_FLAGS_NONE,
     CU_GRAPHICS_REGISTER_FLAGS_TEXTURE_GATHER,
     CU_RESOURCE_TYPE_ARRAY,
-    CUarray,
+    CuArrayPtr,
     cuGraphicsGLRegisterImage,
     cuGraphicsMapResources,
     CUgraphicsResource,
@@ -18,9 +18,9 @@ using ModernGL
 """
     gltex_to_cuda_ptr(id)
 Registers the texture or renderbuffer object specified by image for access by CUDA.
-A CUarray pointer to the resource is returned.
+A CuArrayPtr to the resource is returned.
 """
-function gltex_to_cuda_ptr(id::GLuint; readonly = false) where {T}
+function gltex_to_cuda_ptr(texture::GLAbstraction.Texture{<:Any,N}; readonly=false) where {N}
     resources = Ref{CUDA.CUgraphicsResource}()
     # For reading also works: 
     if readonly
@@ -29,9 +29,9 @@ function gltex_to_cuda_ptr(id::GLuint; readonly = false) where {T}
         flags = CU_GRAPHICS_REGISTER_FLAGS_NONE
     end
     # resource as reference
-    cuGraphicsGLRegisterImage(resources, id, GL_TEXTURE_2D, flags)
+    cuGraphicsGLRegisterImage(resources, texture.id, GLAbstraction.texturetype_from_dimensions(N), flags)
     cuGraphicsMapResources(1, resources, C_NULL)
-    cuarray_ptr = Ref{CUarray}()
+    cuarray_ptr = Ref{CuArrayPtr{Cvoid}}()
     # resources dereferenced
     cuGraphicsSubResourceGetMappedArray(cuarray_ptr, resources[], 0, 0)
     cuarray_ptr[]
@@ -47,45 +47,28 @@ end
 
 """
     unsafe_copyto!(dest, src)
-Copy a 2D graphics resource to the host memory.
+Copy the first attachment of an OpenGL framebuffer to an Array.
+The array type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
 """
-function Base.unsafe_copyto!(dest::Matrix{T}, src::CUarray) where {T}
-    src_ptr = Base.unsafe_convert(CuArrayPtr{T}, src)
-    width, height = size(dest)
-    Mem.unsafe_copy2d!(pointer(dest), Mem.Host, src_ptr, Mem.Array, width, height)
-end
+Base.unsafe_copyto!(dest::AbstractArray, src::GLAbstraction.FrameBuffer) = unsafe_copyto!(dest, first(src.attachments))
 
 """
     unsafe_copyto!(dest, src)
-Copy a 2D graphics resource to the CUDA device memory.
+Copy an OpenGL texture to an Array.
+The array type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
 """
-function Base.unsafe_copyto!(dest::CuMatrix{T}, src::CUarray) where {T}
-    typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, src)
-    width, height = size(dest)
-    # TODO somehow wrap instead of copying like https://gist.github.com/watosar/471f0f6b20d5dd18753b87c497d9a36d
-    Mem.unsafe_copy2d!(pointer(dest), Mem.Device, typed_ptr, Mem.Array, width, height)
+function Base.unsafe_copyto!(dest::AbstractArray{T,N}, src::GLAbstraction.Texture{U,N}) where {T,U,N}
+    ptr = Base.unsafe_convert(CuArrayPtr{T}, gltex_to_cuda_ptr(src))
+    unsafe_copyto!(dest, ptr)
 end
 
-"""
-    unsafe_copyto!(dest, src)
-Copy a 2D texture to the CUDA device memory.
-CuMatrix type can differ from texture type if you know what you are doing (e.g. Flaot32 instead of Gray{Float32})
-"""
-function Base.unsafe_copyto!(dest::CuMatrix{T}, src::GLAbstraction.Texture{U,2}) where {T,U}
-    ptr = gltex_to_cuda_ptr(src.id)
-    Base.unsafe_copyto!(dest, ptr)
-end
+# TODO somehow wrap instead of copying like https://gist.github.com/watosar/471f0f6b20d5dd18753b87c497d9a36d
+Base.unsafe_copyto!(dest::CuArray{T,2}, src::CuArrayPtr{T}) where {T} = Mem.unsafe_copy2d!(pointer(dest), Mem.Device, src, Mem.Array, size(dest)...)
+Base.unsafe_copyto!(dest::Array{T,2}, src::CuArrayPtr) where {T} = Mem.unsafe_copy2d!(pointer(dest), Mem.Host, src, Mem.Array, size(dest)...)
 
-"""
-    unsafe_copyto!(dest, src)
-Copy a 2D texture to the CPU host memory.
-CuMatrix type can differ from texture type if you know what you are doing (e.g. Flaot32 instead of Gray{Float32}).
-Prefer the GLAbstraction version which requires the same type for both
-"""
-function Base.unsafe_copyto!(dest::Matrix{T}, src::GLAbstraction.Texture{U,2}) where {T,U}
-    ptr = gltex_to_cuda_ptr(src.id)
-    Base.unsafe_copyto!(dest, ptr)
-end
+Base.unsafe_copyto!(dest::CuArray{T,3}, src::CuArrayPtr{T}) where {T} = Mem.unsafe_copy3d!(pointer(dest), Mem.Device, src, Mem.Array, size(dest)...)
+Base.unsafe_copyto!(dest::Array{T,3}, src::CuArrayPtr) where {T} = Mem.unsafe_copy3d!(pointer(dest), Mem.Host, src, Mem.Array, size(dest)...)
+
 
 # Mapping instead of copying, hopefully a pull request will make this copy pointless
 
@@ -125,7 +108,7 @@ mutable struct SciTextureArray{T,N}
 end
 
 function unsafe_destroy!(t::SciTextureArray)
-    context!(t.ctx; skip_destroyed = true) do
+    context!(t.ctx; skip_destroyed=true) do
         Mem.free(t.buf)
     end
 end
@@ -156,7 +139,7 @@ Map an OpenGL Texture to a CUDA Texture using the type of the texture.
 Color types seem to cause problems with some Kernels.
 """
 function CUDA.CuTexture(texture::GLAbstraction.Texture{T,N}) where {T,N}
-    ptr = SciGL.gltex_to_cuda_ptr(texture.id)
+    ptr = SciGL.gltex_to_cuda_ptr(texture)
     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
     array_buf = CUDA.Mem.ArrayBuffer{T,N}(typed_ptr, size(texture))
     texture_array = SciGL.SciTextureArray(array_buf)
@@ -168,7 +151,7 @@ end
 Map an OpenGL Texture to a CUDA Texture with an explicit type conversion.
 """
 function CUDA.CuTexture(::Type{T}, texture::GLAbstraction.Texture{U,N}) where {T,U,N}
-    ptr = SciGL.gltex_to_cuda_ptr(texture.id)
+    ptr = SciGL.gltex_to_cuda_ptr(texture)
     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
     array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
     texture_array = SciGL.SciTextureArray(array_buf)
