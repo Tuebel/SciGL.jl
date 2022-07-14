@@ -14,9 +14,8 @@ struct Pose
     R::Rotation
 end
 
-# TODO vector might also represent a quaternion.
 """
-    Pose(t_xyz, r_xyz)
+    Pose(t_xyz, r)
 Pose from a translation vector and some rotation representation.
 """
 Pose(t_xyz::AbstractVector, r) = Pose(Translation(t_xyz), r)
