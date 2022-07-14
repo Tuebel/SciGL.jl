@@ -14,11 +14,12 @@ struct Pose
     R::Rotation
 end
 
+# TODO vector might also represent a quaternion.
 """
     Pose(t_xyz, r_xyz)
-Pose from a translation vector and XYZ Euler angles.
+Pose from a translation vector and some rotation representation.
 """
-Pose(t_xyz::AbstractVector, r_xyz::AbstractVector) = Pose(Translation(t_xyz), RotXYZ(r_xyz...))
+Pose(t_xyz::AbstractVector, r) = Pose(Translation(t_xyz), r)
 
 """
     SceneObject
@@ -49,7 +50,7 @@ end
     SceneObject(object, program)
 Creates a SceneObject with an identity rotation & zero translation
 """
-SceneObject(object::T; pose = Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
+SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
 
 """
     draw(program, scene_object)
