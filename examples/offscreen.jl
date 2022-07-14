@@ -22,11 +22,12 @@ normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
 silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
-# Init mesh
-monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
-
-# Init Camera
+# Init scene
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
+cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
+cube = @set cube.pose.t = Translation(1, 0, 0)
+monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+monkey = @set monkey.pose.t = Translation(0, 0, 0)
 
 # Key callbacks GLFW.GetKey does not seem to work
 GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin
@@ -47,21 +48,21 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
     # update camera pose
     camera = @set camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
+    # WARN if not using Scene, to_gpu has to be called for the camera
     camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()
     if floor(Int, time() / 5) % 3 == 0
         to_gpu(normal_prog, camera)
-        to_gpu(normal_prog, monkey)
         draw(normal_prog, monkey)
+        draw(normal_prog, cube)
     elseif floor(Int, time() / 5) % 3 == 1
         to_gpu(silhouette_prog, camera)
-        to_gpu(silhouette_prog, monkey)
         draw(silhouette_prog, monkey)
     else
         to_gpu(depth_prog, camera)
-        to_gpu(depth_prog, monkey)
+        draw(depth_prog, cube)
         draw(depth_prog, monkey)
     end
     # Simplified interface, performance only slightly worse

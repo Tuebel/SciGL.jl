@@ -52,7 +52,7 @@ Creates a SceneObject with an identity rotation & zero translation
 SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
 
 """
-    draw(program, scene_object)
+    draw(program, scene)
 Draws the whole scene via the given shader Program.
 Transfers all the unions (matrices) to the shader Program.
 """
@@ -60,7 +60,6 @@ function draw(program::GLAbstraction.AbstractProgram, scene::Scene)
     # setup camera & lights before rendering meshes
     to_gpu(program, scene.camera)
     for so in scene.meshes
-        to_gpu(program, so)
         draw(program, so)
     end
 end

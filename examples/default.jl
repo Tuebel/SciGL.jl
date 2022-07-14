@@ -19,7 +19,7 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 # Init scene
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
-cube = @set cube.pose.t = Translation(3, 0, 0)
+cube = @set cube.pose.t = Translation(1, 0, 0)
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
 monkey = @set monkey.pose.t = Translation(0, 0, 0)
 scene = Scene(camera, [cube, monkey])

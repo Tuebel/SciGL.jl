@@ -1,7 +1,6 @@
 # @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
-# using GeometryBasics
 
 """
     load_mesh(mesh, program)
@@ -28,7 +27,7 @@ load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString) = l
     to_gpu(program, scene_object)
 Transfers the model matrix to the OpenGL program
 """
-function to_gpu(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T <: GLAbstraction.VertexArray}
+function to_gpu(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T<:GLAbstraction.VertexArray}
     GLAbstraction.bind(program)
     GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose))
     GLAbstraction.unbind(program)
@@ -37,12 +36,13 @@ end
 """
     draw(program, scene_object)
 Draws the model via the given shader Program.
-**Warning:** the location of the unions in the must match those of the program used for the construction of the VertexArray.  
-Call `to_gpu` to update the pose in the shader program before this function.
+**Warning:** the location of the unions in the must match those of the program used for the construction of the VertexArray.
 """
-function draw(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T <: GLAbstraction.VertexArray}
+function draw(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T<:GLAbstraction.VertexArray}
     GLAbstraction.bind(program)
     GLAbstraction.bind(scene_object.object)
+    # Copied from to_gpu to avoid unnecessary bind / unbind
+    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose))
     GLAbstraction.draw(scene_object.object)
     GLAbstraction.unbind(scene_object.object)
     GLAbstraction.unbind(program)

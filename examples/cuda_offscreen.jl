@@ -5,7 +5,6 @@
 using Accessors
 using CUDA
 using SciGL
-# TODO remove from package depencies
 using ImageView
 
 const WIDTH = 801
@@ -52,21 +51,19 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
     # update camera pose
     camera = @set camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
+    # WARN if not using Scene, to_gpu has to be called for the camera
     camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()
     if floor(Int, time() / 5) % 3 == 0
         to_gpu(normal_prog, camera)
-        to_gpu(normal_prog, monkey)
         draw(normal_prog, monkey)
     elseif floor(Int, time() / 5) % 3 == 1
         to_gpu(silhouette_prog, camera)
-        to_gpu(silhouette_prog, monkey)
         draw(silhouette_prog, monkey)
     else
         to_gpu(depth_prog, camera)
-        to_gpu(depth_prog, monkey)
         draw(depth_prog, monkey)
     end
     # Simplified interface, performance only slightly worse

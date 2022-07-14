@@ -23,6 +23,7 @@ monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj") |> SceneObject
 # Init Camera
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 camera = @set camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
+# WARN if not using Scene, to_gpu has to be called for the camera
 camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
 # Buffer settings
 enable_depth_stencil()
@@ -32,7 +33,6 @@ set_clear_color()
 GLAbstraction.bind(framebuffer)
 clear_buffers()
 to_gpu(depth_prog, camera)
-to_gpu(depth_prog, monkey)
 draw(depth_prog, monkey)
 
 # Fill undefined and then copy empty framebuffer -> should change

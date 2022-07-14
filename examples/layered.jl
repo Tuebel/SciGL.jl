@@ -50,15 +50,15 @@ while !GLFW.WindowShouldClose(window)
     scene = @set scene.camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
     scene = @set scene.camera.pose.R = lookat(scene.camera, monkey, [0 1 0])
 
-    SciGL.activate_layer(framebuffer, 1)
+    activate_layer(framebuffer, 1)
     clear_buffers()
     draw(silhouette_prog, scene)
 
-    SciGL.activate_layer(framebuffer, 2)
+    activate_layer(framebuffer, 2)
     clear_buffers()
     draw(depth_prog, scene)
 
-    SciGL.activate_layer(framebuffer, 3)
+    activate_layer(framebuffer, 3)
     clear_buffers()
     draw(normal_prog, scene)
 

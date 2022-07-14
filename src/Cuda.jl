@@ -126,12 +126,6 @@ function CUDA.CUDA_RESOURCE_DESC(texarr::SciTextureArray)
     return resDesc_ref
 end
 
-# TODO This note is from https://github.com/JuliaGPU/CUDA.jl/blob/master/src/texture.jl but I could not get ArrayBuffer working with CuArray because of illegal conversions
-# NOTE: the API for texture support is not final yet. some thoughts:
-#
-# - instead of CuTextureArray, use CuArray with an ArrayBuffer. This array could then
-#   adapt to a CuTexture, or do the same for CuDeviceArray.
-
 CUDA.CuTexture(x::SciTextureArray{T,N}; kwargs...) where {T,N} =
     CuTexture{T,N,typeof(x)}(x; kwargs...)
 
@@ -152,10 +146,34 @@ end
     CuTexture(texture)
 Map an OpenGL Texture to a CUDA Texture with an explicit type conversion.
 """
-function CUDA.CuTexture(::Type{T}, texture::GLAbstraction.Texture{U,N}) where {T,U,N}
+function CUDA.CuTexture(::Type{T}, texture::GLAbstraction.Texture{<:Any,N}) where {T,N}
     ptr = SciGL.gltex_to_cuda_ptr(texture)
     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
     array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
     texture_array = SciGL.SciTextureArray(array_buf)
     CUDA.CuTexture(texture_array)
 end
+
+# TODO This note is from https://github.com/JuliaGPU/CUDA.jl/blob/master/src/texture.jl but I could not get ArrayBuffer working with CuArray because of illegal conversions
+# NOTE: the API for texture support is not final yet. some thoughts:
+#
+# - instead of CuTextureArray, use CuArray with an ArrayBuffer. This array could then
+#   adapt to a CuTexture, or do the same for CuDeviceArray.
+
+# function CUDA.CuArray(texture::GLAbstraction.Texture{T,N}) where {T,N}
+#     ptr = SciGL.gltex_to_cuda_ptr(texture)
+#     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
+#     array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
+#     storage = CUDA.ArrayStorage(array_buf, 1)
+#     CuArray{T,N}(storage, size(texture))
+# end
+
+# function CUDA.CuArray(::Type{T}, texture::GLAbstraction.Texture{<:Any,N}) where {T,N}
+#     ptr = SciGL.gltex_to_cuda_ptr(texture)
+#     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
+#     array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
+#     storage = CUDA.ArrayStorage(array_buf, 1)
+#     CuArray{T,N}(storage, size(texture))
+# end
+
+# Base.convert(::Type{CuPtr{T}}, buf::CUDA.Mem.ArrayBuffer{T}) where {T} = Base.convert(CuPtr{T}, UInt(pointer(buf)))
