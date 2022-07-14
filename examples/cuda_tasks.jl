@@ -4,9 +4,7 @@
 
 using Accessors
 using BenchmarkTools
-using CoordinateTransformations, Rotations
 using CUDA
-using GLAbstraction, GLFW
 using SciGL
 
 const N_TASKS = 1000
@@ -83,3 +81,6 @@ end
 
 @benchmark bench_cuda(depth_prog, scene, texture, channel)
 @benchmark bench_cpu(depth_prog, scene, framebuffer, channel)
+
+# needed if you're running this from the REPL
+GLFW.DestroyWindow(window)

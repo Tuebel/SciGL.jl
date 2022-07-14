@@ -4,9 +4,7 @@
 
 using Accessors
 using BenchmarkTools
-using CoordinateTransformations, Rotations
 using CUDA
-using GLAbstraction, GLFW
 using SciGL
 
 const WIDTH = 2000
@@ -178,4 +176,4 @@ end
 #  Memory estimate: 384 bytes, allocs estimate: 12.
 
 # needed if you're running this from the REPL
-# GLFW.DestroyWindow(window)
+GLFW.DestroyWindow(window)

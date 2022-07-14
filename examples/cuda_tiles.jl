@@ -4,9 +4,7 @@
 
 using Accessors
 using BenchmarkTools
-using CoordinateTransformations, Rotations
 using CUDA
-using GLAbstraction, GLFW
 using SciGL
 
 const N_TASKS = 500
@@ -160,3 +158,6 @@ end
 # Only makes sense for large number of parallel samples, on my machine > 25
 # @benchmark parallel_predict(scenes)
 # @benchmark serial_predict(scenes)
+
+# needed if you're running this from the REPL
+GLFW.DestroyWindow(window)

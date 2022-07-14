@@ -3,8 +3,6 @@
 # All rights reserved. 
 
 using Accessors
-using CoordinateTransformations, Rotations
-using GLAbstraction, GLFW
 using SciGL
 using ImageView
 

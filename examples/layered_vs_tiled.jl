@@ -2,17 +2,13 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
-# Lessons learned: Overhead of switching layers is existent but compensated by not having to reindex the memory.
+# Lessons learned: Overhead of switching layers does exist but is compensated by not having to reindex the memory.
 # Moreover, layered compared to reindexing does not allocate a second CuArray which will be helpful if we want to max out the samples per inference step  
 
 using Accessors
 using BenchmarkTools
-using CoordinateTransformations, Rotations
 using CUDA
-using GLAbstraction, GLFW
 using SciGL
-using StaticArrays
-# TODO remove from package depencies
 using ImageView
 
 const WIDTH = 100
@@ -35,7 +31,7 @@ set_clear_color()
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init scene
-monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj") |> SceneObject
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 scene = SciGL.Scene(camera, [monkey, monkey])
 

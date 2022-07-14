@@ -3,12 +3,8 @@
 # All rights reserved. 
 
 using Accessors
-using CoordinateTransformations, Rotations
 using CUDA
-using GLAbstraction, GLFW
 using SciGL
-using StaticArrays
-# TODO remove from package depencies
 using ImageView
 
 const WIDTH = 800

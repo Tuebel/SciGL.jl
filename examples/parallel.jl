@@ -4,9 +4,6 @@
 
 using Accessors
 using BenchmarkTools
-using ColorTypes
-using CoordinateTransformations, Rotations
-using GLAbstraction, GLFW
 using SciGL
 # TODO remove from package depencies
 
@@ -37,7 +34,6 @@ GLAbstraction.bind(framebuffer)
 cpu_data = gpu_data(framebuffer)
 global_img = view(cpu_data, tiles, 1)
 img_lock = ReentrantLock()
-
 
 # Buffer settings
 enable_depth_stencil()

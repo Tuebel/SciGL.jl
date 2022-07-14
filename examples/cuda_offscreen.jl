@@ -3,9 +3,7 @@
 # All rights reserved. 
 
 using Accessors
-using CoordinateTransformations, Rotations
 using CUDA
-using GLAbstraction, GLFW
 using SciGL
 # TODO remove from package depencies
 using ImageView

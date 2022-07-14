@@ -1,3 +1,7 @@
+# @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
+# Copyright (c) 2022, Institute of Automatic Control - RWTH Aachen University
+# All rights reserved. 
+
 __precompile__()
 
 module SciGL
@@ -6,6 +10,7 @@ module SciGL
 # TODO not use whole libs
 using ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
 using CoordinateTransformations
+using CUDA
 using FixedPointNumbers: N0f8, Normed
 using GeometryBasics
 using GLAbstraction
@@ -78,5 +83,17 @@ export activate_layer
 export render_channel
 export draw_to_cpu
 export draw_to_cpu_async
+
+# Reexport
+using Reexport
+@reexport begin
+    import ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
+    import CoordinateTransformations: Translation
+    import GLAbstraction
+    import GLAbstraction: gpu_data
+    import GLFW
+
+    using Rotations
+end
 
 end # module

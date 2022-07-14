@@ -1,7 +1,6 @@
 # @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
 # Copyright (c) 2022, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved.
-using CUDA
 using CUDA:
     CU_GRAPHICS_REGISTER_FLAGS_NONE,
     CU_GRAPHICS_REGISTER_FLAGS_TEXTURE_GATHER,
@@ -12,8 +11,6 @@ using CUDA:
     CUgraphicsResource,
     cuGraphicsSubResourceGetMappedArray,
     Mem
-using GLAbstraction
-using ModernGL
 
 """
     gltex_to_cuda_ptr(id)

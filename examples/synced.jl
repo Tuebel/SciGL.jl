@@ -4,15 +4,12 @@
 
 using Accessors
 using BenchmarkTools
-using ColorTypes
-using CoordinateTransformations, Rotations
-using GLAbstraction, GLFW
 using SciGL
 # TODO remove from package depencies
 
 const WIDTH = 100
 const HEIGHT = 100
-const BENCHMARK = true
+const BENCHMARK = false
 if BENCHMARK
     # Main / Benchmark task not included
     const N_TASKS = 10

@@ -36,6 +36,15 @@ The next section contains a list and use cases of the packages
 - [MeshIO](https://github.com/JuliaIO/MeshIO.jl): Load mesh files like *.obj*, *.ply*, and *.stl*.
   It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this packages is also included.
 
+### Reexport
+For convenience commonly used symbols are reexported:
+- ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
+- CoordinateTransformations: Translation
+- GLAbstraction
+- GLFW
+- Rotations: all symbols
+
+
 # HPC on Headless Server with VirtualGL
 Install [VirtualGL](https://virtualgl.org/) on the server which will be used to instantiate a render context without an attached display.
 There are also good [instructions](https://github.com/JuliaGL/GLVisualize.jl/issues/146#issuecomment-289242168) on the GLVisualize github.
