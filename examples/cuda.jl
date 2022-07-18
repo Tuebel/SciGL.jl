@@ -39,14 +39,32 @@ draw(depth_prog, monkey)
 cu_array = CuArray{Float32}(undef, (WIDTH, HEIGHT))
 cpu_data = Matrix{Float32}(undef, WIDTH, HEIGHT)
 
-# Maximum depth value should change for rotated monkey
-CUDA.@time begin
+# Slowest
+function broadcast_copy(cu_array, texture)
     cu_tex = CUDA.CuTexture(Float32, texture)
     cu_array .= cu_tex
 end
-# display(maximum(cu_array))
-# A bit faster
-CUDA.@time unsafe_copyto!(cu_array, texture)
+@benchmark CUDA.@sync broadcast_copy(cu_array, texture)
+# Maximum depth value should change for rotated monkey
+@assert 0 < maximum(cu_array) < 2
+#  Range (min … max):  1.722 ms …  14.447 ms  ┊ GC (min … max): 0.00% … 0.00%
+#  Time  (median):     2.078 ms               ┊ GC (median):    0.00%
+#  Time  (mean ± σ):   2.181 ms ± 580.061 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+# A bit faster might be due to globals
+@benchmark CUDA.@sync unsafe_copyto!(cu_array, texture)
+@assert 0 < maximum(cu_array) < 2
+#  Range (min … max):  1.012 ms …  41.702 ms  ┊ GC (min … max): 0.00% … 0.00%
+#  Time  (median):     1.288 ms               ┊ GC (median):    0.00%
+#  Time  (mean ± σ):   1.330 ms ± 763.115 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+# Even a bit faster but much more consistent. Would allow double buffering for optimization.
+cuglbuf = SciGL.CuGLBuffer(Float32, texture)
+@benchmark CUDA.@sync unsafe_copyto!(cuglbuf, texture)
+@assert 0 < maximum(CuArray(cuglbuf, size(texture))) < 2
+#  Range (min … max):   10.505 μs …   1.108 ms  ┊ GC (min … max): 0.00% … 0.00%
+#  Time  (median):       1.015 ms               ┊ GC (median):    0.00%
+#  Time  (mean ± σ):   917.651 μs ± 295.208 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
 """
     pixel_xy(width, iter)

@@ -84,6 +84,12 @@ export render_channel
 export draw_to_cpu
 export draw_to_cpu_async
 
+# CUDA
+export CuGLBuffer
+export async_copyto!
+export map_resource, unmap_resource
+export sync_resource
+
 # Reexport
 using Reexport
 @reexport begin

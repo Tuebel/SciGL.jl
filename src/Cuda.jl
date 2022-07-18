@@ -3,6 +3,7 @@
 # All rights reserved.
 using CUDA:
     CU_GRAPHICS_REGISTER_FLAGS_NONE,
+    CU_GRAPHICS_REGISTER_FLAGS_READ_ONLY,
     CU_GRAPHICS_REGISTER_FLAGS_TEXTURE_GATHER,
     CU_RESOURCE_TYPE_ARRAY,
     CuArrayPtr,
@@ -13,11 +14,163 @@ using CUDA:
     Mem
 
 """
-    gltex_to_cuda_ptr(id)
-Registers the texture or renderbuffer object specified by image for access by CUDA.
+    CuGLBuffer
+Link an OpenGL (pixel) buffer object to a CUDA by calling CuArray(::CuGLBuffer, dims) once.
+Transfer the data to the CuGLBuffer using `unsafe_copyto!` and the CuArray will have the same contents since it points to the same linear memory.
+Use `async_copyto` which returns immediately if you have other calculations to do while the transfer is in progress.
+However you will have to manually synchronize the transfer by calling `sync_resource`.
+"""
+struct CuGLBuffer{T}
+    buffer::GLAbstraction.Buffer{T}
+    resource::Ref{CUgraphicsResource}
+end
+
+"""
+    CuGLBuffer(buffer)
+Use an existing OpenGL buffer object and map it to a CUDA resource.
+Infers from the buffers usage type if the mapping is readonly.
+"""
+function CuGLBuffer(buffer::GLAbstraction.Buffer{T}) where {T}
+    # Fetch the CUDA resource for it
+    resource = Ref{CUgraphicsResource}()
+    READ_BIT = 0b1
+    if Bool(buffer.usage & READ_BIT)
+        flags = CU_GRAPHICS_REGISTER_FLAGS_READ_ONLY
+    else
+        flags = CU_GRAPHICS_REGISTER_FLAGS_NONE
+    end
+    CUDA.cuGraphicsGLRegisterBuffer(resource, buffer.id, flags)
+    CuGLBuffer{T}(buffer, resource)
+end
+
+"""
+    CuGLBuffer(::Type{T}, length; [buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ])
+Generate and OpenGL buffer object and map it to a CUDA resource.
+Defaults to a pixel pack buffer for reading from an texture.
+"""
+CuGLBuffer(::Type{T}, length::Int; buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ) where {T} = CuGLBuffer(GLAbstraction.Buffer(T, length; buffertype=buffertype, usage=usage))
+
+
+"""
+    CuGLBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ])
+Convenience method to generate a pixel buffer object which can hold the elements of the texture.
+This method allows to set a custom element type for the buffer which must be compatible with the texture element type, e.g. Float32 instead of Gray{Float32}
+"""
+CuGLBuffer(::Type{T}, texture::GLAbstraction.Texture; buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ) where {T} = CuGLBuffer(T, length(texture); buffertype=buffertype, usage=usage)
+
+"""
+    CuGLBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ])
+Convenience method to generate a pixel buffer object which can hold the elements of the texture.
+This method sets the buffer element type to the element type of the texture.
+"""
+CuGLBuffer(texture::GLAbstraction.Texture{T}; buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ) where {T} = CuGLBuffer(T, texture; buffertype=buffertype, usage=usage)
+
+GLAbstraction.Buffer(buf::CuGLBuffer) = buf.buffer
+
+"""
+    CuArray(::CuGLBuffer)
+Maps the OpenGL buffer to a CuArray
+The internal CuPtr should stays the same, so it has to be called only once.
+"""
+function CUDA.CuArray(buffer::CuGLBuffer{T}, dims) where {T}
+    map_resource(buffer)
+    # Get the CuPtr to the buffer object
+    cu_device_ptr = Ref{CUDA.CUdeviceptr}()
+    num_bytes = Ref{Csize_t}()
+    # dereference resource via []
+    CUDA.cuGraphicsResourceGetMappedPointer_v2(cu_device_ptr, num_bytes, buffer.resource[])
+    cu_ptr = Base.unsafe_convert(CuPtr{T}, cu_device_ptr[])
+    cu_array = unsafe_wrap(CuArray, cu_ptr, dims)
+    unmap_resource(buffer)
+    cu_array
+end
+
+"""
+    unsafe_copyto!(buffer, source)
+Synchronously transfer data from a source to the internal OpenGL buffer object.
+For the best performance it is advised, to use a second buffer object and go the async route: http://www.songho.ca/opengl/gl_pbo.html
+"""
+function Base.unsafe_copyto!(buffer::CuGLBuffer, source)
+    async_copyto!(buffer, source)
+    sync_resource(buffer)
+end
+
+"""
+    async_copyto!(buffer, source)
+Start the async transfer operation from a source to the internal OpenGL buffer object.
+"""
+async_copyto!(buffer::CuGLBuffer, source) = unsafe_copyto!(buffer.buffer, source)
+
+"""
+    sync_resource(buffer)
+Synchronizes to CUDA the buffer by mapping and unmapping the internal resource.
+"""
+function sync_resource(buffer::CuGLBuffer)
+    map_resource(buffer)
+    unmap_resource(buffer)
+end
+
+"""
+    map_resource(buffer)
+Map the internal resource for CUDA-OpenGL interop calls.
+"""
+map_resource(buffer::CuGLBuffer) = CUDA.cuGraphicsMapResources(1, buffer.resource, C_NULL)
+
+"""
+    map_resource(buffer)
+Unmap the internal resource for CUDA-OpenGL interop calls.
+"""
+unmap_resource(buf::CuGLBuffer) = CUDA.cuGraphicsUnmapResources(1, buf.resource, C_NULL)
+
+"""
+    CuArray(buffer, dims; [readonly=false])
+Wraps the memory of an OpenGL buffer to an CuArray, so the data is shared.
+Consequently, you can use unsafe_copyto! to update the contents of the buffer from an texture which results in updated data of the CuArray.
+The type of the CuArray is inferred from the buffer.
+"""
+function CUDA.CuArray(buffer::GLAbstraction.Buffer, dims; readonly=false)
+    cu_ptr = glbuffer_to_cuptr(buffer; readonly=readonly)
+    unsafe_wrap(CuArray, cu_ptr, dims)
+end
+
+"""
+    unsafe_copyto!(dst::Buffer, src::Texture)
+Copy the contents of the texture to the buffer object.
+The buffer type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
+"""
+function Base.unsafe_copyto!(dest::GLAbstraction.Buffer{T}, src::GLAbstraction.Texture) where {T}
+    GLAbstraction.bind(dest)
+    glGetTextureImage(src.id, 0, src.format, src.pixeltype, length(dest) * sizeof(T), C_NULL)
+    GLAbstraction.unbind(dest)
+end
+
+"""
+    unsafe_copyto!(dest, src)
+Copy the first attachment of an OpenGL framebuffer to an buffer object.
+The buffer type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
+"""
+Base.unsafe_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.FrameBuffer) = unsafe_copyto!(dest, first(src.attachments))
+
+# TODO remove glReadPixels is as fast but does not allow 3D textures
+# function Base.unsafe_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.FrameBuffer)
+#     texture = first(src.attachments)
+#     width, height = size(texture)
+#     GLAbstraction.bind(dest)
+#     glNamedFramebufferReadBuffer(src.id, GL_COLOR_ATTACHMENT0)
+#     glReadPixels(0, 0, width, height, texture.format, texture.pixeltype, C_NULL)
+#     GLAbstraction.unbind(dest)
+# end
+
+# Map an OpenGL texture to a CuTexture.
+# Addressing is not linear but optimized for interpolation.
+# These are represented by CUDA Arrays instead of device pointers and are indexed by Floats.
+
+"""
+    gltex_to_cuarrayptr(id)
+Registers the texture for access by CUDA.
 A CuArrayPtr to the resource is returned.
 """
-function gltex_to_cuda_ptr(texture::GLAbstraction.Texture{<:Any,N}; readonly=false) where {N}
+function gltex_to_cuarrayptr(texture::GLAbstraction.Texture{<:Any,N}; readonly=false) where {N}
     resources = Ref{CUDA.CUgraphicsResource}()
     # For reading also works: 
     if readonly
@@ -34,32 +187,23 @@ function gltex_to_cuda_ptr(texture::GLAbstraction.Texture{<:Any,N}; readonly=fal
     cuarray_ptr[]
 end
 
-# TODO renderbuffer fails with invalid
-# function cuda_register_image(tex::GLAbstraction.RenderBuffer)
-#     resources = Ref{CUgraphicsResource}()
-#     flags = CU_GRAPHICS_REGISTER_FLAGS_NONE
-#     CUDA.cuGraphicsGLRegisterImage(resources, tex.id, GL_RENDERBUFFER, flags)
-#     resources[]
-# end
-
-"""
-    unsafe_copyto!(dest, src)
-Copy the first attachment of an OpenGL framebuffer to an Array.
-The array type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
-"""
-Base.unsafe_copyto!(dest::AbstractArray, src::GLAbstraction.FrameBuffer) = unsafe_copyto!(dest, first(src.attachments))
-
 """
     unsafe_copyto!(dest, src)
 Copy an OpenGL texture to an Array.
 The array type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
 """
 function Base.unsafe_copyto!(dest::AbstractArray{T,N}, src::GLAbstraction.Texture{U,N}) where {T,U,N}
-    ptr = Base.unsafe_convert(CuArrayPtr{T}, gltex_to_cuda_ptr(src))
+    ptr = Base.unsafe_convert(CuArrayPtr{T}, gltex_to_cuarrayptr(src))
     unsafe_copyto!(dest, ptr)
 end
 
-# TODO somehow wrap instead of copying like https://gist.github.com/watosar/471f0f6b20d5dd18753b87c497d9a36d
+Base.unsafe_copyto!(dest::AbstractArray, src::GLAbstraction.FrameBuffer) = unsafe_copyto!(dest, first(src.attachments))
+
+"""
+    unsafe_copyto!(dest, src)
+Copy the first attachment of an OpenGL framebuffer to an Array.
+The array type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
+"""
 Base.unsafe_copyto!(dest::CuArray{T,2}, src::CuArrayPtr{T}) where {T} = Mem.unsafe_copy2d!(pointer(dest), Mem.Device, src, Mem.Array, size(dest)...)
 Base.unsafe_copyto!(dest::Array{T,2}, src::CuArrayPtr) where {T} = Mem.unsafe_copy2d!(pointer(dest), Mem.Host, src, Mem.Array, size(dest)...)
 
@@ -67,7 +211,7 @@ Base.unsafe_copyto!(dest::CuArray{T,3}, src::CuArrayPtr{T}) where {T} = Mem.unsa
 Base.unsafe_copyto!(dest::Array{T,3}, src::CuArrayPtr) where {T} = Mem.unsafe_copy3d!(pointer(dest), Mem.Host, src, Mem.Array, size(dest)...)
 
 
-# Mapping instead of copying, hopefully a pull request will make this copy pointless
+# TODO Pull request for the internal constructor which accepts an existing ArrayBuffer instead of allocating one.
 
 """
     SciTextureArray{T,N}
@@ -131,11 +275,10 @@ CUDA.CuTexture(x::SciTextureArray{T,N}; kwargs...) where {T,N} =
 
 """
     CuTexture(texture)
-Map an OpenGL Texture to a CUDA Texture using the type of the texture.
-Color types seem to cause problems with some Kernels.
+Map an OpenGL Texture to a CUDA Texture with an explicit type conversion.
 """
-function CUDA.CuTexture(texture::GLAbstraction.Texture{T,N}) where {T,N}
-    ptr = SciGL.gltex_to_cuda_ptr(texture)
+function CUDA.CuTexture(::Type{T}, texture::GLAbstraction.Texture{<:Any,N}) where {T,N}
+    ptr = SciGL.gltex_to_cuarrayptr(texture)
     typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
     array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
     texture_array = SciGL.SciTextureArray(array_buf)
@@ -144,15 +287,11 @@ end
 
 """
     CuTexture(texture)
-Map an OpenGL Texture to a CUDA Texture with an explicit type conversion.
+Map an OpenGL Texture to a CUDA Texture using the type of the texture.
+Color types seem to cause problems with some Kernels.
 """
-function CUDA.CuTexture(::Type{T}, texture::GLAbstraction.Texture{<:Any,N}) where {T,N}
-    ptr = SciGL.gltex_to_cuda_ptr(texture)
-    typed_ptr = Base.unsafe_convert(CuArrayPtr{T}, ptr)
-    array_buf = CUDA.Mem.ArrayBuffer{T,N}(context(), typed_ptr, size(texture))
-    texture_array = SciGL.SciTextureArray(array_buf)
-    CUDA.CuTexture(texture_array)
-end
+CUDA.CuTexture(texture::GLAbstraction.Texture{T,N}) where {T,N} = CuTexture(T, texture)
+
 
 # TODO This note is from https://github.com/JuliaGPU/CUDA.jl/blob/master/src/texture.jl but I could not get ArrayBuffer working with CuArray because of illegal conversions
 # NOTE: the API for texture support is not final yet. some thoughts:

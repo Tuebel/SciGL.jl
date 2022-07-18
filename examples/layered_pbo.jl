@@ -17,7 +17,9 @@ window = context_offscreen(WIDTH, HEIGHT)
 framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
 texture = framebuffer.attachments[1]
 cpu_data = gpu_data(texture)
-cu_data = CuArray(cpu_data)
+cu_pbo = CuGLBuffer(texture)
+# Map once
+cu_data = CuArray(cu_pbo, size(texture))
 
 # Compile shader program
 normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
@@ -69,16 +71,11 @@ while !GLFW.WindowShouldClose(window)
     # Display one image
     id = time() ÷ 5 % 3 + 1 |> Int
     # Test if both work and show the same image
-    GLAbstraction.unsafe_copyto!(cu_data, framebuffer)
+    unsafe_copyto!(cu_pbo, framebuffer)
     img = Array(cu_data)[:, :, id]
     img = img[:, end:-1:1] |> transpose
     imshow(canvas, img)
-    sleep(0.1)
-    GLAbstraction.unsafe_copyto!(cpu_data, framebuffer)
-    img = cpu_data[:, :, id]
-    img = img[:, end:-1:1] |> transpose
-    imshow(canvas, img)
-    sleep(0.1)
+    sleep(0.05)
 end
 
 # needed if you're running this from the REPL
