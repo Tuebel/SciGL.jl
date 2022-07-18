@@ -88,7 +88,7 @@ export draw_to_cpu_async
 export CuGLBuffer
 export async_copyto!
 export map_resource, unmap_resource
-export sync_resource
+export sync_buffer
 
 # Reexport
 using Reexport

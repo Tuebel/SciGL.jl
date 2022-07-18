@@ -16,10 +16,14 @@ window = context_offscreen(WIDTH, HEIGHT)
 # On Intel copying data from a texture or an RBO does not really make a difference
 framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
 texture = framebuffer.attachments[1]
-cpu_data = gpu_data(texture)
+# cpu_data = gpu_data(texture)
 cu_pbo = CuGLBuffer(texture)
+pbo = GLAbstraction.Buffer(cu_pbo)
+
 # Map once
 cu_data = CuArray(cu_pbo, size(texture))
+cpu_data = Array(pbo, size(texture))
+@assert Array(cu_data) == cpu_data
 
 # Compile shader program
 normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
@@ -73,6 +77,11 @@ while !GLFW.WindowShouldClose(window)
     # Test if both work and show the same image
     unsafe_copyto!(cu_pbo, framebuffer)
     img = Array(cu_data)[:, :, id]
+    img = img[:, end:-1:1] |> transpose
+    imshow(canvas, img)
+    sleep(0.05)
+    unsafe_copyto!(pbo, framebuffer)
+    img = cpu_data[:, :, id]
     img = img[:, end:-1:1] |> transpose
     imshow(canvas, img)
     sleep(0.05)

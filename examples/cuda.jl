@@ -58,7 +58,7 @@ end
 #  Time  (median):     1.288 ms               ┊ GC (median):    0.00%
 #  Time  (mean ± σ):   1.330 ms ± 763.115 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-# Even a bit faster but much more consistent. Would allow double buffering for optimization.
+# Even a bit faster but much more consistent. Would allow double buffering for optimization.😍 
 cuglbuf = SciGL.CuGLBuffer(Float32, texture)
 @benchmark CUDA.@sync unsafe_copyto!(cuglbuf, texture)
 @assert 0 < maximum(CuArray(cuglbuf, size(texture))) < 2
