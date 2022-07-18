@@ -151,16 +151,6 @@ The buffer type can differ from texture type if you know what you are doing (e.g
 """
 Base.unsafe_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.FrameBuffer) = unsafe_copyto!(dest, first(src.attachments))
 
-# TODO remove glReadPixels is as fast but does not allow 3D textures
-# function Base.unsafe_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.FrameBuffer)
-#     texture = first(src.attachments)
-#     width, height = size(texture)
-#     GLAbstraction.bind(dest)
-#     glNamedFramebufferReadBuffer(src.id, GL_COLOR_ATTACHMENT0)
-#     glReadPixels(0, 0, width, height, texture.format, texture.pixeltype, C_NULL)
-#     GLAbstraction.unbind(dest)
-# end
-
 # Map an OpenGL texture to a CuTexture.
 # Addressing is not linear but optimized for interpolation.
 # These are represented by CUDA Arrays instead of device pointers and are indexed by Floats.
@@ -210,9 +200,7 @@ Base.unsafe_copyto!(dest::Array{T,2}, src::CuArrayPtr) where {T} = Mem.unsafe_co
 Base.unsafe_copyto!(dest::CuArray{T,3}, src::CuArrayPtr{T}) where {T} = Mem.unsafe_copy3d!(pointer(dest), Mem.Device, src, Mem.Array, size(dest)...)
 Base.unsafe_copyto!(dest::Array{T,3}, src::CuArrayPtr) where {T} = Mem.unsafe_copy3d!(pointer(dest), Mem.Host, src, Mem.Array, size(dest)...)
 
-
 # TODO Pull request for the internal constructor which accepts an existing ArrayBuffer instead of allocating one.
-
 """
     SciTextureArray{T,N}
 Basically a copy of the `CuTextureArray` from CUDA.jl but with an additional internal constructor which allows to pass an existing `ArrayBuffer`.
