@@ -16,6 +16,7 @@ using GeometryBasics
 using GLAbstraction
 using GLFW
 using FileIO
+using Logging
 using MeshIO
 using ModernGL
 using LinearAlgebra
@@ -85,7 +86,7 @@ export draw_to_cpu
 export draw_to_cpu_async
 
 # CUDA
-export CuGLBuffer
+export PersistentBuffer
 export async_copyto!
 export map_resource, unmap_resource
 export sync_buffer

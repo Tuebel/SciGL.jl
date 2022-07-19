@@ -14,84 +14,79 @@ using CUDA:
     Mem
 
 """
-    CuGLBuffer
-Link an OpenGL (pixel) buffer object to a CUDA by calling CuArray(::CuGLBuffer, dims) once.
-Transfer the data to the CuGLBuffer using `unsafe_copyto!` and the CuArray will have the same contents since it points to the same linear memory.
+    PersistentBuffer
+Link an OpenGL (pixel) buffer object to an (Cu)Array by calling (Cu)Array(::PersistentBuffer, dims) once.
+Transfer the data to the PersistentBuffer using `unsafe_copyto!` and the array will have the same contents since it points to the same linear memory.
 Use `async_copyto` which returns immediately if you have other calculations to do while the transfer is in progress.
-However you will have to manually synchronize the transfer by calling `sync_resource`.
+However you will have to manually synchronize the transfer by calling `sync_buffer`.
 """
-struct CuGLBuffer{T}
-    buffer::GLAbstraction.Buffer{T}
-    resource::Ref{CUgraphicsResource}
-end
+mutable struct PersistentBuffer{T}
+    id::GLuint
+    length::Int
+    buffertype::GLenum
+    flags::GLenum
+    context::GLAbstraction.Context
+    # Might change during async_copyto! + finalizer, thus mutable
+    fence::GLsync
 
-"""
-    CuGLBuffer(buffer)
-Use an existing OpenGL buffer object and map it to a CUDA resource.
-Infers from the buffers usage type if the mapping is readonly.
-"""
-function CuGLBuffer(buffer::GLAbstraction.Buffer{T}) where {T}
-    # Fetch the CUDA resource for it
-    resource = Ref{CUgraphicsResource}()
-    if is_readonly(buffer)
-        flags = CU_GRAPHICS_REGISTER_FLAGS_READ_ONLY
-    else
-        flags = CU_GRAPHICS_REGISTER_FLAGS_NONE
+    function PersistentBuffer{T}(id::GLuint, length::Int, buffertype::GLenum, flags::GLenum, context::GLAbstraction.Context, fence::GLsync) where {T}
+        obj = new{T}(id, length, buffertype, flags, context, fence)
+        finalizer(GLAbstraction.free!, obj)
+        obj
     end
-    CUDA.cuGraphicsGLRegisterBuffer(resource, buffer.id, flags)
-    CuGLBuffer{T}(buffer, resource)
 end
 
-# Last bit decides whether usage is readonly
-is_readonly(buffer) = Bool(buffer.usage & 0b1)
-
 """
-    CuGLBuffer(::Type{T}, length; [buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ])
-Generate and OpenGL buffer object and map it to a CUDA resource.
+    PersistentBuffer(::Type{T}, length; [buffertype=GL_PIXEL_PACK_BUFFER, FLAGS=GL_MAP_READ_BIT])
+Generate a persistent OpenGL buffer object which can be mapped persistently to one Array /orCuArray.
 Defaults to a pixel pack buffer for reading from an texture.
+Set GL_MAP_READ_BIT or GL_MAP_WRITE_BIT as flags, `GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT` is always applied for persistent storage.
 """
-CuGLBuffer(::Type{T}, length::Int; buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ) where {T} = CuGLBuffer(GLAbstraction.Buffer(T, length; buffertype=buffertype, usage=usage))
+function PersistentBuffer(::Type{T}, length::Int; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T}
+    id = glGenBuffers()
+    persistent_flags = flags | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT
+    glBindBuffer(buffertype, id)
+    # WARN glNamedBufferStorage results in crashes when mapping?
+    glBufferStorage(buffertype, length * sizeof(T), C_NULL, persistent_flags)
+    glBindBuffer(buffertype, 0)
+    PersistentBuffer{T}(id, length, buffertype, persistent_flags, GLAbstraction.current_context(), C_NULL)
+end
 
 """
-    CuGLBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ])
-Convenience method to generate a pixel buffer object which can hold the elements of the texture.
+    PersistentBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT])
+Convenience method to generate a persistent buffer object which can hold the elements of the texture.
 This method allows to set a custom element type for the buffer which must be compatible with the texture element type, e.g. Float32 instead of Gray{Float32}
 """
-CuGLBuffer(::Type{T}, texture::GLAbstraction.Texture; buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ) where {T} = CuGLBuffer(T, length(texture); buffertype=buffertype, usage=usage)
+PersistentBuffer(::Type{T}, texture::GLAbstraction.Texture; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T} = PersistentBuffer(T, length(texture); buffertype=buffertype, flags=flags)
 
 """
-    CuGLBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ])
-Convenience method to generate a pixel buffer object which can hold the elements of the texture.
+    PersistentBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT])
+Convenience method to generate a persistent buffer object which can hold the elements of the texture.
 This method sets the buffer element type to the element type of the texture.
 """
-CuGLBuffer(texture::GLAbstraction.Texture{T}; buffertype=GL_PIXEL_PACK_BUFFER, usage=GL_DYNAMIC_READ) where {T} = CuGLBuffer(T, texture; buffertype=buffertype, usage=usage)
+PersistentBuffer(texture::GLAbstraction.Texture{T}; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T} = PersistentBuffer(T, texture; buffertype=buffertype, flags=flags)
 
-GLAbstraction.Buffer(buf::CuGLBuffer) = buf.buffer
-
-"""
-    CuArray(::CuGLBuffer)
-Maps the OpenGL buffer to a CuArray
-The internal CuPtr should stays the same, so it has to be called only once.
-"""
-function CUDA.CuArray(buffer::CuGLBuffer{T}, dims) where {T}
-    map_buffer(buffer)
-    # Get the CuPtr to the buffer object
-    cu_device_ptr = Ref{CUDA.CUdeviceptr}()
-    num_bytes = Ref{Csize_t}()
-    # dereference resource via []
-    CUDA.cuGraphicsResourceGetMappedPointer_v2(cu_device_ptr, num_bytes, buffer.resource[])
-    cu_ptr = Base.unsafe_convert(CuPtr{T}, cu_device_ptr[])
-    cu_array = unsafe_wrap(CuArray, cu_ptr, dims)
-    unmap_buffer(buffer)
-    cu_array
+function GLAbstraction.free!(x::PersistentBuffer)
+    glDeleteSync(x.fence)
+    GLAbstraction.context_command(x.context, () -> glDeleteBuffers(1, [x.id]))
 end
+
+Base.length(buffer::PersistentBuffer) = buffer.length
+Base.sizeof(buffer::PersistentBuffer{T}) where {T} = length(buffer) * sizeof(T)
+
+GLAbstraction.bind(buffer::PersistentBuffer) = glBindBuffer(buffer.buffertype, buffer.id)
+GLAbstraction.unbind(buffer::PersistentBuffer) = glBindBuffer(buffer.buffertype, 0)
+
+is_readonly(buffer) = (buffer.flags & GL_MAP_READ_BIT == GL_MAP_READ_BIT) && (buffer.flags & GL_MAP_WRITE_BIT != GL_MAP_WRITE_BIT)
+
+# OpenGL internal mapping from texture to buffer
 
 """
     unsafe_copyto!(buffer, source)
 Synchronously transfer data from a source to the internal OpenGL buffer object.
 For the best performance it is advised, to use a second buffer object and go the async route: http://www.songho.ca/opengl/gl_pbo.html
 """
-function Base.unsafe_copyto!(buffer::CuGLBuffer, source)
+function Base.unsafe_copyto!(buffer::PersistentBuffer, source)
     async_copyto!(buffer, source)
     sync_buffer(buffer)
 end
@@ -100,86 +95,91 @@ end
     sync_buffer(buffer)
 Synchronizes to CUDA / CPU by mapping and unmapping the internal resource.
 """
-function sync_buffer(buffer)
-    map_buffer(buffer)
-    unmap_buffer(buffer)
+function sync_buffer(buffer::PersistentBuffer, timeout_ns=1)
+    loop = true
+    while loop
+        res = glClientWaitSync(buffer.fence, GL_SYNC_FLUSH_COMMANDS_BIT, timeout_ns)
+        if res == GL_ALREADY_SIGNALED || res == GL_CONDITION_SATISFIED
+            loop = false
+        elseif res == GL_WAIT_FAILED
+            @error "Failed to sync the PersistentBuffer id: $(buffer.id)"
+            loop = false
+        end
+    end
 end
-
-"""
-    async_copyto!(dest, source)
-Start the async transfer operation from a source to the internal OpenGL buffer object.
-"""
-async_copyto!(dest::CuGLBuffer, src) = async_copyto!(dest.buffer, src)
-
-"""
-    map_resource(buffer)
-Map the internal resource for CUDA-OpenGL interop calls.
-"""
-map_buffer(buffer::CuGLBuffer) = CUDA.cuGraphicsMapResources(1, buffer.resource, C_NULL)
-
-"""
-    map_resource(buffer)
-Unmap the internal resource for CUDA-OpenGL interop calls.
-"""
-unmap_buffer(buf::CuGLBuffer) = CUDA.cuGraphicsUnmapResources(1, buf.resource, C_NULL)
-
-# Regular CPU mapping
-
-"""
-    CuArray(::CuGLBuffer)
-Maps the OpenGL buffer to a CuArray
-The internal CuPtr should stays the same, so it has to be called only once.
-"""
-function Base.Array(buffer::GLAbstraction.Buffer, dims)
-    ptr = map_buffer(buffer)
-    array = unsafe_wrap(Array, ptr, dims)
-    unmap_buffer(buffer)
-    array
-end
-
-"""
-    map_resource(buffer)
-Map the internal resource to a CPU pointer.
-"""
-map_buffer(buffer::GLAbstraction.Buffer{T}) where {T} = is_readonly(buffer) ? Ptr{T}(glMapNamedBuffer(buffer.id, GL_READ_ONLY)) : Ptr{T}(glMapNamedBuffer(buffer.id, GL_READ_WRITE))
-
-"""
-    map_resource(buffer)
-Unmap the internal for CPU use.
-"""
-unmap_buffer(buffer::GLAbstraction.Buffer) = glUnmapNamedBuffer(buffer.id)
-
-# OpenGL internal mapping from texture to buffer
-
-"""
-    unsafe_copyto!(dest::Buffer, src::Texture)
-Copy the contents of the texture to the buffer object.
-The buffer type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
-"""
-function Base.unsafe_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.Texture)
-    async_copyto!(dest, src)
-    sync_buffer(dest)
-end
-
-"""
-    unsafe_copyto!(dest, src)
-Copy the first attachment of an OpenGL framebuffer to an buffer object.
-The buffer type can differ from texture type if you know what you are doing (e.g. Float32 instead of Gray{Float32})
-"""
-Base.unsafe_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.FrameBuffer) = unsafe_copyto!(dest, first(src.attachments))
 
 """
     async_copyto!(buffer, src)
 Start the async transfer operation from a source to the internal OpenGL buffer object.
 Call `sync_buffer` to finish the transfer operation by mapping & unmapping the buffer.
 """
-function async_copyto!(dest::GLAbstraction.Buffer{T}, src::GLAbstraction.Texture) where {T}
+function async_copyto!(dest::PersistentBuffer{T}, src::GLAbstraction.Texture) where {T}
     GLAbstraction.bind(dest)
     glGetTextureImage(src.id, 0, src.format, src.pixeltype, length(dest) * sizeof(T), C_NULL)
     GLAbstraction.unbind(dest)
+    # Synchronize after pixel transfer
+    glDeleteSync(dest.fence)
+    dest.fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0)
 end
 
-async_copyto!(dest::GLAbstraction.Buffer, src::GLAbstraction.FrameBuffer) = async_copyto!(dest, first(src.attachments))
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.FrameBuffer) = async_copyto!(dest, first(src.attachments))
+
+# CUDA mapping
+
+"""
+    CuArray(::PersistentBuffer)
+Maps the OpenGL buffer to a CuArray
+The internal CuPtr should stays the same, so it has to be called only once.
+"""
+function CUDA.CuArray(buffer::PersistentBuffer{T}, dims) where {T}
+    # Fetch the CUDA resource for it
+    resource = Ref{CUgraphicsResource}()
+    if is_readonly(buffer)
+        flags = CU_GRAPHICS_REGISTER_FLAGS_READ_ONLY
+    else
+        flags = CU_GRAPHICS_REGISTER_FLAGS_NONE
+    end
+    CUDA.cuGraphicsGLRegisterBuffer(resource, buffer.id, flags)
+    CUDA.cuGraphicsMapResources(1, resource, C_NULL)
+    # Get the CuPtr to the buffer object
+    cu_device_ptr = Ref{CUDA.CUdeviceptr}()
+    num_bytes = Ref{Csize_t}()
+    # dereference resource via []
+    CUDA.cuGraphicsResourceGetMappedPointer_v2(cu_device_ptr, num_bytes, resource[])
+    cu_ptr = Base.unsafe_convert(CuPtr{T}, cu_device_ptr[])
+    cu_array = unsafe_wrap(CuArray, cu_ptr, dims)
+    cu_array
+end
+
+# Regular CPU mapping
+
+"""
+    Array(::PersistentBuffer)
+Maps the OpenGL buffer to a CuArray
+The internal CuPtr should stays the same, so it has to be called only once.
+"""
+function Base.Array(buffer::PersistentBuffer{T}, dims) where {T}
+    # Avoid nullptr
+    unmap_buffer(buffer)
+    ptr = map_buffer(buffer)
+    if (ptr == C_NULL)
+        @error "Mapping PersistentBuffer id $(buffer.id) returned NULL"
+        return zeros(T, dims)
+    end
+    unsafe_wrap(Array, ptr, dims)
+end
+
+"""
+    map_resource(buffer)
+Map the internal resource to a CPU pointer.
+"""
+map_buffer(buffer::PersistentBuffer{T}) where {T} = is_readonly(buffer) ? Ptr{T}(glMapNamedBufferRange(buffer.id, 0, sizeof(buffer), buffer.flags)) : Ptr{T}(glMapNamedBufferRange(buffer.id, 0, sizeof(buffer), buffer.flags))
+
+"""
+    map_resource(buffer)
+Unmap the internal for CPU use.
+"""
+unmap_buffer(buffer::PersistentBuffer) = glUnmapNamedBuffer(buffer.id)
 
 # Map an OpenGL texture to a CuTexture.
 # Addressing is not linear but optimized for interpolation.

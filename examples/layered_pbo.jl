@@ -9,6 +9,7 @@ using ImageView
 
 const WIDTH = 800
 const HEIGHT = 600
+const USE_CUDA = true
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
@@ -16,14 +17,15 @@ window = context_offscreen(WIDTH, HEIGHT)
 # On Intel copying data from a texture or an RBO does not really make a difference
 framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
 texture = framebuffer.attachments[1]
-# cpu_data = gpu_data(texture)
-cu_pbo = CuGLBuffer(texture)
-pbo = GLAbstraction.Buffer(cu_pbo)
 
 # Map once
-cu_data = CuArray(cu_pbo, size(texture))
-cpu_data = Array(pbo, size(texture))
-@assert Array(cu_data) == cpu_data
+pbo = PersistentBuffer(texture)
+# WARN mapping to CPU & CUDA leads to NULL in CPU data (probably for a reason)
+data = if USE_CUDA
+    CuArray(pbo, size(texture))
+else
+    Array(pbo, size(texture))
+end
 
 # Compile shader program
 normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
@@ -75,15 +77,15 @@ while !GLFW.WindowShouldClose(window)
     # Display one image
     id = time() ÷ 5 % 3 + 1 |> Int
     # Test if both work and show the same image
-    unsafe_copyto!(cu_pbo, framebuffer)
-    img = Array(cu_data)[:, :, id]
-    img = img[:, end:-1:1] |> transpose
-    imshow(canvas, img)
-    sleep(0.05)
     unsafe_copyto!(pbo, framebuffer)
-    img = cpu_data[:, :, id]
-    img = img[:, end:-1:1] |> transpose
-    imshow(canvas, img)
+    img = if USE_CUDA
+        Array(data)
+    else
+        data
+    end
+    img = @view img[:, :, id]
+    img = @view img[:, end:-1:1]
+    imshow(canvas, transpose(img))
     sleep(0.05)
 end
 

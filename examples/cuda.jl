@@ -33,7 +33,16 @@ set_clear_color()
 GLAbstraction.bind(framebuffer)
 clear_buffers()
 to_gpu(depth_prog, camera)
+
+# Sanity check for persistent buffer
+persistent_buf = PersistentBuffer(Float32, texture)
+cu_sanity = CuArray(persistent_buf, size(texture))
+unsafe_copyto!(persistent_buf, texture)
+@assert maximum(cu_sanity) == 0
+
 draw(depth_prog, monkey)
+unsafe_copyto!(persistent_buf, texture)
+@assert 0 < maximum(cu_sanity) < 2
 
 # Fill undefined and then copy empty framebuffer -> should change
 cu_array = CuArray{Float32}(undef, (WIDTH, HEIGHT))
@@ -58,13 +67,12 @@ end
 #  Time  (median):     1.288 ms               ┊ GC (median):    0.00%
 #  Time  (mean ± σ):   1.330 ms ± 763.115 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-# Even a bit faster but much more consistent. Would allow double buffering for optimization.😍 
-cuglbuf = SciGL.CuGLBuffer(Float32, texture)
-@benchmark CUDA.@sync unsafe_copyto!(cuglbuf, texture)
-@assert 0 < maximum(CuArray(cuglbuf, size(texture))) < 2
-#  Range (min … max):   10.505 μs …   1.108 ms  ┊ GC (min … max): 0.00% … 0.00%
-#  Time  (median):       1.015 ms               ┊ GC (median):    0.00%
-#  Time  (mean ± σ):   917.651 μs ± 295.208 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+# Even faster and more consistent times because of the persistent buffer. Would allow double buffering for optimization.😍 
+@benchmark unsafe_copyto!(persistent_buf, texture)
+@assert 0 < maximum(cu_sanity) < 2
+#  Range (min … max):  1.014 ms …  1.163 ms  ┊ GC (min … max): 0.00% … 0.00%
+#  Time  (median):     1.019 ms              ┊ GC (median):    0.00%
+#  Time  (mean ± σ):   1.025 ms ± 12.736 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
 """
     pixel_xy(width, iter)
