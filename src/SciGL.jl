@@ -87,9 +87,8 @@ export draw_to_cpu_async
 
 # CUDA
 export PersistentBuffer
-export async_copyto!
+export async_copyto!, sync_buffer
 export map_resource, unmap_resource
-export sync_buffer
 
 # Reexport
 using Reexport
