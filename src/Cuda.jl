@@ -83,18 +83,19 @@ is_readonly(buffer) = (buffer.flags & GL_MAP_READ_BIT == GL_MAP_READ_BIT) && (bu
 # OpenGL internal mapping from texture to buffer
 
 """
-    unsafe_copyto!(buffer, source)
+    unsafe_copyto!(buffer, source, dims...)
 Synchronously transfer data from a source to the internal OpenGL buffer object.
 For the best performance it is advised, to use a second buffer object and go the async route: http://www.songho.ca/opengl/gl_pbo.html
 """
-function Base.unsafe_copyto!(buffer::PersistentBuffer, source)
-    async_copyto!(buffer, source)
+function Base.unsafe_copyto!(buffer::PersistentBuffer, source, dims...)
+    async_copyto!(buffer, source, GLsizei.(dims)...)
     sync_buffer(buffer)
 end
 
 """
     sync_buffer(buffer)
 Synchronizes to CUDA / CPU by mapping and unmapping the internal resource.
+`dims`: (x_offset, y_offset, z_offset, width, height, depth), (width, height, depth) or (), zero offset is used if no custom offset is specified. 
 """
 function sync_buffer(buffer::PersistentBuffer, timeout_ns=1)
     loop = true
@@ -110,20 +111,46 @@ function sync_buffer(buffer::PersistentBuffer, timeout_ns=1)
 end
 
 """
-    async_copyto!(buffer, src)
+    async_copyto!(dest, src, x_offset, y_offset, z_offset, width, height, depth)
 Start the async transfer operation from a source to the internal OpenGL buffer object.
 Call `sync_buffer` to finish the transfer operation by mapping & unmapping the buffer.
 """
-function async_copyto!(dest::PersistentBuffer{T}, src::GLAbstraction.Texture) where {T}
+function async_copyto!(dest::PersistentBuffer{T}, src::GLAbstraction.Texture, x_offset::GLint, y_offset::GLint, z_offset::GLint, width::GLsizei, height::GLsizei, depth::GLsizei) where {T}
     GLAbstraction.bind(dest)
-    glGetTextureImage(src.id, 0, src.format, src.pixeltype, length(dest) * sizeof(T), C_NULL)
+    glGetTextureSubImage(src.id, 0, x_offset, y_offset, z_offset, width, height, depth, src.format, src.pixeltype, GLsizei(length(dest) * sizeof(T)), C_NULL)
     GLAbstraction.unbind(dest)
     # Synchronize after pixel transfer
     glDeleteSync(dest.fence)
     dest.fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0)
 end
 
-async_copyto!(dest::PersistentBuffer, src::GLAbstraction.FrameBuffer) = async_copyto!(dest, first(src.attachments))
+"""
+    async_copyto!(dest, src, width, height, depth)
+Start the async transfer operation from a source to the internal OpenGL buffer object.
+Call `sync_buffer` to finish the transfer operation by mapping & unmapping the buffer.
+Defaults to copying the texture with zero offset and the given width, height and depth.
+"""
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.Texture, width::GLsizei, height::GLsizei, depth::GLsizei) = async_copyto!(dest, src, GLint(0), GLint(0), GLint(0), width, height, depth)
+# 2D and 1D
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.Texture, width::GLsizei, height::GLsizei) = async_copyto!(dest, src, GLint(0), GLint(0), GLint(0), width, height, GLint(1))
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.Texture, width::GLsizei) = async_copyto!(dest, src, GLint(0), GLint(0), GLint(0), width, GLint(1), GLint(1))
+
+
+"""
+    async_copyto!(dest, src)
+Start the async transfer operation from a source to the internal OpenGL buffer object.
+Call `sync_buffer` to finish the transfer operation by mapping & unmapping the buffer.
+Defaults to copying the whole texture.
+"""
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.Texture) = async_copyto!(dest, src, GLsizei.(size(src))...)
+
+"""
+    async_copyto!(dest, src, dims...)
+Start the async transfer operation from a source to the internal OpenGL buffer object.
+Call `sync_buffer` to finish the transfer operation by mapping & unmapping the buffer.
+`dims`: (x_offset, y_offset, z_offset, width, height, depth), (width, height, depth) or (), zero offset is used if no custom offset is specified. 
+"""
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.FrameBuffer, dims...) = async_copyto!(dest, first(src.attachments), dims...)
 
 # CUDA mapping
 

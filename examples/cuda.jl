@@ -41,6 +41,9 @@ unsafe_copyto!(persistent_buf, texture)
 @assert maximum(cu_sanity) == 0
 
 draw(depth_prog, monkey)
+unsafe_copyto!(persistent_buf, texture, 100, 100)
+# Upper left corner should be blank
+@assert maximum(cu_sanity) == 0
 unsafe_copyto!(persistent_buf, texture)
 @assert 0 < maximum(cu_sanity) < 2
 
@@ -73,6 +76,12 @@ end
 #  Range (min … max):  1.014 ms …  1.163 ms  ┊ GC (min … max): 0.00% … 0.00%
 #  Time  (median):     1.019 ms              ┊ GC (median):    0.00%
 #  Time  (mean ± σ):   1.025 ms ± 12.736 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+# Copying only the required parts is MUCH FASTER
+@benchmark unsafe_copyto!(persistent_buf, texture, 100, 100)
+#  Range (min … max):  13.687 μs … 66.332 μs  ┊ GC (min … max): 0.00% … 0.00%
+#  Time  (median):     16.458 μs              ┊ GC (median):    0.00%
+#  Time  (mean ± σ):   17.631 μs ±  4.065 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
 """
     pixel_xy(width, iter)

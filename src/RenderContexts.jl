@@ -18,8 +18,8 @@ const default_window_hints = [
     (GLFW.RESIZABLE, false),
     (GLFW.FOCUSED, false),
     (GLFW.CONTEXT_VERSION_MAJOR, 4),
-    # TODO Persistent mapping
-    (GLFW.CONTEXT_VERSION_MINOR, 4),
+    # TODO Persistent mapping & glGetTextureSubImage
+    (GLFW.CONTEXT_VERSION_MINOR, 5),
     (GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)]
 
 """

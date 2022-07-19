@@ -83,6 +83,8 @@ while !GLFW.WindowShouldClose(window)
     id = time() ÷ 5 % 3 + 1 |> Int
     # Test if both work and show the same image
     unsafe_copyto!(pbo, framebuffer)
+    # To test whether partial copy works, only silhouette_prog should move
+    # unsafe_copyto!(pbo, framebuffer, WIDTH, HEIGHT)
     img = if USE_CUDA
         Array(data)
     else
