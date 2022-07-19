@@ -22,9 +22,9 @@ texture = framebuffer.attachments[1]
 pbo = PersistentBuffer(texture)
 # WARN mapping to CPU & CUDA leads to NULL in CPU data (probably for a reason)
 data = if USE_CUDA
-    CuArray(pbo, size(texture))
+    CuArray(pbo)
 else
-    Array(pbo, size(texture))
+    Array(pbo)
 end
 
 # Compile shader program

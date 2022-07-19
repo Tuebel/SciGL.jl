@@ -36,7 +36,7 @@ to_gpu(depth_prog, camera)
 
 # Sanity check for persistent buffer
 persistent_buf = PersistentBuffer(Float32, texture)
-cu_sanity = CuArray(persistent_buf, size(texture))
+cu_sanity = CuArray(persistent_buf)
 unsafe_copyto!(persistent_buf, texture)
 @assert maximum(cu_sanity) == 0
 
