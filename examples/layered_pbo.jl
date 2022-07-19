@@ -34,8 +34,11 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init scene
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
+cube = @set cube.pose.t = Translation(1, 0, 0)
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
-scene = SciGL.Scene(camera, [monkey, monkey])
+scene = SciGL.Scene(camera, [monkey])
+cube_scene = SciGL.Scene(camera, [monkey, cube])
 
 # create ImageView
 guidict = imshow(rand(HEIGHT, WIDTH))
@@ -61,6 +64,7 @@ while !GLFW.WindowShouldClose(window)
 
     scene = @set scene.camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
     scene = @set scene.camera.pose.R = lookat(scene.camera, monkey, [0 1 0])
+    cube_scene = @set cube_scene.camera = scene.camera
 
     activate_layer(framebuffer, 1)
     clear_buffers()
@@ -70,9 +74,10 @@ while !GLFW.WindowShouldClose(window)
     clear_buffers()
     draw(depth_prog, scene)
 
+    # Test whether 2D DepthStencil RenderBuffer works with 3D Texture 
     activate_layer(framebuffer, 3)
     clear_buffers()
-    draw(normal_prog, scene)
+    draw(normal_prog, cube_scene)
 
     # Display one image
     id = time() ÷ 5 % 3 + 1 |> Int
