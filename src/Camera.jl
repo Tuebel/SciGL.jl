@@ -30,9 +30,10 @@ struct CvCamera <: Camera
 end
 
 """
+    CvCamera(width, height, f_x, f_y, c_x, c_y; [s=0, distortion=zeros(8), near=0.01, far=100])
 Constructor with reasonable defaults
 """
-CvCamera(width::Integer, height::Integer, f_x::Real, f_y::Real, c_x::Real, c_y::Real; s = 0, distortion = zeros(8), near = 0.01, far = 100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far)
+CvCamera(width::Integer, height::Integer, f_x::Real, f_y::Real, c_x::Real, c_y::Real; s=0, distortion=zeros(8), near=0.01, far=100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far)
 
 """
 Parametrizes the glOrtho camera function.
@@ -123,7 +124,7 @@ projection_matrix(c::GLOrthoCamera) = orthographic_matrix(c)
     lookat(camera_t, object_t, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-function lookat(camera_t, object_t, up = SVector{3,T}(0, 1, 0))
+function lookat(camera_t, object_t, up=SVector{3,T}(0, 1, 0))
     c_t = SVector{3}(camera_t)
     o_t = SVector{3}(object_t)
     u = SVector{3}(up)
@@ -138,25 +139,25 @@ end
     lookat(camera_t, object_t, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-lookat(camera_t::Translation, object_t::Translation, up = SVector{3,T}(0, 1, 0)) = lookat(camera_t.translation, object_t.translation, up)
+lookat(camera_t::Translation, object_t::Translation, up=SVector{3,T}(0, 1, 0)) = lookat(camera_t.translation, object_t.translation, up)
 
 """
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-lookat(camera::Pose, object::Pose, up = SVector{3,T}(0, 1, 0)) = lookat(camera.t, object.t, up)
+lookat(camera::Pose, object::Pose, up=SVector{3,T}(0, 1, 0)) = lookat(camera.t, object.t, up)
 
 """
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-lookat(camera::SceneObject{CvCamera}, object::SceneObject, up = SVector{3,T}(0, 1, 0)) = lookat(camera.pose, object.pose, up)
+lookat(camera::SceneObject{CvCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat(camera.pose, object.pose, up)
 
 """
     lookat_opengl(camera, object, up)
 Calculates the Rotation to look at the object along negative z with up defining the upwards direction
 """
-function lookat_opengl(camera_t, object_t, up = SVector{3,T}(0, 1, 0))
+function lookat_opengl(camera_t, object_t, up=SVector{3,T}(0, 1, 0))
     c_t = SVector{3}(camera_t)
     o_t = SVector{3}(object_t)
     u = SVector{3}(up)
@@ -175,7 +176,7 @@ end
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along negative z with up defining the upwards direction
 """
-lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up = SVector{3,T}(0, 1, 0)) = lookat_opengl(camera.pose, object.pose, up)
+lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat_opengl(camera.pose, object.pose, up)
 
 """
     to_gpu(program, so::SceneObject{Camera})
