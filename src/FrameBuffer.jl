@@ -37,7 +37,7 @@ Supports depth and stencil tests via an appropriate RenderBuffer.
 """
 function depth_framebuffer(dims::Integer...)
     width, height, _... = dims
-    depth_tex = GLAbstraction.Texture(Gray{Float32}, (width, height))
+    depth_tex = GLAbstraction.Texture(Gray{Float32}, dims)
     depth_stencil_rbo = GLAbstraction.RenderBuffer(GLAbstraction.DepthStencil{GLAbstraction.Float24,N0f8}, (width, height))
     GLAbstraction.FrameBuffer((width, height), depth_tex, depth_stencil_rbo)
 end
