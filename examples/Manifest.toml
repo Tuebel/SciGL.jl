@@ -266,9 +266,7 @@ version = "1.0.10+0"
 
 [[deps.GLAbstraction]]
 deps = ["ColorTypes", "FixedPointNumbers", "ModernGL", "Printf", "StaticArrays", "ThreadPools"]
-git-tree-sha1 = "eb6c8fb97c1af919148f045ad27a35acf9f4a1b1"
-repo-rev = "master"
-repo-url = "https://github.com/Tuebel/GLAbstraction.jl.git"
+path = "../dev/GLAbstraction"
 uuid = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
 version = "0.1.1"
 

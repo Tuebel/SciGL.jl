@@ -16,7 +16,7 @@ window = context_offscreen(WIDTH, HEIGHT)
 
 # On Intel copying data from a texture or an RBO does not really make a difference
 framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
-texture = framebuffer.attachments[1]
+texture = first(GLAbstraction.color_attachments(framebuffer))
 
 # Map once
 pbo = PersistentBuffer(texture)
