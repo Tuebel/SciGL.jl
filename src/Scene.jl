@@ -30,6 +30,14 @@ struct SceneObject{T}
 end
 
 """
+    SceneObject(object, program)
+Creates a SceneObject with an identity rotation & zero translation
+"""
+SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
+
+Base.show(io::IO, object::SceneObject{T}) where {T} = print(io, "SceneObject{$(T)}, pose: $(object.pose)")
+
+"""
     Camera
 Abstract type of a camera, which is required in every scene
 """
@@ -44,12 +52,6 @@ struct Scene{T<:Camera,U<:SceneObject{<:GLAbstraction.VertexArray}}
     camera::SceneObject{T}
     meshes::Vector{U}
 end
-
-"""
-    SceneObject(object, program)
-Creates a SceneObject with an identity rotation & zero translation
-"""
-SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
 
 """
     draw(program, scene)
