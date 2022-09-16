@@ -35,6 +35,7 @@ include("FrameBuffer.jl")
 include("Layers.jl")
 include("Tiles.jl")
 include("Sync.jl")
+include("PersistentBuffer.jl")
 include("Cuda.jl")
 
 # Scene types
@@ -85,8 +86,10 @@ export render_channel
 export draw_to_cpu
 export draw_to_cpu_async
 
-# CUDA
+# PersistentBuffer
 export PersistentBuffer
+
+# CUDA
 export async_copyto!, sync_buffer
 export map_resource, unmap_resource
 
