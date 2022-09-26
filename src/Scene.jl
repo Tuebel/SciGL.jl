@@ -6,19 +6,21 @@ using CoordinateTransformations
 using Rotations
 
 """
-    Pose
-Orientation and position of a scene object.
+    Pose{N}
+Orientation and position of a scene object with dimensionality N.
 """
-struct Pose{T<:Translation,R<:Rotation}
+struct Pose{N,T<:Translation{<:SVector{N}},R<:Rotation{N}}
     translation::T
     rotation::R
 end
+
+Base.show(io::IO, p::Pose) = print(io, "Pose($(p.translation), Rotation$(p.rotation))")
 
 """
     Pose(t_xyz, r)
 Pose from a translation vector and some rotation representation.
 """
-Pose(t_xyz::AbstractVector, r) = Pose(Translation(t_xyz), r)
+Pose(t_xyz::AbstractVector, r) = Pose(Translation(t_xyz...), r)
 
 """
     SceneObject

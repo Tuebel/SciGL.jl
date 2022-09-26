@@ -27,3 +27,8 @@ M_aps2 = @inferred SMatrix(aps)
 aug_x = SVector(1, 1, 1, 1)
 @test ap(x) == (M_ap*aug_x)[1:3]
 @test aps(x) == (M_aps*aug_x)[1:3]
+
+# This is unstable
+p = Pose([3, 2, 1], R)
+# In favor for this being stable
+@inferred SMatrix(p)
