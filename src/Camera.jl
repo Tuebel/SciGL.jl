@@ -145,7 +145,7 @@ lookat(camera_t::Translation, object_t::Translation, up=SVector{3,T}(0, 1, 0)) =
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-lookat(camera::Pose, object::Pose, up=SVector{3,T}(0, 1, 0)) = lookat(camera.t, object.t, up)
+lookat(camera::Pose, object::Pose, up=SVector{3,T}(0, 1, 0)) = lookat(camera.translation, object.translation, up)
 
 """
     lookat(camera, object, up)

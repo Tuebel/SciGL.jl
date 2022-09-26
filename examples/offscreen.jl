@@ -25,9 +25,9 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 # Init scene
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
-cube = @set cube.pose.t = Translation(1, 0, 0)
+cube = @set cube.pose.translation = Translation(1, 0, 0)
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
-monkey = @set monkey.pose.t = Translation(0, 0, 0)
+monkey = @set monkey.pose.translation = Translation(0, 0, 0)
 
 # Key callbacks GLFW.GetKey does not seem to work
 GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin
@@ -47,9 +47,9 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
     # update camera pose
-    camera = @set camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
+    camera = @set camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
     # WARN if not using Scene, to_gpu has to be called for the camera
-    camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
+    camera = @set camera.pose.rotation = lookat(camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()

@@ -9,9 +9,9 @@ using Rotations
     Pose
 Orientation and position of a scene object.
 """
-struct Pose
-    t::Translation
-    R::Rotation
+struct Pose{T<:Translation,R<:Rotation}
+    translation::T
+    rotation::R
 end
 
 """
@@ -24,16 +24,17 @@ Pose(t_xyz::AbstractVector, r) = Pose(Translation(t_xyz), r)
     SceneObject
 Each object in a scene has a pose and a shader program attached to it
 """
-struct SceneObject{T}
+struct SceneObject{T,P<:Pose,S<:Scale}
     object::T
-    pose::Pose
+    pose::P
+    scale::S
 end
 
 """
     SceneObject(object, program)
 Creates a SceneObject with an identity rotation & zero translation
 """
-SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion))) where {T} = SceneObject(object, pose)
+SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion)), scale=Scale(1, 1, 1)) where {T} = SceneObject(object, pose, scale)
 
 Base.show(io::IO, object::SceneObject{T}) where {T} = print(io, "SceneObject{$(T)}, pose: $(object.pose)")
 
@@ -48,8 +49,8 @@ abstract type Camera end
 A scene should consist of only one camera and several meshes.
 In the future, lights could be supported for rendering RGB images.
 """
-struct Scene{T<:Camera,U<:SceneObject{<:GLAbstraction.VertexArray}}
-    camera::SceneObject{T}
+struct Scene{C<:SceneObject{<:Camera},U<:SceneObject{<:GLAbstraction.VertexArray}}
+    camera::C
     meshes::Vector{U}
 end
 

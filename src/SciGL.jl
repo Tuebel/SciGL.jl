@@ -24,7 +24,7 @@ using Rotations
 using StaticArrays
 
 # lib includes
-include("BaseExtensions.jl")
+include("CoordinateTransformationExtensions.jl")
 include("Scene.jl")
 include("RenderContexts.jl")
 include("Transformations.jl")
@@ -42,6 +42,7 @@ include("Cuda.jl")
 export CvCamera
 export GLOrthoCamera
 export Pose
+export Scale
 export SceneObject
 export Scene
 
@@ -97,7 +98,7 @@ export map_resource, unmap_resource
 using Reexport
 @reexport begin
     import ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
-    import CoordinateTransformations: Translation
+    import CoordinateTransformations: AffineMap, LinearMap, Translation
     import GLAbstraction
     import GLAbstraction: gpu_data
     import GLFW

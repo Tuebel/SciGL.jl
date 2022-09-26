@@ -50,9 +50,9 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
     # update camera pose
-    camera = @set camera.pose.t = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
+    camera = @set camera.pose.translation = Translation(1.5 * sin(2 * π * time() / 5), 0, 1.5 * cos(2 * π * time() / 5))
     # WARN if not using Scene, to_gpu has to be called for the camera
-    camera = @set camera.pose.R = lookat(camera, monkey, [0 1 0])
+    camera = @set camera.pose.rotation = lookat(camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()

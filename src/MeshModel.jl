@@ -29,7 +29,7 @@ Transfers the model matrix to the OpenGL program
 """
 function to_gpu(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{T}) where {T<:GLAbstraction.VertexArray}
     GLAbstraction.bind(program)
-    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose))
+    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose, scene_object.scale))
     GLAbstraction.unbind(program)
 end
 
@@ -42,7 +42,7 @@ function draw(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{
     GLAbstraction.bind(program)
     GLAbstraction.bind(scene_object.object)
     # Copied from to_gpu to avoid unnecessary bind / unbind
-    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose))
+    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose, scene_object.scale))
     GLAbstraction.draw(scene_object.object)
     GLAbstraction.unbind(scene_object.object)
     GLAbstraction.unbind(program)

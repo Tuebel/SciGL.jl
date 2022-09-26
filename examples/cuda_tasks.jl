@@ -7,7 +7,7 @@ using BenchmarkTools
 using CUDA
 using SciGL
 
-const N_TASKS = 1000
+const N_TASKS = 100
 const WIDTH = 100
 const HEIGHT = 100
 
@@ -26,8 +26,8 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj") |> SceneObject
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 scene = Scene(camera, [monkey, monkey])
-scene = @set scene.camera.pose.t = Translation(1.5, 0, 1.5)
-scene = @set scene.camera.pose.R = lookat(scene.camera, scene.meshes[1], [0 1 0])
+scene = @set scene.camera.pose.translation = Translation(1.5, 0, 1.5)
+scene = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1], [0 1 0])
 
 # This is where the magic happens 
 channel = render_channel()

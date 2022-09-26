@@ -51,8 +51,8 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
 
-    scene = @set scene.camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
-    scene = @set scene.camera.pose.R = lookat(scene.camera, monkey, [0 1 0])
+    scene = @set scene.camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey, [0 1 0])
 
     # draw
     activate_all(tiles)

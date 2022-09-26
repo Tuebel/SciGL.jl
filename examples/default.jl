@@ -2,6 +2,10 @@
 # Copyright (c) 2021, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+# WARN Do not run this if you want Revise to work
+# include("../src/SciGL.jl")
+# using .SciGL
+
 using Accessors
 using SciGL
 
@@ -19,9 +23,10 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 # Init scene
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
-cube = @set cube.pose.t = Translation(1, 0, 0)
+cube = @set cube.pose.translation = Translation(1, 0, 0)
+cube = @set cube.scale = Scale(0.1, 0.3, 0.5)
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
-monkey = @set monkey.pose.t = Translation(0, 0, 0)
+monkey = @set monkey.pose.translation = Translation(0, 0, 0)
 scene = Scene(camera, [cube, monkey])
 
 # Key callbacks GLFW.GetKey does not seem to work
@@ -39,8 +44,8 @@ while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
     # update camera pose
-    scene = @set scene.camera.pose.t = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
-    scene = @set scene.camera.pose.R = lookat(scene.camera, monkey, [0 1 0])
+    scene = @set scene.camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey, [0 1 0])
 
     # draw
     clear_buffers()
