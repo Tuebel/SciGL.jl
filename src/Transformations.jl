@@ -40,7 +40,7 @@ augmented_matrix(M::SMatrix{3,3}, v::SVector{3}) = SMatrix{4,4,Float32}([M v; 0 
     SMatrix(a::AffineMap)
 Converts an AffineMap to a static affine transformation matrix.
 """
-StaticArrays.SMatrix(a::AbstractAffineMap) = decompose(a)... |> augmented_matrix
+StaticArrays.SMatrix(a::AbstractAffineMap) = augmented_matrix(decompose(a)...)
 
 """
     SMatrix(p::pose)
