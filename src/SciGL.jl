@@ -121,7 +121,7 @@ using SnoopPrecompile
     texture = first(GLAbstraction.color_attachments(framebuffer))
     pbo = PersistentBuffer(texture)
     data = Array(pbo)
-    if CUDA.functional()
+    if cuda_interop_available()
         CuArray(pbo)
     end
 
