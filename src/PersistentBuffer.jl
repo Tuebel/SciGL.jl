@@ -64,7 +64,7 @@ PersistentBuffer(texture::GLAbstraction.Texture{T}; buffertype=GL_PIXEL_PACK_BUF
 
 function GLAbstraction.free!(x::PersistentBuffer)
     glDeleteSync(x.fence)
-    GLAbstraction.context_command(x.context, () -> glDeleteBuffers(1, [x.id]))
+    GLAbstraction.context_command(() -> glDeleteBuffers(1, [x.id]), x.context)
 end
 
 Base.size(buffer::PersistentBuffer) = buffer.dims

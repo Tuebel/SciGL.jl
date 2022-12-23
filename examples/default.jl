@@ -20,7 +20,7 @@ normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
 silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
-# Init scene
+# Init scene with normal_prog as it uses most attributes
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
 cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
 cube = @set cube.pose.translation = Translation(1, 0, 0)
