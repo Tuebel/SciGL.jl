@@ -265,8 +265,8 @@ uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
 
 [[deps.GLAbstraction]]
-deps = ["ColorTypes", "FixedPointNumbers", "ModernGL", "Printf", "StaticArrays", "ThreadPools"]
-git-tree-sha1 = "03378f08871d679dcac99a1d520699776f7979af"
+deps = ["ColorTypes", "FixedPointNumbers", "Logging", "ModernGL", "Printf", "StaticArrays", "ThreadPools"]
+git-tree-sha1 = "7fddca1d881450e6296ee036a3064f0917453f48"
 repo-rev = "master"
 repo-url = "https://github.com/Tuebel/GLAbstraction.jl.git"
 uuid = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
@@ -786,7 +786,7 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
 
 [[deps.SciGL]]
-deps = ["CUDA", "ColorTypes", "CoordinateTransformations", "DocumentFormat", "FileIO", "FixedPointNumbers", "GLAbstraction", "GLFW", "GeometryBasics", "LinearAlgebra", "Logging", "MeshIO", "ModernGL", "Reexport", "Rotations", "StaticArrays"]
+deps = ["CUDA", "ColorTypes", "CoordinateTransformations", "DocumentFormat", "FileIO", "FixedPointNumbers", "GLAbstraction", "GLFW", "GeometryBasics", "LinearAlgebra", "Logging", "MeshIO", "ModernGL", "Reexport", "Rotations", "SnoopPrecompile", "StaticArrays"]
 path = ".."
 uuid = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
 version = "0.1.7"

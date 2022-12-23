@@ -13,6 +13,16 @@ using CUDA:
     cuGraphicsSubResourceGetMappedArray,
     Mem
 
+function cuda_interop_available()
+    vendor_str = glGetString(GL_VENDOR)
+    if vendor_str == C_NULL
+        @warn "Null pointer for GL_VENDOR. Is an OpenGL context initialized?"
+        return false
+    end
+    vendor = unsafe_string(vendor_str) |> uppercase
+    CUDA.functional() && contains(vendor, "NVIDIA")
+end
+
 # Map an OpenGL texture to a CuTexture.
 # Addressing is not linear but optimized for interpolation.
 # These are represented by CUDA Arrays instead of device pointers and are indexed by Floats.
