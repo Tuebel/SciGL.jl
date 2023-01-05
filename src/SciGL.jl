@@ -108,7 +108,7 @@ end
 using SnoopPrecompile
 @precompile_setup begin
     using Pkg
-    cube_path = joinpath(Pkg.dir("SciGL"), "examples", "meshes", "cube.obj")
+    cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
     WIDTH = 800
     HEIGHT = 600
     @precompile_all_calls begin
