@@ -84,10 +84,10 @@ function tile_indices(tiles::Tiles, id::Int)
 end
 
 """
-    coordinates(tiles, id)
+    tile_coordinates(tiles, id)
 Image coordinates of the upper left tile corner.
 """
-function coordinates(tiles::Tiles, id::Integer)
+function tile_coordinates(tiles::Tiles, id::Integer)
     x, y = gl_tile_indices(tiles, id)
     x0 = x * tiles.tile_width + 1
     y0 = y * tiles.tile_height + 1
@@ -95,13 +95,13 @@ function coordinates(tiles::Tiles, id::Integer)
 end
 
 """
-    coordinates(tiles, tile_id, iter)
+    tile_coordinates(tiles, tile_id, iter)
 Image coordinates of iter in the whole texture.
 `iter` would typically be thread_id:n_threads:width*height
 """
-function coordinates(tiles::Tiles, tile_id::Integer, iter::Integer)
+function tile_coordinates(tiles::Tiles, tile_id::Integer, iter::Integer)
     # Upper left corner indices
-    tile_left, tile_top = coordinates(tiles, tile_id)
+    tile_left, tile_top = tile_coordinates(tiles, tile_id)
     # Starting 1 is included in the top lef coordinates
     tile_x = rem(iter - 1, tiles.tile_width)
     tile_y = div(iter - 1, tiles.tile_width)
@@ -115,7 +115,7 @@ Image coordinates for a linear index `i`.
 function cartesian_idx(tiles::Tiles, i::Integer)
     tile_id = (i - 1) ÷ tile_length(tiles) + 1
     iter = (i - 1) % tile_length(tiles) + 1
-    coordinates(tiles, tile_id, iter)
+    tile_coordinates(tiles, tile_id, iter)
 end
 
 """
@@ -153,7 +153,7 @@ end
 Create a view of the Matrix `M` for the given tile id.
 """
 function Base.view(M::AbstractMatrix, tiles::Tiles, id::Int)
-    x0, y0 = coordinates(tiles, id)
+    x0, y0 = tile_coordinates(tiles, id)
     x1 = x0 + tiles.tile_width - 1
     y1 = y0 + tiles.tile_height - 1
     view(M, x0:x1, y0:y1)
@@ -185,4 +185,4 @@ end
     unsafe_copyto!(dest, source, tiles)
 Convenience dispatch for copying the tile from the GPU source to the CPU dest.
 """
-GLAbstraction.unsafe_copyto!(dest, source, tiles::Tiles, id::Integer) = unsafe_copyto!(dest, source, coordinates(tiles, id)...)
+GLAbstraction.unsafe_copyto!(dest, source, tiles::Tiles, id::Integer) = unsafe_copyto!(dest, source, tile_coordinates(tiles, id)...)

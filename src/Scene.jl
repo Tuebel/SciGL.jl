@@ -36,7 +36,7 @@ end
     SceneObject(object, program)
 Creates a SceneObject with an identity rotation & zero translation
 """
-SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(UnitQuaternion)), scale=Scale(1, 1, 1)) where {T} = SceneObject(object, pose, scale)
+SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(QuatRotation)), scale=Scale(1, 1, 1)) where {T} = SceneObject(object, pose, scale)
 
 Base.show(io::IO, object::SceneObject{T}) where {T} = print(io, "SceneObject{$(T)}, pose: $(object.pose)")
 

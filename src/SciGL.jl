@@ -72,7 +72,7 @@ export Tiles
 
 export activate_all
 export activate_tile
-export coordinates
+export tile_coordinates
 export tile_length
 export tile_size
 export full_size

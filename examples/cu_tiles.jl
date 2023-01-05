@@ -19,7 +19,7 @@ function coordinate_test(mat::CuDeviceMatrix, tiles::Tiles)
     n_threads = blockDim().x
     image_length = tile_length(tiles)
     for i = thread_id:n_threads:image_length
-        x, y = coordinates(tiles, block_id, i)
+        x, y = tile_coordinates(tiles, block_id, i)
         @inbounds mat[x, y] = i * block_id
     end
     return nothing

@@ -46,7 +46,7 @@ function gpu_block_sum(tex::CuDeviceTexture{<:Any,2}, tiles::Tiles, out::CuDevic
     # thread strided loop
     for i in thread_id:n_threads:tile_length(tiles)
         # Texture indices: N-Dims Float32
-        x, y = coordinates(tiles, block_id, i) .|> Float32
+        x, y = tile_coordinates(tiles, block_id, i) .|> Float32
         @inbounds thread_sum += fn(tex[x, y])
     end
     # Synchronized accumulation for block
