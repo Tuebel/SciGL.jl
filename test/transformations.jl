@@ -2,10 +2,6 @@
 # Copyright (c) 2022, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
-using SciGL
-using StaticArrays
-using Test
-
 x = SVector(1, 1, 1)
 t = Translation(3, 2, 1)
 R = RotZ(π / 2)

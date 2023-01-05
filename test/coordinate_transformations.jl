@@ -2,11 +2,6 @@
 # Copyright (c) 2022, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
-using CoordinateTransformations
-using SciGL
-using StaticArrays
-using Test
-
 x = SVector(1, 1)
 t = Translation(1, 1)
 R = [0 -1; 1 0]
