@@ -97,7 +97,7 @@ end
 Synchronizes to CUDA / CPU by mapping and unmapping the internal resource.
 `dims`: (x_offset, y_offset, z_offset, width, height, depth), (width, height, depth) or (), zero offset is used if no custom offset is specified. 
 """
-function sync_buffer(buffer::PersistentBuffer, timeout_ns=1)
+function sync_buffer(buffer::PersistentBuffer, timeout_ns=10)
     loop = true
     while loop
         res = glClientWaitSync(buffer.fence, GL_SYNC_FLUSH_COMMANDS_BIT, timeout_ns)
@@ -150,7 +150,7 @@ Start the async transfer operation from a source to the internal OpenGL buffer o
 Call `sync_buffer` to finish the transfer operation by mapping & unmapping the buffer.
 `dims`: (x_offset, y_offset, z_offset, width, height, depth), (width, height, depth) or (), zero offset is used if no custom offset is specified. 
 """
-async_copyto!(dest::PersistentBuffer, src::GLAbstraction.FrameBuffer, dims...) = async_copyto!(dest, first(GLAbstraction.color_attachments(src)), dims...)
+async_copyto!(dest::PersistentBuffer, src::GLAbstraction.FrameBuffer, dims...) = async_copyto!(dest, first(GLAbstraction.color_attachments(src)), GLsizei.(dims)...)
 
 # CUDA mapping
 
