@@ -13,32 +13,40 @@ function set_context!(window::GLFW.Window)
     return window
 end
 
-# I find most of the GLFW defaults more reasonable than the ones provided by GLFW.jl
-const default_window_hints = [
-    (GLFW.RESIZABLE, false),
-    (GLFW.FOCUSED, false),
-    (GLFW.CONTEXT_VERSION_MAJOR, 4),
-    # TODO Persistent mapping & glGetTextureSubImage
-    (GLFW.CONTEXT_VERSION_MINOR, 5),
-    (GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)]
-
 """
     context_fullscreen(width, height; name, window_hints)
 Create an OpenGL context in fullscreen mode and makes it current.
 """
-context_fullscreen(width::Integer, height::Integer; name="SciGL.jl", window_hints=default_window_hints) = GLFW.Window(name=name, resolution=(width, height), windowhints=window_hints, fullscreen=true) |> set_context!
+context_fullscreen(width::Integer, height::Integer; name="SciGL.jl", window_hints=default_window_hints) = GLFW.Window(name=name, resolution=(width, height), windowhints=window_hints, fullscreen=true) |> render_defaults |> set_context!
 
 """
     context_offscreen(width, height; name, window_hints)
 Create an OpenGL context which is not visible, e.g. for offscreen rendering and makes it current.
 """
-context_offscreen(width::Integer, height::Integer; name="SciGL.jl", window_hints=default_window_hints) = GLFW.Window(name=name, resolution=(width, height), windowhints=window_hints, visible=false) |> set_context!
+context_offscreen(width::Integer, height::Integer; name="SciGL.jl", window_hints=default_window_hints) = GLFW.Window(name=name, resolution=(width, height), windowhints=window_hints, visible=false) |> render_defaults |> set_context!
 
 """
     context_window(width, height; name, window_hints)
 Create an OpenGL context in windowed mode and makes it current.
 """
-context_window(width::Integer, height::Integer; name="SciGL.jl", window_hints=default_window_hints) = GLFW.Window(name=name, resolution=(width, height), windowhints=window_hints, focus=true) |> set_context!
+context_window(width::Integer, height::Integer; name="SciGL.jl", window_hints=default_window_hints) = GLFW.Window(name=name, resolution=(width, height), windowhints=window_hints, focus=true) |> render_defaults |> set_context!
+
+# I find most of the GLFW defaults more reasonable than the ones provided by GLFW.jl
+const default_window_hints = [
+    (GLFW.RESIZABLE, false),
+    (GLFW.FOCUSED, false),
+    (GLFW.CONTEXT_VERSION_MAJOR, 4),
+    # Persistent mapping & glGetTextureSubImage
+    (GLFW.CONTEXT_VERSION_MINOR, 5),
+    (GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)]
+
+# Pipeable, set some sane defaults to avoid black screens by default
+function render_defaults(x)
+    enable_depth_stencil()
+    set_clear_color()
+    clear_buffers()
+    return x
+end
 
 """
     enable_depth_stencil()

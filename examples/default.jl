@@ -16,9 +16,9 @@ const HEIGHT = 600
 window = context_window(WIDTH, HEIGHT)
 
 # Compile shader program
-normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
-silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
-depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
+normal_prog = compile_shader(SimpleVert, NormalFrag)
+silhouette_prog = compile_shader(SimpleVert, SilhouetteFrag)
+depth_prog = compile_shader(SimpleVert, DepthFrag)
 
 # Init scene with normal_prog as it uses most attributes
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
@@ -60,4 +60,4 @@ while !GLFW.WindowShouldClose(window)
 end
 
 # needed if you're running this from the REPL
-GLFW.DestroyWindow(window)
+destroy_context(window)

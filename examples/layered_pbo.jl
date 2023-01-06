@@ -16,7 +16,7 @@ window = context_offscreen(WIDTH, HEIGHT)
 
 # On Intel copying data from a texture or an RBO does not really make a difference
 framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
-texture = first(GLAbstraction.color_attachments(framebuffer))
+texture = first(color_attachments(framebuffer))
 
 # Map once
 pbo = PersistentBuffer(texture)
@@ -28,9 +28,9 @@ else
 end
 
 # Compile shader program
-normal_prog = GLAbstraction.Program(SimpleVert, NormalFrag)
-silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
-depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
+normal_prog = compile_shader(SimpleVert, NormalFrag)
+silhouette_prog = compile_shader(SimpleVert, SilhouetteFrag)
+depth_prog = compile_shader(SimpleVert, DepthFrag)
 
 # Init scene
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
@@ -56,7 +56,7 @@ enable_depth_stencil()
 set_clear_color()
 
 # Draw to framebuffer
-GLAbstraction.bind(framebuffer)
+glbind(framebuffer)
 
 # Draw until we receive a close event
 while !GLFW.WindowShouldClose(window)
@@ -98,4 +98,4 @@ while !GLFW.WindowShouldClose(window)
 end
 
 # needed if you're running this from the REPL
-GLFW.DestroyWindow(window)
+destroy_context(window)

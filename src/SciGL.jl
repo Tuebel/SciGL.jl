@@ -12,6 +12,7 @@ using CoordinateTransformations
 using CUDA
 using FixedPointNumbers: N0f8, Normed
 using GeometryBasics
+# TODO Either take over the development or roll my own Package
 using GLAbstraction
 using GLFW
 using FileIO
@@ -25,7 +26,6 @@ using StaticArrays
 # lib includes
 include("CoordinateTransformationExtensions.jl")
 include("Scene.jl")
-include("RenderContexts.jl")
 include("Transformations.jl")
 include("Camera.jl")
 include("Shaders.jl")
@@ -36,6 +36,7 @@ include("Tiles.jl")
 include("Sync.jl")
 include("PersistentBuffer.jl")
 include("Cuda.jl")
+include("RenderContexts.jl")
 
 # Scene types
 export CvCamera

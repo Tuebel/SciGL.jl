@@ -56,17 +56,21 @@ This method allows to set a custom element type for the buffer which must be com
 PersistentBuffer(::Type{T}, texture::GLAbstraction.Texture; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T} = PersistentBuffer(T, size(texture); buffertype=buffertype, flags=flags)
 
 """
-    PersistentBuffer(T, texture; [buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT])
+    PersistentBuffer(texture; [buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT])
 Convenience method to generate a persistent buffer object which can hold the elements of the texture.
-This method sets the buffer element type to the element type of the texture.
+This method sets the buffer element type to the element type of the texture with the exception of Gray{T} which is sets the element type to T
 """
 PersistentBuffer(texture::GLAbstraction.Texture{T}; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T} = PersistentBuffer(T, texture; buffertype=buffertype, flags=flags)
+# Automatic conversion for computations
+PersistentBuffer(texture::GLAbstraction.Texture{Gray{T}}; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T} = PersistentBuffer(T, texture; buffertype=buffertype, flags=flags)
+
 
 function GLAbstraction.free!(x::PersistentBuffer)
     glDeleteSync(x.fence)
     GLAbstraction.context_command(() -> glDeleteBuffers(1, [x.id]), x.context)
 end
 
+Base.eltype(::PersistentBuffer{T}) where {T} = T
 Base.size(buffer::PersistentBuffer) = buffer.dims
 Base.length(buffer::PersistentBuffer) = prod(size(buffer))
 Base.sizeof(buffer::PersistentBuffer{T}) where {T} = length(buffer) * sizeof(T)

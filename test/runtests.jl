@@ -9,3 +9,5 @@ using Test
 
 include("coordinate_transformations.jl")
 include("transformations.jl")
+
+include("persistent_buffer.jl")
