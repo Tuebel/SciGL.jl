@@ -8,6 +8,7 @@ module SciGL
 # TODO not use whole libs
 using ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
 using CoordinateTransformations
+# TODO maybe create another package SciCuGL which has CUDA in its dependencies and precompiles it
 using CUDA
 using FixedPointNumbers: N0f8, Normed
 using GeometryBasics
@@ -123,9 +124,6 @@ using SnoopPrecompile
         texture = first(GLAbstraction.color_attachments(framebuffer))
         pbo = PersistentBuffer(texture)
         data = Array(pbo)
-        if cuda_interop_available()
-            CuArray(pbo)
-        end
 
         # Scene
         camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
