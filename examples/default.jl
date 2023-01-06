@@ -21,11 +21,11 @@ silhouette_prog = compile_shader(SimpleVert, SilhouetteFrag)
 depth_prog = compile_shader(SimpleVert, DepthFrag)
 
 # Init scene with normal_prog as it uses most attributes
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
-cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+cube = load_mesh(normal_prog, "examples/meshes/cube.obj")
 cube = @set cube.pose.translation = Translation(1, 0, 0)
 cube = @set cube.scale = Scale(0.1, 0.3, 0.5)
-monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
 monkey = @set monkey.pose.translation = Translation(0, 0, 0)
 scene = Scene(camera, [cube, monkey])
 
@@ -34,10 +34,6 @@ GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin
     key == GLFW.KEY_ESCAPE && GLFW.SetWindowShouldClose(window, true)
     println("Registered $key")
 end)
-
-# Buffer settings
-enable_depth_stencil()
-set_clear_color()
 
 # Draw until we receive a close event
 while !GLFW.WindowShouldClose(window)

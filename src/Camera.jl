@@ -31,9 +31,9 @@ end
 
 """
     CvCamera(width, height, f_x, f_y, c_x, c_y; [s=0, distortion=zeros(8), near=0.01, far=100])
-Constructor with reasonable defaults
+Constructor with reasonable defaults, returns a SceneObject{CvCamera}
 """
-CvCamera(width::Integer, height::Integer, f_x::Real, f_y::Real, c_x::Real, c_y::Real; s=0, distortion=zeros(8), near=0.01, far=100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far)
+CvCamera(width::Integer, height::Integer, f_x::Real, f_y::Real, c_x::Real, c_y::Real; s=0, distortion=zeros(8), near=0.01, far=100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far) |> SceneObject
 
 """
 Parametrizes the glOrtho camera function.
@@ -49,7 +49,13 @@ struct GLOrthoCamera <: Camera
 end
 
 """
-    OrthgraphicCamera(c::CvCamera):SceneObject{VertexArray}
+    OrthgraphicCamera(c::CvCamera):SceneObject{GLOrthoCamera}
+extracts the orthographic scaling from the OpenCV camera
+"""
+OrthgraphicCamera(left, right, top, bottom, near, far) = GLOrthoCamera(left, right, top, bottom, near, far) |> SceneObject
+
+"""
+    OrthgraphicCamera(c::CvCamera)
 extracts the orthographic scaling from the OpenCV camera
 """
 OrthgraphicCamera(c::CvCamera) = GLOrthoCamera(0, c.width, 0, c.height, c.near, c.far)

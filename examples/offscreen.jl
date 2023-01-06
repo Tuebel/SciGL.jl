@@ -23,10 +23,10 @@ silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init scene with normal_prog as it uses most attributes
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
-cube = load_mesh(normal_prog, "examples/meshes/cube.obj") |> SceneObject
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+cube = load_mesh(normal_prog, "examples/meshes/cube.obj")
 cube = @set cube.pose.translation = Translation(1, 0, 0)
-monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
 monkey = @set monkey.pose.translation = Translation(0, 0, 0)
 
 # Key callbacks GLFW.GetKey does not seem to work

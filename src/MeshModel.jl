@@ -17,7 +17,7 @@ function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
     @debug "Attributes unavailable in shader program: $(Base.structdiff(mesh_attributes, intersect_attributes) |> keys)"
     # finds the order of the variables in the shader program and automatically assigns them correctly
     buffers = GLAbstraction.generate_buffers(program; intersect_attributes...)
-    return GLAbstraction.VertexArray(buffers, faces(mesh))
+    return GLAbstraction.VertexArray(buffers, faces(mesh)) |> SceneObject
 end
 
 """

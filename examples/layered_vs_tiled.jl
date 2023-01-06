@@ -31,8 +31,8 @@ set_clear_color()
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init scene
-monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj") |> SceneObject
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
+monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj")
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
 scene = SciGL.Scene(camera, [monkey, monkey])
 
 # Benchmark overhead of switching layers

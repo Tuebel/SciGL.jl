@@ -27,10 +27,10 @@ silhouette_prog = GLAbstraction.Program(SimpleVert, SilhouetteFrag)
 depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init mesh
-monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj") |> SceneObject
+monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
 
 # Init Camera
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> SceneObject
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
 
 # Key callbacks GLFW.GetKey does not seem to work
 GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin
