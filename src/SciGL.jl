@@ -37,6 +37,7 @@ include("Sync.jl")
 include("PersistentBuffer.jl")
 include("Cuda.jl")
 include("RenderContexts.jl")
+include("OffscreenContext.jl")
 
 # Scene types
 export CvCamera
@@ -91,7 +92,9 @@ export PersistentBuffer
 export context_fullscreen
 export context_offscreen
 export context_window
+export depth_offscreen_context
 export destroy_context
+export OffscreenContext
 
 # CUDA
 export async_copyto!, sync_buffer
