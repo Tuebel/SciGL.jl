@@ -57,9 +57,6 @@ export SimpleVert
 export clear_buffers
 export color_framebuffer
 export color_framebuffer_rbo
-export context_fullscreen
-export context_offscreen
-export context_window
 export depth_framebuffer
 export depth_framebuffer_rbo
 export draw
@@ -90,6 +87,12 @@ export draw_to_cpu_async
 # PersistentBuffer
 export PersistentBuffer
 
+# Context
+export context_fullscreen
+export context_offscreen
+export context_window
+export destroy_context
+
 # CUDA
 export async_copyto!, sync_buffer
 export cuda_interop_available
@@ -112,7 +115,5 @@ compile_shader = GLAbstraction.Program
 export compile_shader
 glbind = GLAbstraction.bind
 export glbind
-destroy_context = GLFW.DestroyWindow
-export destroy_context
 
 end # module

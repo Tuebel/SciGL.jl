@@ -73,3 +73,9 @@ Clears color, depth, and stencil.
 function clear_buffers()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
 end
+
+"""
+    destroy_context(context)
+Generalization of GLFW.DestroyWindow
+"""
+destroy_context(context::GLFW.Window) = GLFW.DestroyWindow(context)
