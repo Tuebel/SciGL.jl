@@ -29,6 +29,7 @@ scene2 = @set scene1.camera.pose.translation = Translation(1.3 * sin(5 * π / 4)
 scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, monkey, [0 1 0])
 scene3 = @set scene1.camera.pose.translation = Translation(1.3 * sin(3 * π / 4), 0, 1.3 * cos(3 * π / 4))
 scene3 = @set scene3.camera.pose.rotation = lookat(scene3.camera, monkey, [0 1 0])
+scenes = [scene1, scene2, scene3]
 
 # Key callbacks GLFW.GetKey does not seem to work
 GLFW.SetKeyCallback(gl_context.window, (win, key, scancode, action, mods) -> begin
@@ -41,7 +42,7 @@ while !GLFW.WindowShouldClose(gl_context.window)
     # events
     GLFW.PollEvents()
     # draw
-    imgs = draw(gl_context, scene1, scene2, scene3)
+    imgs = draw(gl_context, scenes)
     if floor(Int, time() / 2) % 3 == 0
         img = imgs[:, :, 1]
     elseif floor(Int, time() / 5) % 3 == 1

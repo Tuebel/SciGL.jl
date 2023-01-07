@@ -53,15 +53,25 @@ Base.size(render_context::OffscreenContext) = size(render_context.render_data)
 Base.eltype(::OffscreenContext{T}) where {T} = T
 
 """
-    draw(context, scenes...)
-Synchronously transfer the image with the given `depth` from OpenGL to the `render_data`.
-Returns a view of the data of size (width, height, depth).
+    draw(context, scenes)
+Synchronously draw the scenes into the layers of the contxt's framebuffer.
+Returns a view of of size (width, height, length(scenes)).
 """
-function draw(context::OffscreenContext, scenes::Scene...)
+function draw(context::OffscreenContext, scenes::AbstractArray{<:Scene})
     for (idx, scene) in enumerate(scenes)
         draw_framebuffer(context, scene, idx)
     end
     transfer(context, length(scenes))
+end
+
+"""
+    draw(context, scene)
+Synchronously transfer the image with the given `depth` from OpenGL to the `render_data`.
+Returns a view of the data of size (width, height, length(scenes)).
+"""
+function draw(context::OffscreenContext, scene::Scene)
+    draw_framebuffer(context, scene)
+    transfer(context)
 end
 
 """
@@ -78,14 +88,25 @@ function draw_framebuffer(context::OffscreenContext, scene::Scene, layer_id=1::I
 end
 
 """
-    transfer(context, [depth=1])
-Synchronously transfer the image with the given `depth` from OpenGL to the `render_data`.
+    transfer(context, depth)
+Synchronously transfer the image from OpenGL to the `render_data`.
 Returns a view of the data of size (width, height, depth).
 """
-function transfer(context::OffscreenContext, depth=1)
+function transfer(context::OffscreenContext, depth)
     start_transfer(context, depth)
     wait_transfer(context)
     @view context.render_data[:, :, 1:depth]
+end
+
+"""
+    transfer(context)
+Synchronously transfer the image from OpenGL to the `render_data`.
+Returns a view of the data of size (width, height).
+"""
+function transfer(context::OffscreenContext)
+    start_transfer(context)
+    wait_transfer(context)
+    @view context.render_data[:, :, 1]
 end
 
 """

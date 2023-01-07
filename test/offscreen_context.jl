@@ -23,6 +23,7 @@ camera = @set camera.pose.rotation = lookat(camera, cube, [0 1 0])
 scene1 = Scene(camera, [cube])
 scene2 = @set scene1.camera.pose.translation = Translation(1.3 * sin(0.1), 0, 1.3 * cos(0.1))
 scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube, [0 1 0])
+scenes = [scene1, scene2]
 
 @testset "OffscreenContext clear_buffers" begin
     glbind(gl_context.framebuffer)
@@ -35,8 +36,16 @@ scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube, [0 1 0])
     @test iszero(gl_context.render_data[:, :, 1:2])
 end
 
-@testset "OffscreenContext draw" begin
-    imgs = draw(gl_context, scene1, scene2)
+@testset "OffscreenContext draw one" begin
+    img = draw(gl_context, scene1)
+    @test img isa SubArray{Float32}
+    @test size(img) == (WIDTH, HEIGHT)
+    # Anything rendered? And different values per scene?
+    @test !iszero(img)
+end
+
+@testset "OffscreenContext draw two" begin
+    imgs = draw(gl_context, scenes)
     @test imgs isa SubArray{Float32}
     @test size(imgs) == (WIDTH, HEIGHT, 2)
     # Anything rendered? And different values per scene?
