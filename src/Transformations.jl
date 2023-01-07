@@ -16,13 +16,16 @@ decompose(a::AffineMap{<:AbstractMatrix,<:SVector{N}}) where {N} = SMatrix{N,N,F
 """
     augmented_matrix(M, v)
 Converts a linear map and a translation vector to an augmented affine transformation matrix.
-The matrix is of type Float32 for OpenGL
+The matrix is of type Float32 and row major for OpenGL.
 """
 function augmented_matrix(M::SMatrix{N,N}, v::SVector{N}) where {N}
-    aug = zeros(Float32, N + 1)
-    aug[end] = 1
-    aug
-    SMatrix{4,4,Float32}([M v; transpose(aug)])
+    # MMatrix for fast assignment
+    A = zeros(MMatrix{4,4,Float32})
+    A[1:3, 1:3] = M
+    A[1:3, 4] = v
+    A[4, 4] = 1
+    # SMatrix required by gluniform
+    SMatrix(A)
 end
 
 # Convert to AffineMap
