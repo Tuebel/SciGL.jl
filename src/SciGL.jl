@@ -118,5 +118,7 @@ compile_shader = GLAbstraction.Program
 export compile_shader
 glbind = GLAbstraction.bind
 export glbind
+glunbind = GLAbstraction.bind
+export glunbind
 
 end # module

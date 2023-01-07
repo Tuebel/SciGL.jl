@@ -9,22 +9,60 @@ r = LinearMap(R)
 a = AffineMap(R, t.translation)
 s = Scale(1, 2)
 
-@test s(x) == SVector(1, 2)
-@test (t ∘ s)(x) == t(s(x))
-@test (s ∘ t)(x) == s(t(x))
-@test (t ∘ s)(x) != (s ∘ t)(x)
+@testset "Composition: Scale & Translation" begin
+    @test s(x) == SVector(1, 2)
+    @test (t ∘ s)(x) == t(s(x))
+    @test (s ∘ t)(x) == s(t(x))
+    @test (t ∘ s)(x) != (s ∘ t)(x)
+end
 
-@test (r ∘ s)(x) == r(s(x))
-@test (s ∘ r)(x) == s(r(x))
-@test (r ∘ s)(x) != (s ∘ r)(x)
+@testset "Composition: Scale & Rotation" begin
+    @test (r ∘ s)(x) == r(s(x))
+    @test (s ∘ r)(x) == s(r(x))
+    @test (r ∘ s)(x) != (s ∘ r)(x)
+end
 
-@test (a ∘ s)(x) == a(s(x))
-@test (s ∘ a)(x) == s(a(x))
-@test (a ∘ s)(x) != (s ∘ a)(x)
+@testset "Composition: Scale & AffineMap" begin
+    @test (a ∘ s)(x) == a(s(x))
+    @test (s ∘ a)(x) == s(a(x))
+    @test (a ∘ s)(x) != (s ∘ a)(x)
+end
 
-@test inv(s) == Scale(1, 0.5)
-s2 = Scale(0.5, 2)
-@test (s ∘ s2)(x) == s(s2(x))
-@test (s ∘ s2)(x) == (s2 ∘ s)(x)
-@test transform_deriv(s, x) == [1 0; 0 2]
-@test isapprox(s, Scale(1 + eps(), 2))
+@testset "Composition: Scale & Scale" begin
+    s2 = Scale(0.5, 2)
+    @test (s ∘ s2)(x) == s(s2(x))
+    @test (s ∘ s2)(x) == (s2 ∘ s)(x)
+end
+
+@testset "Inverse & derivatives" begin
+    @test inv(s) == Scale(1, 0.5)
+    @test transform_deriv(s, x) == [1 0; 0 2]
+    @test isapprox(s, Scale(1 + eps(), 2))
+end
+
+x = SVector(1, 1, 1)
+t = Translation(3, 2, 1)
+R = RotZ(π / 2)
+r = LinearMap(R)
+s = Scale(1, 2, 3)
+p = @inferred Pose(t, R)
+ap = @inferred AffineMap(p)
+aps = @inferred AffineMap(p, s)
+@testset "Pose to AffineMap to augmented matrix" begin
+    @test ap(s(x)) == aps(x)
+
+    M_ap = @inferred SMatrix(ap)
+    M_aps = @inferred SMatrix(p, s)
+    M_aps2 = @inferred SMatrix(aps)
+    @test M_ap != M_aps
+    @test M_aps == M_aps2
+
+    aug_x = SVector(1, 1, 1, 1)
+    @test ap(x) == (M_ap*aug_x)[1:3]
+    @test aps(x) == (M_aps*aug_x)[1:3]
+end
+
+# This is unstable
+p = Pose([3, 2, 1], R)
+# In favor for this being stable
+@inferred SMatrix(p)

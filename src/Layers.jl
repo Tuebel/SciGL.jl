@@ -5,7 +5,7 @@ using GLAbstraction
 using ModernGL
 
 """
-    activate_layer(tiles, id)
+    activate_layer(frambeuffer, id)
 Activates `layer` of the first attachement to `framebuffer`.
 Does not for RBOs since they are inherently 2D.
 """

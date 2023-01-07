@@ -7,19 +7,23 @@ using SciGL
 # Create the GLFW window. This sets all the hints and makes the context current.
 WIDTH = 800
 HEIGHT = 600
-window = context_offscreen(WIDTH, HEIGHT)
+gl_context = context_offscreen(WIDTH, HEIGHT)
 
 # Color
-framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
-texture = first(color_attachments(framebuffer))
-pbo = @inferred PersistentBuffer(texture)
-@test eltype(pbo) <: RGBA
-array = Array(pbo)
+@testset "Color PBO" begin
+    framebuffer = color_framebuffer(WIDTH, HEIGHT, 3)
+    texture = first(color_attachments(framebuffer))
+    pbo = @inferred PersistentBuffer(texture)
+    @test eltype(pbo) <: RGBA
+    array = @inferred Array(pbo)
+end
 
 # Depth should return Float32
-framebuffer = depth_framebuffer(WIDTH, HEIGHT, 3)
-texture = first(color_attachments(framebuffer))
-pbo = @inferred PersistentBuffer(texture)
-@test eltype(pbo) == Float32
+@testset "Depth PBO" begin
+    framebuffer = depth_framebuffer(WIDTH, HEIGHT, 3)
+    texture = first(color_attachments(framebuffer))
+    pbo = @inferred PersistentBuffer(texture)
+    @test eltype(pbo) == Float32
+end
 
-destroy_context(window)
+destroy_context(gl_context)
