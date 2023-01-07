@@ -26,13 +26,11 @@ scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube, [0 1 0])
 scenes = [scene1, scene2]
 
 @testset "OffscreenContext clear_buffers" begin
-    glbind(gl_context.framebuffer)
     activate_layer(gl_context.framebuffer, 1)
     clear_buffers()
     activate_layer(gl_context.framebuffer, 2)
     clear_buffers()
     unsafe_copyto!(gl_context.gl_buffer, gl_context.framebuffer, size(gl_context.render_data)...)
-    glunbind(gl_context.framebuffer)
     @test iszero(gl_context.render_data[:, :, 1:2])
 end
 

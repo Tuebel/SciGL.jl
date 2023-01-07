@@ -7,6 +7,7 @@
 Keep everything required for offscreen rendering and transfer to a `(Cu)Array` in one place.
 
 **High level API** `draw(context, scenes...)`: Synchronously draws and transfers the scenes to the `(Cu)Array`.
+During construction the context's framebuffer is bound once. Make sure to bind it again if you unbind it.
 
 **Low level API** might be useful if you have calculations to execute during the transfer:
 * `draw_framebuffer` draws a scene to the texture attachment of the `framebuffer`
@@ -35,6 +36,7 @@ function depth_offscreen_context(width::Integer, height::Integer, depth::Integer
     window = context_offscreen(width, height)
     # Do not use RBO which only supports 2D shapes.
     framebuffer = depth_framebuffer(width, height, depth)
+    GLAbstraction.bind(framebuffer)
     texture = first(GLAbstraction.color_attachments(framebuffer))
     gl_buffer = PersistentBuffer(texture)
     render_data = T(gl_buffer)
@@ -80,11 +82,9 @@ Render the scene to the framebuffer of the context.
 """
 function draw_framebuffer(context::OffscreenContext, scene::Scene, layer_id=1::Integer)
     # Draw to framebuffer
-    GLAbstraction.bind(context.framebuffer)
     activate_layer(context.framebuffer, layer_id)
     clear_buffers()
     draw(context.shader_program, scene)
-    GLAbstraction.unbind(context.framebuffer)
 end
 
 """
