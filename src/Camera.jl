@@ -64,12 +64,12 @@ OrthgraphicCamera(c::CvCamera) = GLOrthoCamera(0, c.width, 0, c.height, c.near, 
     orthographic_matrix(c::GLOrthoCamera)
 Calculates the orthographic projection matrix like glOrtho
 """
-orthographic_matrix(c::GLOrthoCamera) = SMatrix{4,4,Float32}([
+orthographic_matrix(c::GLOrthoCamera) = @SMatrix Float32[
     2/(c.right-c.left) 0 0 -(c.right + c.left)/(c.right-c.left)
     0 2/(c.top-c.bottom) 0 -(c.top + c.bottom)/(c.top-c.bottom)
     0 0 -2/(c.far-c.near) -(c.far + c.near)/(c.far-c.near)
     0 0 0 1
-])
+]
 
 """
     orthographic_matrix(c::GLOrthoCamera)
@@ -77,12 +77,12 @@ Calculates the orthographic projection matrix for an OpenCV camera
 """
 orthographic_matrix(c::CvCamera) = c |> OrthgraphicCamera |> orthographic_matrix
 
-perspective_matrix(c::CvCamera) = SMatrix{4,4,Float32}([
+perspective_matrix(c::CvCamera) = @SMatrix Float32[
     c.f_x -c.s -c.c_x 0
     0 -c.f_y -c.c_y 0
     0 0 c.near+c.far c.near*c.far
     0 0 -1 0
-])
+]
 
 """
     view_matrix(so::SceneObject{CvCamera})
