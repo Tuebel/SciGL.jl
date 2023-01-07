@@ -24,7 +24,7 @@ scene1 = Scene(camera, [cube])
 scene2 = @set scene1.camera.pose.translation = Translation(1.3 * sin(0.1), 0, 1.3 * cos(0.1))
 scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube, [0 1 0])
 
-@testet "OffscreenContext clear_buffers" begin
+@testset "OffscreenContext clear_buffers" begin
     glbind(gl_context.framebuffer)
     activate_layer(gl_context.framebuffer, 1)
     clear_buffers()
@@ -35,7 +35,7 @@ scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube, [0 1 0])
     @test iszero(gl_context.render_data[:, :, 1:2])
 end
 
-@testet "OffscreenContext draw" begin
+@testset "OffscreenContext draw" begin
     imgs = draw(gl_context, scene1, scene2)
     @test imgs isa SubArray{Float32}
     @test size(imgs) == (WIDTH, HEIGHT, 2)
