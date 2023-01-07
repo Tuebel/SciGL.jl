@@ -192,7 +192,7 @@ function Base.Array(buffer::PersistentBuffer{T}) where {T}
     ptr = map_buffer(buffer)
     if (ptr == C_NULL)
         @error "Mapping PersistentBuffer id $(buffer.id) returned NULL"
-        return zeros(T, dims)
+        return zeros(T, size(buffer))
     end
     unsafe_wrap(Array, ptr, size(buffer))
 end
