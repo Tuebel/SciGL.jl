@@ -19,6 +19,7 @@ window = context_window(WIDTH, HEIGHT)
 normal_prog = compile_shader(SimpleVert, NormalFrag)
 silhouette_prog = compile_shader(SimpleVert, SilhouetteFrag)
 depth_prog = compile_shader(SimpleVert, DepthFrag)
+dist_prog = compile_shader(SimpleVert, DistanceFrag)
 
 # Init scene with normal_prog as it uses most attributes
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
@@ -45,12 +46,14 @@ while !GLFW.WindowShouldClose(window)
 
     # draw
     clear_buffers()
-    if floor(Int, time() / 5) % 3 == 0
+    if floor(Int, time() / 5) % 4 == 0
         draw(normal_prog, scene)
-    elseif floor(Int, time() / 5) % 3 == 1
+    elseif floor(Int, time() / 5) % 4 == 1
         draw(silhouette_prog, scene)
-    else
+    elseif floor(Int, time() / 5) % 4 == 2
         draw(depth_prog, scene)
+    else
+        draw(dist_prog, scene)
     end
     GLFW.SwapBuffers(window)
 end

@@ -16,6 +16,21 @@ void main()
 }
 """
 
+DistanceFrag = GLAbstraction.frag"""
+# version 150
+
+in vec4 view_position;
+
+out vec4 out_color;
+
+void main()
+{
+    vec3 center_dist = vec3(view_position);
+    float dist = sqrt(dot(center_dist, center_dist));
+    out_color = vec4(dist, dist, dist, 1.0);
+}
+"""
+
 NormalFrag = GLAbstraction.frag"""
 # version 150
 in vec3 view_normal;

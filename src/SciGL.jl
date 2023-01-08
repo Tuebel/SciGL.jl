@@ -49,6 +49,7 @@ export Scene
 
 # Shaders
 export DepthFrag
+export DistanceFrag
 export ModelNormalFrag
 export NormalFrag
 export SilhouetteFrag
