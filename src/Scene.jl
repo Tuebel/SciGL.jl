@@ -56,6 +56,7 @@ struct Scene{C<:SceneObject{<:AbstractCamera},U<:SceneObject{<:GLAbstraction.Ver
     meshes::Vector{U}
 end
 
+
 """
     draw(program, scene)
 Draws the whole scene via the given shader Program.
