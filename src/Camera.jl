@@ -205,7 +205,7 @@ Calculates the Rotation to look at the object along negative z with up defining 
 """
 lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat_opengl(camera.pose, object.pose, up)
 
-# TODO Often, the camera parameters do not change and even its pose might be static. Avoid frequent calculations and uploads of the view / projection matrices by storing the current state. However, using let to store the state results in type instabilities which are as bad performance-wise.
+# Often, the camera parameters do not change and even its pose might be static. It might be tempting to store the state of the program and camera to avoid frequent uploads. But it is hard to implement type stable which eats up a lot of the performance gains.
 """
     to_gpu(program, so::SceneObject{Camera})
 Transfers the view and projection matrices to the OpenGL program
