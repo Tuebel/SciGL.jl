@@ -40,8 +40,10 @@ include("OffscreenContext.jl")
 
 # Scene types
 export AbstractCamera
+export Camera
 export CvCamera
-export GLOrthoCamera
+export OrthgraphicCamera
+
 export Pose
 export Scale
 export SceneObject

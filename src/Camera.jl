@@ -3,56 +3,75 @@
 # All rights reserved.
 
 """
+    Camera
+Strongly typed camera type which contains a static projection matrix.
+"""
+struct Camera <: AbstractCamera
+    projection_matrix::SMatrix{4,4,Float32}
+end
+
+"""
 A Camera parametrized like OpenCV.
 The convention is as in OpenCV: x-rigth, y-down, **z-forward**
 """
 struct CvCamera <: AbstractCamera
     # horizontal resolution [pixel]
-    width::Integer
+    width::Int
     # vertical resolution in [pixel]
-    height::Integer
+    height::Int
     # horizontal focal length [pixel/m]
-    f_x::Real
+    f_x::Float32
     # vertical focal length [pixel/m]
-    f_y::Real
+    f_y::Float32
     # horizontal center offset [pixel]
-    c_x::Real
+    c_x::Float32
     # vertical center offset [pixel]
-    c_y::Real
+    c_y::Float32
     # axis skew
-    s::Real
+    s::Float32
     # distortion coefficients
     distortion::SVector{8}
     # near plane for OpenGL
-    near::Real
+    near::Float32
     # far plane for OpenGL
-    far::Real
+    far::Float32
 end
 
 """
     CvCamera(width, height, f_x, f_y, c_x, c_y; [s=0, distortion=zeros(8), near=0.01, far=100])
 Constructor with reasonable defaults, returns a SceneObject{CvCamera}
+# Parameters
+* width horizontal resolution [pixel]
+* height: vertical resolution in [pixel]
+* f_x: horizontal focal length [pixel/m]
+* f_y: vertical focal length [pixel/m]
+* c_x: horizontal center offset [pixel]
+* c_y: vertical center offset [pixel]
+* s: axis skew
+* distortion: distortion coefficients
+* near: near plane for OpenGL
+* far: far plane for OpenGL
 """
-CvCamera(width::Integer, height::Integer, f_x::Real, f_y::Real, c_x::Real, c_y::Real; s=0, distortion=zeros(8), near=0.01, far=100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far) |> SceneObject
+CvCamera(width, height, f_x, f_y, c_x, c_y; s=0, distortion=zeros(8), near=0.01, far=100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far) |> projection_matrix |> Camera |> SceneObject
 
 """
 Parametrizes the glOrtho camera function.
 The convention is as in OpenGL: x-rigth, y-up, **negative z-forward**
 """
 struct GLOrthoCamera <: AbstractCamera
-    left::Integer
-    right::Integer
-    top::Integer
-    bottom::Integer
-    near::Real
-    far::Real
+    left::Int
+    right::Int
+    top::Int
+    bottom::Int
+    near::Float32
+    far::Float32
 end
 
 """
     OrthgraphicCamera(c::CvCamera):SceneObject{GLOrthoCamera}
 extracts the orthographic scaling from the OpenCV camera
 """
-OrthgraphicCamera(left, right, top, bottom, near, far) = GLOrthoCamera(left, right, top, bottom, near, far) |> SceneObject
+OrthgraphicCamera(left, right, top, bottom, near, far) = GLOrthoCamera(left, right, top, bottom, near, far) |> projection_matrix |> Camera |> SceneObject
 
 """
     OrthgraphicCamera(c::CvCamera)
@@ -100,7 +119,7 @@ end
 Calculates the view matrix for a camera pose.
 The convention is as in OpenCV: x-rigth, y-down, **z-forward**
 """
-function view_matrix(so::SceneObject{CvCamera})
+function view_matrix(so::SceneObject{<:AbstractCamera})
     # convert camera pose to passive transformation matrix / move the world around the camera
     affine = AffineMap(so.pose)
     passive = inv(affine)
@@ -125,6 +144,8 @@ Calculates the projection matrix an orthographic OpenGL camera.
 The convention is as in OpenGL: x-rigth, y-up, **negative z-forward**
 """
 projection_matrix(c::GLOrthoCamera) = orthographic_matrix(c)
+
+projection_matrix(c::Camera) = c.projection_matrix
 
 """
     lookat(camera_t, object_t, up)
@@ -157,7 +178,7 @@ lookat(camera::Pose, object::Pose, up=SVector{3,T}(0, 1, 0)) = lookat(camera.tra
     lookat(camera, object, up)
 Calculates the Rotation to look at the object along positive z with up defining the upwards direction
 """
-lookat(camera::SceneObject{CvCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat(camera.pose, object.pose, up)
+lookat(camera::SceneObject{<:AbstractCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat(camera.pose, object.pose, up)
 
 """
     lookat_opengl(camera, object, up)
