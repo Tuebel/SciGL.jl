@@ -205,39 +205,14 @@ Calculates the Rotation to look at the object along negative z with up defining 
 """
 lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat_opengl(camera.pose, object.pose, up)
 
-# Often, the camera parameters do not change and even its pose might be static. Avoid frequent calculations and uploads of the view / projection matrices by storing the current state.
-let gl_program = Ref{Union{GLAbstraction.Program,Nothing}}(nothing), cam_state = Ref{Union{SceneObject{<:AbstractCamera},Nothing}}(nothing)
-    """
-        to_gpu(program, so::SceneObject{Camera})
-    Transfers the view and projection matrices to the OpenGL program
-    """
-    global function to_gpu(program::GLAbstraction.AbstractProgram, camera::SceneObject{<:AbstractCamera})
-        if gl_program[] != program
-            # New program → cannot assume the camera to be uploaded
-            cam_state[] = nothing
-            gl_program[] = program
-        end
-        if isnothing(cam_state[])
-            # First time execution upload the whole camera
-            GLAbstraction.bind(program)
-            GLAbstraction.gluniform(program, :view_matrix, view_matrix(camera))
-            GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(camera.object))
-            GLAbstraction.unbind(program)
-            cam_state[] = camera
-        elseif cam_state[] != camera
-            # Existing state but changed
-            GLAbstraction.bind(program)
-            if cam_state[].pose != camera.pose
-                # View changed
-                GLAbstraction.gluniform(program, :view_matrix, view_matrix(camera))
-            end
-            if cam_state[].pose != camera.pose
-                # Projection changed 
-                GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(camera.object))
-            end
-            cam_state[] = camera
-            GLAbstraction.unbind(program)
-        end
-    end
-
+# TODO Often, the camera parameters do not change and even its pose might be static. Avoid frequent calculations and uploads of the view / projection matrices by storing the current state. However, using let to store the state results in type instabilities which are as bad performance-wise.
+"""
+    to_gpu(program, so::SceneObject{Camera})
+Transfers the view and projection matrices to the OpenGL program
+"""
+function to_gpu(program::GLAbstraction.AbstractProgram, so::SceneObject{T}) where {T<:AbstractCamera}
+    GLAbstraction.bind(program)
+    GLAbstraction.gluniform(program, :view_matrix, view_matrix(so))
+    GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(so.object))
+    GLAbstraction.unbind(program)
 end
