@@ -209,13 +209,12 @@ let gl_program = Ref{Union{GLAbstraction.Program,Nothing}}(nothing), cam_state =
             if cam_state[].pose != camera.pose
                 # View changed
                 GLAbstraction.gluniform(program, :view_matrix, view_matrix(camera))
-                cam_state[] = SceneObject(cam_state[].object, camera.pose, cam_state[].scale)
             end
             if cam_state[].pose != camera.pose
                 # Projection changed 
                 GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(camera.object))
-                cam_state[] = SceneObject(camera.object, cam_state[].pose, cam_state[].scale)
             end
+            cam_state[] = camera
             GLAbstraction.unbind(program)
         end
     end
