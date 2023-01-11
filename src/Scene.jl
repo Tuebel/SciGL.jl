@@ -41,17 +41,17 @@ SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(QuatRotation)), scale
 Base.show(io::IO, object::SceneObject{T}) where {T} = print(io, "SceneObject{$(T)}, pose: $(object.pose)")
 
 """
-    Camera
+    AbstractCamera
 Abstract type of a camera, which is required in every scene
 """
-abstract type Camera end
+abstract type AbstractCamera end
 
 """
     Scene
 A scene should consist of only one camera and several meshes.
 In the future, lights could be supported for rendering RGB images.
 """
-struct Scene{C<:SceneObject{<:Camera},U<:SceneObject{<:GLAbstraction.VertexArray}}
+struct Scene{C<:SceneObject{<:AbstractCamera},U<:SceneObject{<:GLAbstraction.VertexArray}}
     camera::C
     meshes::Vector{U}
 end

@@ -6,7 +6,7 @@
 A Camera parametrized like OpenCV.
 The convention is as in OpenCV: x-rigth, y-down, **z-forward**
 """
-struct CvCamera <: Camera
+struct CvCamera <: AbstractCamera
     # horizontal resolution [pixel]
     width::Integer
     # vertical resolution in [pixel]
@@ -39,7 +39,7 @@ CvCamera(width::Integer, height::Integer, f_x::Real, f_y::Real, c_x::Real, c_y::
 Parametrizes the glOrtho camera function.
 The convention is as in OpenGL: x-rigth, y-up, **negative z-forward**
 """
-struct GLOrthoCamera <: Camera
+struct GLOrthoCamera <: AbstractCamera
     left::Integer
     right::Integer
     top::Integer
@@ -188,7 +188,7 @@ lookat(camera::SceneObject{GLOrthoCamera}, object::SceneObject, up=SVector{3,T}(
     to_gpu(program, so::SceneObject{Camera})
 Transfers the view and projection matrices to the OpenGL program
 """
-function to_gpu(program::GLAbstraction.AbstractProgram, so::SceneObject{T}) where {T<:Camera}
+function to_gpu(program::GLAbstraction.AbstractProgram, so::SceneObject{T}) where {T<:AbstractCamera}
     GLAbstraction.bind(program)
     GLAbstraction.gluniform(program, :view_matrix, view_matrix(so))
     GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(so.object))

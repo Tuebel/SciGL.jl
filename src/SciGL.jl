@@ -40,6 +40,7 @@ include("RenderContexts.jl")
 include("OffscreenContext.jl")
 
 # Scene types
+export AbstractCamera
 export CvCamera
 export GLOrthoCamera
 export Pose
