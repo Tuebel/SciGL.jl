@@ -40,6 +40,40 @@ end
     @test isapprox(s, Scale(1 + eps(), 2))
 end
 
+s = Scale(2)
+@test s.scale isa Int
+
+@testset "Composition: Scalar Scale & Translation" begin
+    @test s(x) == SVector(2, 2)
+    @test (t ∘ s)(x) == t(s(x))
+    @test (s ∘ t)(x) == s(t(x))
+    @test (t ∘ s)(x) != (s ∘ t)(x)
+end
+
+@testset "Composition: Scalar Scale & Rotation" begin
+    @test (r ∘ s)(x) == r(s(x))
+    @test (s ∘ r)(x) == s(r(x))
+    @test (r ∘ s)(x) == (s ∘ r)(x)
+end
+
+@testset "Composition: Scalar Scale & AffineMap" begin
+    @test (a ∘ s)(x) == a(s(x))
+    @test (s ∘ a)(x) == s(a(x))
+    @test (a ∘ s)(x) != (s ∘ a)(x)
+end
+
+@testset "Composition: Scalar Scale & Scale" begin
+    s2 = Scale(0.5, 2)
+    @test (s ∘ s2)(x) == s(s2(x))
+    @test (s ∘ s2)(x) == (s2 ∘ s)(x)
+end
+
+@testset "Inverse & derivatives" begin
+    @test inv(s) == Scale(0.5)
+    @test transform_deriv(s, x) == 2
+    @test isapprox(s, Scale(2 + eps()))
+end
+
 x = SVector(1, 1, 1)
 t = Translation(3, 2, 1)
 R = RotZ(π / 2)

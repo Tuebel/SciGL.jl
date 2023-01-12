@@ -27,22 +27,25 @@ function CoordinateTransformations.compose(scale1::Scale, scale2::Scale)
 end
 
 function CoordinateTransformations.compose(scale::Scale, affine::AffineMap)
-    AffineMap(SDiagonal(scale.scale) * affine.linear, scale.scale .* affine.translation)
+    AffineMap(scale_diag(scale.scale) * affine.linear, scale.scale .* affine.translation)
 end
 
 function CoordinateTransformations.compose(affine::AffineMap, scale::Scale)
-    AffineMap(affine.linear * SDiagonal(scale.scale), affine.translation)
+    AffineMap(affine.linear * scale_diag(scale.scale), affine.translation)
 end
 
 function CoordinateTransformations.compose(affine::LinearMap, scale::Scale)
-    LinearMap(affine.linear * SDiagonal(scale.scale))
+    LinearMap(affine.linear * scale_diag(scale.scale))
 end
 
 function CoordinateTransformations.compose(scale::Scale, affine::LinearMap)
-    LinearMap(SDiagonal(scale.scale) * affine.linear)
+    LinearMap(scale_diag(scale.scale) * affine.linear)
 end
 
-CoordinateTransformations.transform_deriv(scale::Scale, ::Any) = SDiagonal(scale.scale)
+scale_diag(scale) = SDiagonal(scale)
+scale_diag(scale::Real) = scale
+
+CoordinateTransformations.transform_deriv(scale::Scale, ::Any) = scale_diag(scale.scale)
 
 function Base.isapprox(scale1::Scale, scale2::Scale; kwargs...)
     isapprox(scale1.scale, scale2.scale; kwargs...)
