@@ -6,6 +6,13 @@ using CoordinateTransformations
 using Rotations
 
 """
+    AbstractCamera
+Abstract type of a camera, which is required in every scene.
+Must support `projection_matrix(camera)` which returns a 4x4 SMatrix for the projection transformation to normalized device coordinates.
+"""
+abstract type AbstractCamera end
+
+"""
     Pose{N}
 Orientation and position of a scene object with dimensionality N.
 """
@@ -41,12 +48,6 @@ SceneObject(object::T; pose=Pose(Translation(0, 0, 0), one(QuatRotation)), scale
 Base.show(io::IO, object::SceneObject{T}) where {T} = print(io, "SceneObject{$(T)}, pose: $(object.pose)")
 
 """
-    AbstractCamera
-Abstract type of a camera, which is required in every scene
-"""
-abstract type AbstractCamera end
-
-"""
     Scene
 A scene should consist of only one camera and several meshes.
 In the future, lights could be supported for rendering RGB images.
@@ -55,7 +56,6 @@ struct Scene{C<:SceneObject{<:AbstractCamera},U<:SceneObject{<:GLAbstraction.Ver
     camera::C
     meshes::Vector{U}
 end
-
 
 """
     draw(program, scene)

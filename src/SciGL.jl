@@ -42,7 +42,7 @@ include("OffscreenContext.jl")
 export AbstractCamera
 export Camera
 export CvCamera
-export OrthgraphicCamera
+export OrthographicCamera
 
 export Pose
 export Scale
@@ -61,6 +61,7 @@ export SimpleVert
 export clear_buffers
 export color_framebuffer
 export color_framebuffer_rbo
+export crop
 export depth_framebuffer
 export depth_framebuffer_rbo
 export draw
