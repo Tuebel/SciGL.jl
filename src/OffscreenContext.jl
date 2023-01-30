@@ -13,7 +13,7 @@ During construction the context's framebuffer is bound once. Make sure to bind i
 * `draw_framebuffer` draws a scene to the texture attachment of the `framebuffer`
 * `start_transfer` to asynchronously transfer `framebuffer` → `gl_buffer` / `render_data`
 * `wait_transfer` to wait for the transfer to finish
-* Create a view to `render_data` which now contains the rendered image.
+* Create a view via `@view render_data[:, end:-1:begin, 1:n_images]` which now contains the n_images renderings. Note that the Y dimension must be flipped due to OpenGL's origin convention differing from OpenCV (left-bottom instead of left-top).
 """
 struct OffscreenContext{T,F<:GLAbstraction.FrameBuffer,C<:AbstractArray{T},P<:GLAbstraction.AbstractProgram}
     window::GLFW.Window
@@ -58,9 +58,9 @@ Base.eltype(::OffscreenContext{T}) where {T} = T
 """
     draw(context, scenes)
 Synchronously draw the scenes into the layers of the contxt's framebuffer and transfer it to the render_data of the context.
-Returns a view of of size (width, height, length(scenes)).
+Returns a view of of size (width, height, length(scenes)) and takes care of flipping the Y dimension to convert from OpenGL to OpenCV convention.
 
-WARNING: Overwrites the data in the context, copy it if you need it to persist!
+WARN: Overwrites the data in the context, copy it if you need it to persist!
 """
 function draw(context::OffscreenContext, scenes::AbstractArray{<:Scene})
     for (idx, scene) in enumerate(scenes)
@@ -72,7 +72,7 @@ end
 """
     draw(context, scene)
 Synchronously transfer the image with the given `depth` from OpenGL to the `render_data`.
-Returns a view of the data of size (width, height, length(scenes)).
+Returns a view of of size (width, height) and takes care of flipping the Y dimension to convert from OpenGL to OpenCV convention.
 """
 function draw(context::OffscreenContext, scene::Scene)
     draw_framebuffer(context, scene)
@@ -93,34 +93,34 @@ end
 """
     transfer(context, depth)
 Synchronously transfer the image from OpenGL to the `render_data`.
-Returns a view of the data of size (width, height, depth).
+Returns a view of of size (width, height, depth) and takes care of flipping the Y dimension to convert from OpenGL to OpenCV convention.
 
-WARNING: Overwrites the data in the context, copy it if you need it to persist!
+WARN: Overwrites the data in the context, copy it if you need it to persist!
 """
 function transfer(context::OffscreenContext, depth)
     start_transfer(context, depth)
     wait_transfer(context)
-    @view context.render_data[:, :, 1:depth]
+    @view context.render_data[:, end:-1:begin, 1:depth]
 end
 
 """
     transfer(context)
 Synchronously transfer the image from OpenGL to the `render_data`.
-Returns a view of the data of size (width, height).
+Returns a view of of size (width, height) and takes care of flipping the Y dimension to convert from OpenGL to OpenCV convention.
 
-WARNING: Overwrites the data in the context, copy it if you need it to persist!
+WARN: Overwrites the data in the context, copy it if you need it to persist!
 """
 function transfer(context::OffscreenContext)
     start_transfer(context)
     wait_transfer(context)
-    @view context.render_data[:, :, 1]
+    @view context.render_data[:, end:-1:begin, 1]
 end
 
 """
     start_transfer(context, [depth=1])
 Start the asynchronous transfer the image with the given `depth` from OpenGL to the `render_data`.
 
-WARNING: Overwrites the data in the context, copy it if you need it to persist!
+WARN: Overwrites the data in the context, copy it if you need it to persist!
 """
 function start_transfer(context::OffscreenContext, depth=1)
     width, height = size(context.gl_buffer)

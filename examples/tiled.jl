@@ -33,7 +33,7 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Init scene
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 scene = SciGL.Scene(camera, [monkey, monkey])
 
 # create ImageView
