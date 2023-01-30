@@ -20,7 +20,7 @@ cube = load_mesh(gl_context, "examples/meshes/cube.obj")
 cube = @set cube.pose.translation = Translation(1, 0, 0)
 monkey = load_mesh(gl_context, "examples/meshes/monkey.obj")
 monkey = @set monkey.pose.translation = Translation(0, 0, 0)
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 camera = @set camera.pose.translation = Translation(1.3 * sin(π / 4), 0, 1.3 * cos(π / 4))
 camera = @set camera.pose.rotation = lookat(camera, monkey, [0 1 0])
 # WARN if not using Scene, to_gpu has to be called for the camera

@@ -30,7 +30,7 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
 
 # Init Camera
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 
 # Key callbacks GLFW.GetKey does not seem to work
 GLFW.SetKeyCallback(window, (win, key, scancode, action, mods) -> begin

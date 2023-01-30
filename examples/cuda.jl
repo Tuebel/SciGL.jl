@@ -21,7 +21,7 @@ depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 # Init mesh
 monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj")
 # Init Camera
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 camera = @set camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
 # WARN if not using Scene, to_gpu has to be called for the camera
 camera = @set camera.pose.rotation = lookat(camera, monkey, [0 1 0])

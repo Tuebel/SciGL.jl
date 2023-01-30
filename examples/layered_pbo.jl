@@ -37,7 +37,7 @@ monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
 monkey = @set monkey.scale = Scale(1, 0.7, 0.8)
 cube = load_mesh(normal_prog, "examples/meshes/cube.obj")
 cube = @set cube.pose.translation = Translation(1, 0, 0)
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 scene = SciGL.Scene(camera, [monkey])
 cube_scene = SciGL.Scene(camera, [monkey, cube])
 

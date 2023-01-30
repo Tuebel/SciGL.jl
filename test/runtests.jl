@@ -11,3 +11,4 @@ using Test
 include("coordinate_transformations.jl")
 include("persistent_buffer.jl")
 include("offscreen_context.jl")
+include("camera.jl")
