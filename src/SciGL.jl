@@ -31,8 +31,6 @@ include("Shaders.jl")
 include("MeshModel.jl")
 include("FrameBuffer.jl")
 include("Layers.jl")
-include("Tiles.jl")
-include("Sync.jl")
 include("PersistentBuffer.jl")
 include("Cuda.jl")
 include("RenderContexts.jl")
@@ -71,23 +69,8 @@ export lookat
 export set_clear_color
 export to_gpu
 
-# Tiled rendering
-export Tiles
-
-export activate_all
-export activate_tile
-export tile_coordinates
-export tile_length
-export tile_size
-export full_size
-
 # Layered rendering
 export activate_layer
-
-# Synchronized rendering of tiles
-export render_channel
-export draw_to_cpu
-export draw_to_cpu_async
 
 # PersistentBuffer
 export PersistentBuffer
