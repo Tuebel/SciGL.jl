@@ -27,7 +27,7 @@ monkey = load_mesh(depth_prog, "examples/meshes/monkey.obj")
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 scene = Scene(camera, [monkey, monkey])
 scene = @set scene.camera.pose.translation = Translation(1.5, 0, 1.5)
-scene = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1], [0 1 0])
+scene = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1])
 scenes = fill(scene, N_TASKS)
 
 """
@@ -139,7 +139,7 @@ function parallel_predict(scenes::AbstractVector{<:Scene})
         r = rand()
         scene = scenes[i]
         scene = @set scene.camera.pose.translation = Translation(1.5 * sin(2 * π * r / 5), 0, 1.5 * cos(2 * π * r / 5))
-        result[i] = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1], [0 1 0])
+        result[i] = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1])
     end
     result
 end
@@ -150,7 +150,7 @@ function serial_predict(scenes::AbstractVector{<:Scene})
         r = rand()
         scene = scenes[i]
         scene = @set scene.camera.pose.translation = Translation(1.5 * sin(2 * π * r / 5), 0, 1.5 * cos(2 * π * r / 5))
-        result[i] = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1], [0 1 0])
+        result[i] = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1])
     end
     result
 end

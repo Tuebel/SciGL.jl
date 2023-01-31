@@ -42,7 +42,8 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
     # update camera pose
     scene = @set scene.camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
-    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey, [0 1 0])
+    # OpenCV vs. OpenGL: Y down vs. Y up → monkey should be upside down but since the image origin is also top vs. bottom, it appears upright
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey)
 
     # draw
     clear_buffers()

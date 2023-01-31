@@ -19,10 +19,10 @@ cube = load_mesh(gl_context, cube_path)
 cube = @set cube.pose.translation = Translation(0, 0, 0)
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
 camera = @set camera.pose.translation = Translation(1.3 * sin(0), 0, 1.3 * cos(0))
-camera = @set camera.pose.rotation = lookat(camera, cube, [0 1 0])
+camera = @set camera.pose.rotation = lookat(camera, cube)
 scene1 = Scene(camera, [cube])
 scene2 = @set scene1.camera.pose.translation = Translation(1.3 * sin(0.1), 0, 1.3 * cos(0.1))
-scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube, [0 1 0])
+scene2 = @set scene2.camera.pose.rotation = lookat(scene2.camera, cube)
 scenes = [scene1, scene2]
 
 @testset "OffscreenContext clear_buffers" begin

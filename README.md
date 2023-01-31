@@ -1,9 +1,19 @@
 # SciGL.jl
 Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to julia primarily targeted for Bayesian inference.
 
-## Design decisions
+# Design decisions
 I try to incorporate existing Julia packages wherever possible.
-The next section contains a list and use cases of the packages
+The next section contains a list and use cases of the packages.
+
+## Camera and image conventions
+The `OpenCV` camera uses the OpenCV conventions which means:
+* X: right
+* Y: down (OpenGL up)
+* Z: forward (OpenGL backward)
+
+Moreover, the resulting images have the origin in the top-left compared to the bottom-left in OpenGL.
+Consequently, rendering appear upside down in OpenGL context windows but upright in memory, e.g. when copying from textures to CPU/CUDA arrays.
+
 
 ## Shader naming conventions
 **Uniforms**:
@@ -46,21 +56,24 @@ For convenience commonly used symbols are reexported:
 
 
 # HPC on Headless Server with VirtualGL
-Install [VirtualGL](https://virtualgl.org/) on the server which will be used to instantiate a render context without an attached display.
+Install [TurboVNC](https://turbovnc.org/Documentation/Documentation) on the server which will be used to instantiate a render context without an attached display.
 There are also good [instructions](https://github.com/JuliaGL/GLVisualize.jl/issues/146#issuecomment-289242168) on the GLVisualize github.
 
-Once VirtualGL is running on the server, copy the file [.vscode/julia_vgl.sh] to the bin dir of your Julia installation.
-Make the script executable via `chmod +x /path/to/julia/bin/julia_vgl.sh` and then edit the following vscode setting for the remote:
-```json
-"julia.executablePath": "/path/to/julia/bin/julia_vgl.sh"
+Use the following script to launch julia with TurboVNC and NVIDIA as OpenGL vendor:
+```bash
+#!/bin/sh
+DIR="$(cd "$(dirname "$0")" && pwd)"
+JULIA=$DIR/julia
+# VSCode reads the ouputs of julia -e using Pkg; println.(Pkg.depots())
+/opt/TurboVNC/bin/vncserver :6
+DISPLAY=:6 __GLX_VENDOR_LIBRARY_NAME=nvidia $JULIA "$@"%
 ```
 
-## NVIDIA Prime On-Demand
-The same way, the headless rendering can be enabled by faking the julia executable, the NVIDIA card can be selected for the application.
-Simply use [.vscode/julia_nvidia.sh] with the instructions above.
+Make the file executable via `chmod +x julia_nvidia.sh`
 
-> **Tipp:** If you get an unknown CUDA Error (999) during OpenGL interop, you probably render to the integrated device instead of the NVIDIA card.
-> Then you need to use julia_nvidia.sh
+Moreover, you can trick vscode that this file is the julia executable via the setting: "julia.executablePath": "/path/to/julia/bin/julia_nvidia.sh"
+
+> **Tipp:** If you get an unknown CUDA Error (999) during OpenGL interop, you probably render to the integrated device instead of the NVIDIA
 
 # OpenGL.jl devcontainer
 Recommended: Install the vscode [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin and load the [devcontainer](https://code.visualstudio.com/docs/remote/containers).

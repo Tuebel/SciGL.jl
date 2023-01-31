@@ -34,8 +34,8 @@ end
 """
     CvCamera
 A Camera parametrized like OpenCV.
-The convention is as in OpenCV: x-rigth, y-down, **z-forward**.
-Construct a Camera from it to be used in
+The convention is as in OpenCV: x-right, **y-down**, **z-forward**.
+Construct a `Camera` from it to be used in the shaders
 """
 struct CvCamera
     # horizontal resolution [pixel]
@@ -77,6 +77,14 @@ Constructor with reasonable defaults
 """
 CvCamera(width, height, f_x, f_y, c_x, c_y; s=0, distortion=zeros(8), near=0.01, far=100) = CvCamera(width, height, f_x, f_y, c_x, c_y, s, distortion, near, far)
 
+"""
+    perspective_matrix(cv_camera)
+Generate the perspective transformation matrix from the OpenCV camera parameters.
+Takes care of the OpenGL vs. OpenCV convention:
+* looking down negative Z vs. positive Z
+* up in image is positive Y vs. negative Y
+Thus, use the OpenCV convention in following steps.
+"""
 perspective_matrix(c::CvCamera) = @SMatrix Float32[
     c.f_x -c.s -c.c_x 0
     0 -c.f_y -c.c_y 0
@@ -99,9 +107,10 @@ end
 
 """
     OrthographicCamera(c::CvCamera)
-Extracts the orthographic scaling from the OpenCV camera
+Extracts the orthographic scaling from the OpenCV camera.
+Since the origin in OpenGL is in the bottom-left and in OpenCV in the top-left, images will appear upside down in the OpenGL window but upright in memory.
 """
-OrthographicCamera(c::CvCamera) = OrthographicCamera(0, c.width, 0, c.height, c.near, c.far)
+OrthographicCamera(c::CvCamera) = OrthographicCamera(0, c.width, c.height, 0, c.near, c.far)
 
 """
     orthographic_matrix(c::GLOrthoCamera)
@@ -115,10 +124,11 @@ orthographic_matrix(c::OrthographicCamera) = @SMatrix Float32[
 ]
 
 """
-    lookat(camera_t, object_t, up)
-Calculates the Rotation to look at the object along positive z with up defining the upwards direction
+    lookat(camera_t, object_t, [up=[0,-1.0]])
+Calculates the Rotation to look at the object along positive Z with up defining the upwards direction.
+Default is the OpenCV convention: up = negative Y.
 """
-function lookat(camera_t, object_t, up=SVector{3,T}(0, 1, 0))
+function lookat(camera_t, object_t, up=SVector{3}(0, -1, 0))
     c_t = SVector{3}(camera_t)
     o_t = SVector{3}(object_t)
     u = SVector{3}(up)
@@ -129,23 +139,12 @@ function lookat(camera_t, object_t, up=SVector{3,T}(0, 1, 0))
     return RotMatrix3{Float32}([x y z])
 end
 
-"""
-    lookat(camera_t, object_t, up)
-Calculates the Rotation to look at the object along positive z with up defining the upwards direction
-"""
-lookat(camera_t::Translation, object_t::Translation, up=SVector{3,T}(0, 1, 0)) = lookat(camera_t.translation, object_t.translation, up)
 
-"""
-    lookat(camera, object, up)
-Calculates the Rotation to look at the object along positive z with up defining the upwards direction
-"""
-lookat(camera::Pose, object::Pose, up=SVector{3,T}(0, 1, 0)) = lookat(camera.translation, object.translation, up)
+lookat(camera_t::Translation, object_t::Translation, up=SVector{3}(0, -1, 0)) = lookat(camera_t.translation, object_t.translation, up)
 
-"""
-    lookat(camera, object, up)
-Calculates the Rotation to look at the object along positive z with up defining the upwards direction
-"""
-lookat(camera::SceneObject{<:AbstractCamera}, object::SceneObject, up=SVector{3,T}(0, 1, 0)) = lookat(camera.pose, object.pose, up)
+lookat(camera::Pose, object::Pose, up=SVector{3}(0, -1, 0)) = lookat(camera.translation, object.translation, up)
+
+lookat(camera::SceneObject{<:AbstractCamera}, object::SceneObject, up=SVector{3}(0, -1, 0)) = lookat(camera.pose, object.pose, up)
 
 """
     Camera
@@ -162,13 +161,12 @@ Optionally a custom orthographic_camera can be provided, e.g. for cropping views
 """
 Camera(cv_camera::CvCamera, orthographic_camera::OrthographicCamera=OrthographicCamera(cv_camera)) = orthographic_matrix(orthographic_camera) * perspective_matrix(cv_camera) |> Camera |> SceneObject
 
-# TEST
 """
     crop(cv_camera, left, top, width, height)
 Creates a SceneObject{Camera} which contains the projection matrix of the cv_camera.
 This camera does not render the full size image of the cv_camera but only the area described by the bounding box (left, top, width, height) → ([left, top],[left+width, top+height]).
 """
-crop(cv_camera::CvCamera, left, top, width, height) = Camera(cv_camera, OrthographicCamera(left, left + width, top, top + height, cv_camera.near, cv_camera.far))
+crop(cv_camera::CvCamera, left, top, width, height) = Camera(cv_camera, OrthographicCamera(left, left + width, top + height, top, cv_camera.near, cv_camera.far))
 
 # AbstractCamera interface
 projection_matrix(camera::Camera) = camera.projection_matrix

@@ -63,7 +63,7 @@ println(channel)
 function render(program, scene, channel)
     tim = time()
     scene = @set scene.camera.pose.translation = Translation(1.5 * sin(2 * π * tim / 5), 0, 1.5 * cos(2 * π * tim / 5))
-    scene = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1], [0 1 0])
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, scene.meshes[1])
     img = draw_to_cpu(program, scene, channel, (WIDTH, HEIGHT))
     # Some computation
     gray_img = img .|> green .|> Gray

@@ -49,7 +49,7 @@ while !GLFW.WindowShouldClose(window)
     # update camera pose
     camera = @set camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
     # WARN if not using Scene, to_gpu has to be called for the camera
-    camera = @set camera.pose.rotation = lookat(camera, monkey, [0 1 0])
+    camera = @set camera.pose.rotation = lookat(camera, monkey)
 
     # draw
     clear_buffers()
@@ -67,9 +67,9 @@ while !GLFW.WindowShouldClose(window)
     end
     # Simplified interface, performance only slightly worse
     img = gpu_data(framebuffer)
-    img = img[:, end:-1:1]
+    # NOTE monkey upside down is correct since OpenCV uses X=right, Y=down, Z=forward convention
     imshow(canvas, transpose(img))
-    sleep(0.1)
+    sleep(0.01)
 end
 
 # needed if you're running this from the REPL
