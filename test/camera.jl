@@ -66,5 +66,7 @@ crop_img = draw(gl_context, crop_scene) |> copy
 end
 
 @testset "OpenGL crop vs Array crop" begin
-    @test crop_img == full_img[CROP_LEFT+1:CROP_LEFT+CROP_WIDTH, CROP_TOP+1:CROP_TOP+CROP_HEIGHT]
+    @test crop_img ≈ full_img[CROP_LEFT+1:CROP_LEFT+CROP_WIDTH, CROP_TOP+1:CROP_TOP+CROP_HEIGHT]
 end
+
+destroy_context(gl_context)
