@@ -1,4 +1,7 @@
 # SciGL.jl
+Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to julia.
+
+The primary goal is to enable efficient rendering of multiple scenes and transferring the images to a compute device (CPU or CUDA) for **Sci**entific calculations.
 
 # Design decisions
 I try to incorporate existing Julia packages wherever possible.
@@ -14,7 +17,7 @@ The next section contains a list and use cases of the packages.
 - [MeshIO](https://github.com/JuliaIO/MeshIO.jl): Load mesh files like *.obj*, *.ply*, and *.stl*.
   It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this package is also included.
 
-### Reexport
+## Reexport
 For convenience commonly used symbols are reexported:
 - ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
 - CoordinateTransformations: Translation

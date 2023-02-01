@@ -1,7 +1,8 @@
 # SciGL.jl
 Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to julia.
 
-The primary goal is to enable efficient rendering of multiple scenes and transferring the images to a compute device (CPU or CUDA). 
+The primary goal is to enable efficient rendering of multiple scenes and transferring the images to a compute device (CPU or CUDA) for **Sci**entific calculations.
+
 This is achieved by rendering to different layers of a 3D texture `(width, height, depth)` via `glFramebufferTextureLayer`.
 Pixel pack buffer objects are used to transfer data from OpenGL to the CPU or CUDA.
 Have a look at [OffscreenContext](@ref) which provides a simple interface for rendering and transferring the data.
