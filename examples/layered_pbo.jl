@@ -7,9 +7,9 @@ using CUDA
 using SciGL
 using ImageView
 
-const WIDTH = 800
-const HEIGHT = 600
-const USE_CUDA = true
+WIDTH = 800
+HEIGHT = 600
+USE_CUDA = true
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
@@ -62,9 +62,9 @@ glbind(framebuffer)
 while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
-
-    scene = @set scene.camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
-    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey)
+    # Camera rotates around mathematically positive Z
+    scene = @set scene.camera.pose.translation = Translation(1.3 * cos(2 * π * time() / 5), 1.3 * sin(2 * π * time() / 5), 0)
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey, [0, 0, 1])
     cube_scene = @set cube_scene.camera = scene.camera
 
     activate_layer(framebuffer, 1)
@@ -92,7 +92,6 @@ while !GLFW.WindowShouldClose(window)
         data
     end
     img = @view img[:, :, id]
-    img = @view img[:, end:-1:1]
     imshow(canvas, transpose(img))
     sleep(0.05)
 end

@@ -12,8 +12,7 @@ The `OpenCV` camera uses the OpenCV conventions which means:
 * Z: forward (OpenGL backward)
 
 Moreover, the resulting images have the origin in the top-left compared to the bottom-left in OpenGL.
-Consequently, rendering appear upside down in OpenGL context windows but upright in memory, e.g. when copying from textures to CPU/CUDA arrays.
-
+Consequently, renderings appear upside down in OpenGL context windows but upright in memory, e.g. when copying from textures to CPU/CUDA arrays.
 
 ## Shader naming conventions
 **Uniforms**:
@@ -36,15 +35,20 @@ Consequently, rendering appear upside down in OpenGL context windows but upright
 - `vec3 world_normal`: normal vector of the fragment in world coordinates
 - `vec4 world_position`: position of the fragment in world coordinates
 
+## Examples meshes
+In *examples/meshes* you can find two meshes:
+* *cube.obj* is a simple cube of size (1,1,1) meter.
+* *monkey.obj* is the Blender Suzanne with Z pointing up and the face pointing in X direction. Size is (0.632, 1, 0.72) meters.
+
 ## Package Dependencies
-- [CoordinateTransformations](https://github.com/JuliaGeometry/CoordinateTransformations.jl): Representing and chaining transformations like rotations, translations, and perspective transfromations.
+- [CoordinateTransformations](https://github.com/JuliaGeometry/CoordinateTransformations.jl): Representing and chaining transformations like rotations, translations, and perspective transformations.
   [Rotations](https://github.com/JuliaGeometry/Rotations.jl) are handled by the equally named package.
-- [GLAbstractions](https://github.com/Tuebel/GLAbstraction.jl): Takes some of the low level OpenGL pain away.
-  Manages the context, compiles shaders and handles the buffers.
+- [GLAbstractions](https://github.com/Tuebel/GLAbstraction.jl): Takes some of the low-level OpenGL pain away.
+  Manages the context, compiles shaders, and handles the buffers.
 - [ModernGL](https://github.com/JuliaGL/ModernGL.jl): Used by GLAbstractions to interface with the OpenGL driver.
 - [GLFW](https://github.com/JuliaGL/GLFW.jl): OpenGL context handling.
 - [MeshIO](https://github.com/JuliaIO/MeshIO.jl): Load mesh files like *.obj*, *.ply*, and *.stl*.
-  It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this packages is also included.
+  It uses the [FileIO](https://github.com/JuliaIO/FileIO.jl) interface, so this package is also included.
 
 ### Reexport
 For convenience commonly used symbols are reexported:

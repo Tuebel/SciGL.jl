@@ -9,8 +9,8 @@
 using Accessors
 using SciGL
 
-const WIDTH = 800
-const HEIGHT = 600
+WIDTH = 800
+HEIGHT = 600
 
 # Create the window. This sets all the hints and makes the context current.
 window = context_window(WIDTH, HEIGHT)
@@ -40,10 +40,10 @@ end)
 while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
-    # update camera pose
-    scene = @set scene.camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
-    # OpenCV vs. OpenGL: Y down vs. Y up → monkey should be upside down but since the image origin is also top vs. bottom, it appears upright
-    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey)
+    # Camera rotates around mathematically positive Z
+    scene = @set scene.camera.pose.translation = Translation(1.3 * cos(2 * π * time() / 5), 1.3 * sin(2 * π * time() / 5), 0)
+    # OpenCV vs. OpenGL: Y down vs. Y up → monkey upside down, see offscreen.jl where the memory layout is correct.
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey, [0, 0, 1])
 
     # draw
     clear_buffers()

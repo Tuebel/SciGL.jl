@@ -6,8 +6,8 @@ using Accessors
 using SciGL
 using ImageView
 
-const WIDTH = 801
-const HEIGHT = 600
+WIDTH = 801
+HEIGHT = 600
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
@@ -46,10 +46,10 @@ GLAbstraction.bind(framebuffer)
 while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
-    # update camera pose
-    camera = @set camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
+    # Camera rotates around mathematically positive Z
+    camera = @set camera.pose.translation = Translation(1.3 * cos(2 * π * time() / 5), 1.3 * sin(2 * π * time() / 5), 0)
     # WARN if not using Scene, to_gpu has to be called for the camera
-    camera = @set camera.pose.rotation = lookat(camera, monkey)
+    camera = @set camera.pose.rotation = lookat(camera, monkey, [0, 0, 1])
 
     # draw
     clear_buffers()
@@ -69,7 +69,7 @@ while !GLFW.WindowShouldClose(window)
     img = gpu_data(framebuffer)
     # NOTE monkey upside down is correct since OpenCV uses X=right, Y=down, Z=forward convention
     imshow(canvas, transpose(img))
-    sleep(0.01)
+    sleep(0.05)
 end
 
 # needed if you're running this from the REPL

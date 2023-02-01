@@ -7,8 +7,8 @@ using CUDA
 using SciGL
 using ImageView
 
-const WIDTH = 800
-const HEIGHT = 600
+WIDTH = 800
+HEIGHT = 600
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 window = context_offscreen(WIDTH, HEIGHT)
@@ -50,9 +50,9 @@ GLAbstraction.bind(framebuffer)
 while !GLFW.WindowShouldClose(window)
     # events
     GLFW.PollEvents()
-
-    scene = @set scene.camera.pose.translation = Translation(1.3 * sin(2 * π * time() / 5), 0, 1.3 * cos(2 * π * time() / 5))
-    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey)
+    # Camera rotates around mathematically positive Z
+    scene = @set scene.camera.pose.translation = Translation(1.3 * cos(2 * π * time() / 5), 1.3 * sin(2 * π * time() / 5), 0)
+    scene = @set scene.camera.pose.rotation = lookat(scene.camera, monkey, [0, 0, 1])
 
     activate_layer(framebuffer, 1)
     clear_buffers()
@@ -71,14 +71,14 @@ while !GLFW.WindowShouldClose(window)
     # Test if both work and show the same image
     GLAbstraction.unsafe_copyto!(cu_data, framebuffer)
     img = Array(cu_data)[:, :, id]
-    img = img[:, end:-1:1] |> transpose
+    img = img |> transpose
     imshow(canvas, img)
-    sleep(0.1)
+    sleep(0.05)
     GLAbstraction.unsafe_copyto!(cpu_data, framebuffer)
     img = cpu_data[:, :, id]
-    img = img[:, end:-1:1] |> transpose
+    img = img |> transpose
     imshow(canvas, img)
-    sleep(0.1)
+    sleep(0.05)
 end
 
 # needed if you're running this from the REPL
