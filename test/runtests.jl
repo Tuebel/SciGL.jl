@@ -3,9 +3,7 @@
 # All rights reserved. 
 
 using Accessors
-using CoordinateTransformations
 using SciGL
-using StaticArrays
 using Test
 
 include("coordinate_transformations.jl")

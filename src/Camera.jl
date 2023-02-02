@@ -10,6 +10,7 @@ The convention is as in OpenCV: x-rigth, y-down, **z-forward**
 function view_matrix(camera::SceneObject{<:AbstractCamera})
     # convert camera pose to passive transformation matrix / move the world around the camera
     affine = AffineMap(camera.pose)
+    # inv should use specialized versions for affine maps & rotation types 🙂
     passive = inv(affine)
     mat = passive |> SMatrix |> MMatrix{4,4}
     # convert camera view direction from OpenCV to OpenGL
