@@ -21,13 +21,19 @@ struct Pose{N,T<:Translation{<:SVector{N}},R<:Rotation{N}}
     rotation::R
 end
 
-Base.show(io::IO, p::Pose) = print(io, "Pose($(p.translation), Rotation$(p.rotation))")
-
 """
     Pose(t_xyz, r)
 Pose from a translation vector and some rotation representation.
 """
 Pose(t_xyz::AbstractVector, r) = Pose(Translation(t_xyz...), r)
+
+"""
+    one(Pose)
+Returns a pose which results in the identity transformation.
+"""
+Base.one(::Type{<:Pose}) = Pose(Translation(0, 0, 0), one(QuatRotation))
+
+Base.show(io::IO, p::Pose) = print(io, "Pose($(p.translation), Rotation$(p.rotation))")
 
 """
     SceneObject

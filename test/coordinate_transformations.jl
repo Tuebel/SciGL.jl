@@ -101,7 +101,11 @@ aps = @inferred AffineMap(p, s)
     @test aps(x) == (M_aps*aug_x)[1:3]
 end
 
-# This is unstable
-p = Pose([3, 2, 1], R)
-# In favor for this being stable
-@inferred SMatrix(p)
+@testset "Pose Extensions" begin
+    # This is unstable
+    p = Pose([3, 2, 1], R)
+    # In favor for this being stable
+    @inferred SMatrix(p)
+    # one should return identity transformation
+    @test SMatrix(one(Pose)) == one(SMatrix{4,4})
+end
