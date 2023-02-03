@@ -94,6 +94,7 @@ using Reexport
     import ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
     import CoordinateTransformations: AffineMap, LinearMap, Translation
     import FileIO: load
+    import GeometryBasics: Mesh
     import GLAbstraction
     import GLAbstraction: color_attachments, gpu_data
     import GLFW
