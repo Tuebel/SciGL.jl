@@ -163,11 +163,12 @@ Optionally a custom orthographic_camera can be provided, e.g. for cropping views
 Camera(cv_camera::CvCamera, orthographic_camera::OrthographicCamera=OrthographicCamera(cv_camera)) = orthographic_matrix(orthographic_camera) * perspective_matrix(cv_camera) |> Camera |> SceneObject
 
 """
-    crop(cv_camera, left, top, width, height)
+    crop(cv_camera, left, right, top, bottom)
 Creates a SceneObject{Camera} which contains the projection matrix of the cv_camera.
-This camera does not render the full size image of the cv_camera but only the area described by the bounding box (left, top, width, height) → ([left, top],[left+width, top+height]).
+This camera does not render the full size image of the cv_camera but only the area described by the bounding box (left, top, width, height) → (left, right, top, bottom).
+Does not clamp the values since an image can still be rendered.
 """
-crop(cv_camera::CvCamera, left, top, width, height) = Camera(cv_camera, OrthographicCamera(left, left + width, top + height, top, cv_camera.near, cv_camera.far))
+crop(cv_camera::CvCamera, left, right, top, bottom) = Camera(cv_camera, OrthographicCamera(left, right, bottom, top, cv_camera.near, cv_camera.far))
 
 # AbstractCamera interface
 projection_matrix(camera::Camera) = camera.projection_matrix

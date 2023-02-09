@@ -10,9 +10,11 @@ WIDTH = 800
 HEIGHT = 600
 DEPTH = 1
 CROP_LEFT = Int(WIDTH / 2)
+CROP_RIGHT = WIDTH - 10
+CROP_WIDTH = CROP_RIGHT - CROP_LEFT
 CROP_TOP = Int(HEIGHT / 2)
-CROP_WIDTH = Int(WIDTH / 4)
-CROP_HEIGHT = Int(HEIGHT / 3)
+CROP_BOTTOM = HEIGHT - 10
+CROP_HEIGHT = CROP_BOTTOM - CROP_TOP
 cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
 
 # Use regular (uncropped) camera
@@ -47,8 +49,7 @@ gl_context = depth_offscreen_context(CROP_WIDTH, CROP_HEIGHT, DEPTH, Array)
 cube = load_mesh(gl_context, cube_path)
 cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
 cube = @set cube.scale = Scale(0.2)
-# TODO why 0 for top?
-crop_camera = crop(cv_camera, CROP_LEFT, CROP_TOP, CROP_WIDTH, CROP_HEIGHT)
+crop_camera = crop(cv_camera, CROP_LEFT, CROP_RIGHT, CROP_TOP, CROP_BOTTOM)
 crop_scene = Scene(crop_camera, [cube])
 # copy since the buffer is mapped and overwritten at next draw
 crop_img = draw(gl_context, crop_scene) |> copy
@@ -66,7 +67,7 @@ crop_img = draw(gl_context, crop_scene) |> copy
 end
 
 @testset "OpenGL crop vs Array crop" begin
-    @test crop_img ≈ full_img[CROP_LEFT+1:CROP_LEFT+CROP_WIDTH, CROP_TOP+1:CROP_TOP+CROP_HEIGHT]
+    @test crop_img ≈ full_img[CROP_LEFT+1:CROP_RIGHT, CROP_TOP+1:CROP_BOTTOM]
 end
 
 destroy_context(gl_context)
