@@ -59,7 +59,7 @@ export SimpleVert
 export clear_buffers
 export color_framebuffer
 export color_framebuffer_rbo
-export crop
+export crop, crop_size
 export depth_framebuffer
 export depth_framebuffer_rbo
 export draw

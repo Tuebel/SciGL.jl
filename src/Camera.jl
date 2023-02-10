@@ -165,10 +165,17 @@ Camera(cv_camera::CvCamera, orthographic_camera::OrthographicCamera=Orthographic
 """
     crop(cv_camera, left, right, top, bottom)
 Creates a SceneObject{Camera} which contains the projection matrix of the cv_camera.
-This camera does not render the full size image of the cv_camera but only the area described by the bounding box (left, top, width, height) → (left, right, top, bottom).
+This camera does not render the full size image of the cv_camera but only the area described by the bounding box (1, 1, width, height) → (left, right, top, bottom).
+Uses Julia indices starting at 1 and including the right & bottom, like img[left:right,top:bottom].
 Does not clamp the values since an image can still be rendered.
 """
-crop(cv_camera::CvCamera, left, right, top, bottom) = Camera(cv_camera, OrthographicCamera(left, right, bottom, top, cv_camera.near, cv_camera.far))
+crop(cv_camera::CvCamera, left, right, top, bottom) = Camera(cv_camera, OrthographicCamera(left - one(left), right, bottom, top - one(top), cv_camera.near, cv_camera.far))
+
+"""
+    crop_size(left, right, top, bottom)
+Size of the corresponding to img[left:right,top:bottom]
+"""
+crop_size(left, right, top, bottom) = length.((left:right, top:bottom))
 
 # AbstractCamera interface
 projection_matrix(camera::Camera) = camera.projection_matrix
