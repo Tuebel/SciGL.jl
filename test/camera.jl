@@ -67,8 +67,8 @@ crop_img = draw(gl_context, crop_scene) |> copy
     # Cube should be in lower right (-Y=up, X=right)
     @test crop_img[begin, begin] == 0
     @test crop_img[end, end] ≈ 0.6
-    # Array view should be the same as OpenGL crop
-    @test crop_img == full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM]
+    # Array view should be the same as OpenGL crop. Equality fails for some CPU/GPU combinations, thus approx.
+    @test crop_img ≈ full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM]
 end
 
 destroy_context(gl_context)
