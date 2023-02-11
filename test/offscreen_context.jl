@@ -2,6 +2,10 @@
 # Copyright (c) 2023, Institute of Automatic Control - RWTH Aachen University
 # All rights reserved. 
 
+using Accessors
+using SciGL
+using Test
+
 # Create the GLFW window. This sets all the hints and makes the context current.
 WIDTH = 800
 HEIGHT = 600
@@ -17,7 +21,7 @@ end
 cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
 cube = load_mesh(gl_context, cube_path)
 cube = @set cube.pose.translation = Translation(0, 0, 0)
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2) |> Camera
 camera = @set camera.pose.translation = Translation(1.3 * sin(0), 0, 1.3 * cos(0))
 camera = @set camera.pose.rotation = lookat(camera, cube)
 scene1 = Scene(camera, [cube])

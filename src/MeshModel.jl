@@ -3,14 +3,16 @@
 # All rights reserved. 
 
 """
-    load_mesh(mesh, program)
+    load_mesh(mesh, program, [scale=Scale(1)])
 Simplifies loading a Mesh into a VertexArray on the gpu.
 """
-function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
+function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh, scale=Scale(1))
     # Avoid transferring unavailable attributes
     program_attributes = tuple(getproperty.(GLAbstraction.attributes(program), :name)...)
+    # OpenGL uses Float32 by default
+    scale = Scale(Float32.(scale.scale))
     mesh_attributes = (;
-        position=mesh.position,
+        position=scale.(mesh.position),
         normal=mesh.normals,
         tex_coordinates=texturecoordinates(mesh))
     intersect_attributes = NamedTuple{program_attributes}(mesh_attributes)
@@ -21,10 +23,10 @@ function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
 end
 
 """
-    load_mesh(program, mesh_file)
+    load_mesh(program, mesh_file, [scale=Scale(1)])
 Simplifies loading a Mesh into a VertexArray on the gpu.
 """
-load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString) = load_mesh(program, load(mesh_file))
+load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString, scale=Scale(1)) = load_mesh(program, load(mesh_file), scale)
 
 """
     to_gpu(program, scene_object)
@@ -45,7 +47,7 @@ function draw(program::GLAbstraction.AbstractProgram, scene_object::SceneObject{
     GLAbstraction.bind(program)
     GLAbstraction.bind(scene_object.object)
     # Copied from to_gpu to avoid unnecessary bind / unbind
-    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose, scene_object.scale))
+    GLAbstraction.gluniform(program, :model_matrix, SMatrix(scene_object.pose))
     GLAbstraction.draw(scene_object.object)
     GLAbstraction.unbind(scene_object.object)
     GLAbstraction.unbind(program)

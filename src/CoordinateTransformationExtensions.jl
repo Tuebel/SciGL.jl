@@ -16,7 +16,7 @@ Scale(x, y) = Scale(SVector(x, y))
 Scale(x, y, z) = Scale(SVector(x, y, z))
 Base.show(io::IO, scale::Scale) = print(io, "Scale$((scale.scale...,))")
 
-function (scale::Scale{V})(x) where {V}
+function (scale::Scale)(x)
     x .* scale.scale
 end
 

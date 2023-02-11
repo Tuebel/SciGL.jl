@@ -22,10 +22,9 @@ depth_prog = compile_shader(SimpleVert, DepthFrag)
 dist_prog = compile_shader(SimpleVert, DistanceFrag)
 
 # Init scene with normal_prog as it uses most attributes
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2) |> Camera
-cube = load_mesh(normal_prog, "examples/meshes/cube.obj")
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2) |> Camera
+cube = load_mesh(normal_prog, "examples/meshes/cube.obj", Scale(0.1, 0.3, 0.5))
 cube = @set cube.pose.translation = Translation(1, 0, 0)
-cube = @set cube.scale = Scale(0.1, 0.3, 0.5)
 monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj")
 monkey = @set monkey.pose.translation = Translation(0, 0, 0)
 scene = Scene(camera, [cube, monkey])

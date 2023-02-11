@@ -15,20 +15,21 @@ CROP_RIGHT = WIDTH - 10
 # Mind Julia arrays starting at 1
 CROP_TOP = Int(HEIGHT / 2) + 1
 CROP_BOTTOM = HEIGHT - 10
-cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
+cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2)
 
 # Use regular (uncropped) camera
 gl_context = depth_offscreen_context(WIDTH, HEIGHT, DEPTH, Array)
 
 # Load scenes
 cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
-cube = load_mesh(gl_context, cube_path)
+cube_mesh = load(cube_path)
+cube = load_mesh(gl_context, cube_path, Scale(0.2))
 cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
-cube = @set cube.scale = Scale(0.2)
 camera = Camera(cv_camera)
 scene = Scene(camera, [cube])
 # copy since the buffer is mapped and overwritten at next draw
 full_img = draw(gl_context, scene) |> copy
+# Gray.(full_img .+ 1e-2)' # + 1e-2 avoids glitching in vscode plot
 
 @testset "Full camera " begin
     # Sanity checks to hint errors
@@ -48,9 +49,8 @@ destroy_context(gl_context)
 CROP_WIDTH, CROP_HEIGHT = crop_size(CROP_LEFT, CROP_RIGHT, CROP_TOP, CROP_BOTTOM)
 gl_context = depth_offscreen_context(CROP_WIDTH, CROP_HEIGHT, DEPTH, Array)
 
-cube = load_mesh(gl_context, cube_path)
+cube = load_mesh(gl_context, cube_mesh, Scale(0.2))
 cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
-cube = @set cube.scale = Scale(0.2)
 crop_camera = crop(cv_camera, CROP_LEFT, CROP_RIGHT, CROP_TOP, CROP_BOTTOM)
 crop_scene = Scene(crop_camera, [cube])
 # copy since the buffer is mapped and overwritten at next draw
