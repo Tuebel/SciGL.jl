@@ -188,7 +188,6 @@ The internal CuPtr should stays the same, so it has to be called only once.
 """
 function Base.Array(buffer::PersistentBuffer{T}) where {T}
     # Avoid nullptr
-    unmap_buffer(buffer)
     ptr = map_buffer(buffer)
     if (ptr == C_NULL)
         @error "Mapping PersistentBuffer id $(buffer.id) returned NULL"
