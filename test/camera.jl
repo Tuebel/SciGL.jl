@@ -17,15 +17,18 @@ CROP_TOP = Int(HEIGHT / 2) + 1
 CROP_BOTTOM = HEIGHT - 10
 cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2)
 
+function load_cube(gl_context)
+    cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
+    cube = load_mesh(gl_context, cube_path, Scale(0.2))
+    cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
+end
+
 # Use regular (uncropped) camera
 gl_context = depth_offscreen_context(WIDTH, HEIGHT, DEPTH, Array)
 
 # Load scenes
-cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
-cube_mesh = load(cube_path)
-cube = load_mesh(gl_context, cube_path, Scale(0.2))
-cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
 camera = Camera(cv_camera)
+cube = load_cube(gl_context)
 scene = Scene(camera, [cube])
 # copy since the buffer is mapped and overwritten at next draw
 full_img = draw(gl_context, scene) |> copy
@@ -49,8 +52,7 @@ destroy_context(gl_context)
 CROP_WIDTH, CROP_HEIGHT = crop_size(CROP_LEFT, CROP_RIGHT, CROP_TOP, CROP_BOTTOM)
 gl_context = depth_offscreen_context(CROP_WIDTH, CROP_HEIGHT, DEPTH, Array)
 
-cube = load_mesh(gl_context, cube_mesh, Scale(0.2))
-cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
+cube = load_cube(gl_context)
 crop_camera = crop(cv_camera, CROP_LEFT, CROP_RIGHT, CROP_TOP, CROP_BOTTOM)
 crop_scene = Scene(crop_camera, [cube])
 # copy since the buffer is mapped and overwritten at next draw
