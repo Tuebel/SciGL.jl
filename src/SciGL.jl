@@ -98,7 +98,7 @@ using Reexport
     import GLAbstraction
     import GLAbstraction: color_attachments, gpu_data
     import GLFW
-
+    import ModernGL: glGetError
     using Rotations
 end
 
