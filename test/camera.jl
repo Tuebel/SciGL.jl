@@ -15,7 +15,8 @@ CROP_RIGHT = WIDTH - 10
 # Mind Julia arrays starting at 1
 CROP_TOP = Int(HEIGHT / 2) + 1
 CROP_BOTTOM = HEIGHT - 10
-cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2)
+# WARN: Tests have been designed for these parameters. Do not change.
+cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
 
 function load_cube(gl_context)
     cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
@@ -70,8 +71,7 @@ crop_img = draw(gl_context, crop_scene) |> copy
     @test crop_img[begin, begin] == 0
     @test crop_img[end, end] ≈ 0.6
     # Array view should be the same as OpenGL crop. Equality fails for some CPU/GPU combinations, thus approx.
-    max_error = maximum(abs.(crop_img - full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM]))
-    @test isapprox(max_error, 0; atol=2 * eps(Float32))
+    @test crop_img ≈ full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM]
 end
 
 destroy_context(gl_context)
