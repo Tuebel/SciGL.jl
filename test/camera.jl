@@ -70,7 +70,7 @@ crop_img = draw(gl_context, crop_scene) |> copy
     @test crop_img[begin, begin] == 0
     @test crop_img[end, end] ≈ 0.6
     # Array view should be the same as OpenGL crop. Equality fails for some CPU/GPU combinations, thus approx.
-    max_error = maximum(crop_img - full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM])
+    max_error = maximum(abs.(crop_img - full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM]))
     @test isapprox(max_error, 0; atol=2 * eps(Float32))
 end
 
