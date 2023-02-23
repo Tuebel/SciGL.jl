@@ -33,7 +33,9 @@ silhouette_prog = compile_shader(SimpleVert, SilhouetteFrag)
 depth_prog = compile_shader(SimpleVert, DepthFrag)
 
 # Init scene
-monkey = load_mesh(normal_prog, "examples/meshes/monkey.obj", Scale(1, 0.7, 0.8))
+scale = Scale(1, 0.7, 0.8)
+monkey_mesh = load("examples/meshes/monkey.obj") |> scale
+monkey = load_mesh(normal_prog, monkey_mesh)
 cube = load_mesh(normal_prog, "examples/meshes/cube.obj")
 cube = @set cube.pose.translation = Translation(1, 0, 0)
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2) |> Camera

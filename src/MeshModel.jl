@@ -3,17 +3,15 @@
 # All rights reserved. 
 
 """
-    load_mesh(mesh, program, [scale=Scale(1)])
-Simplifies loading a Mesh into a VertexArray on the gpu.
+    load_mesh(mesh, program)
+Load a Mesh into a VertexArray on the gpu.
 """
-function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh, scale=Scale(1))
+function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
     # Avoid transferring unavailable attributes
     program_attributes = tuple(getproperty.(GLAbstraction.attributes(program), :name)...)
-    # OpenGL uses Float32 by default
-    scale = Scale(Float32.(scale.scale))
     mesh_attributes = (;
-        position=scale.(mesh.position),
-        normal=mesh.normals,
+        position=mesh.position,
+        normal=normals(mesh),
         tex_coordinates=texturecoordinates(mesh))
     intersect_attributes = NamedTuple{program_attributes}(mesh_attributes)
     @debug "Attributes unavailable in shader program: $(Base.structdiff(mesh_attributes, intersect_attributes) |> keys)"
@@ -23,10 +21,10 @@ function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh, scale=Sca
 end
 
 """
-    load_mesh(program, mesh_file, [scale=Scale(1)])
-Simplifies loading a Mesh into a VertexArray on the gpu.
+    load_mesh(program, mesh_file)
+Load a mesh from a file into a VertexArray on the gpu.
 """
-load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString, scale=Scale(1)) = load_mesh(program, load(mesh_file), scale)
+load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString) = load_mesh(program, load(mesh_file))
 
 """
     to_gpu(program, scene_object)

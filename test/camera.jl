@@ -18,9 +18,14 @@ CROP_BOTTOM = HEIGHT - 10
 # WARN: Tests have been designed for these parameters. Do not change.
 cv_camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * HEIGHT, WIDTH / 2, HEIGHT / 2)
 
+# Load mesh, transfer later
+cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
+scale = Scale(0.2)
+cube_mesh = scale(load(cube_path))
+
+# Helper tro transfer the mesh and set the position
 function load_cube(gl_context)
-    cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
-    cube = load_mesh(gl_context, cube_path, Scale(0.2))
+    cube = load_mesh(gl_context, cube_mesh)
     cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
 end
 

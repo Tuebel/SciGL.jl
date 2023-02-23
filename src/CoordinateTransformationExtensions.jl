@@ -20,6 +20,28 @@ function (scale::Scale)(x)
     x .* scale.scale
 end
 
+"""
+    scale(mesh)
+Scale the GeometryBasics Mesh using a Scale transformation.
+"""
+function (scale::Scale)(mesh::Mesh)
+    # OpenGL uses Float32 by default
+    scale = Scale(Float32.(scale.scale))
+    # Quite fragile to not rely on functions but works like MeshIO.jl
+    point_attributes = Dict{Symbol,Any}()
+    if hasproperty(mesh, :normals)
+        point_attributes[:normals] = mesh.normals
+    end
+    if hasproperty(mesh, :uv)
+        point_attributes[:uv] = mesh.uv
+    end
+    if hasproperty(mesh, :uvw)
+        point_attributes[:uvw] = mesh.uvw
+    end
+    points = Point.(scale.(mesh.position))
+    Mesh(meta(points; point_attributes...), faces(mesh))
+end
+
 Base.inv(scale::Scale) = Scale(1 ./ scale.scale)
 
 function CoordinateTransformations.compose(scale1::Scale, scale2::Scale)
