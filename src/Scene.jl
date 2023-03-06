@@ -13,10 +13,10 @@ Must support `projection_matrix(camera)` which returns a 4x4 SMatrix for the pro
 abstract type AbstractCamera end
 
 """
-    Pose{N}
-Orientation and position of a scene object with dimensionality N.
+    Pose
+Orientation and position of a scene object.
 """
-struct Pose{N,T<:Translation{<:SVector{N}},R<:Rotation{N}}
+struct Pose{T<:Translation,R<:Rotation}
     translation::T
     rotation::R
 end
