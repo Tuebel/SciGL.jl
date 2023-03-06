@@ -3,10 +3,10 @@
 # All rights reserved. 
 
 """
-    load_mesh(mesh, program)
-Load a Mesh into a VertexArray on the gpu.
+    upload_mesh(mesh, program)
+Upload a Mesh to the GPU as VertexArray.
 """
-function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
+function upload_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
     # Avoid transferring unavailable attributes
     program_attributes = tuple(getproperty.(GLAbstraction.attributes(program), :name)...)
     mesh_attributes = (;
@@ -21,10 +21,10 @@ function load_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
 end
 
 """
-    load_mesh(program, mesh_file)
-Load a mesh from a file into a VertexArray on the gpu.
+    upload_mesh(program, mesh_file)
+Load a mesh from a file an upload it to the GPU as VertexArray.
 """
-load_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString) = load_mesh(program, load(mesh_file))
+upload_mesh(program::GLAbstraction.AbstractProgram, mesh_file::AbstractString) = upload_mesh(program, load(mesh_file))
 
 """
     to_gpu(program, scene_object)

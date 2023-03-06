@@ -19,7 +19,7 @@ end
 
 # Load scenes
 cube_path = joinpath(dirname(pathof(SciGL)), "..", "examples", "meshes", "cube.obj")
-cube = load_mesh(gl_context, cube_path)
+cube = upload_mesh(gl_context, cube_path)
 cube = @set cube.pose.translation = Translation(0, 0, 0)
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2) |> Camera
 camera = @set camera.pose.translation = Translation(1.3 * sin(0), 0, 1.3 * cos(0))

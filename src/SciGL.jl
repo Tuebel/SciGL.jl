@@ -64,7 +64,7 @@ export depth_framebuffer
 export depth_framebuffer_rbo
 export draw
 export enable_depth_stencil
-export load_mesh
+export upload_mesh
 export lookat
 export set_clear_color
 export to_gpu

@@ -16,9 +16,9 @@ guidict = imshow(rand(HEIGHT, WIDTH))
 canvas = guidict["gui"]["canvas"]
 
 # Init scene with normal_prog as it uses most attributes
-cube = load_mesh(gl_context, "examples/meshes/cube.obj")
+cube = upload_mesh(gl_context, "examples/meshes/cube.obj")
 cube = @set cube.pose.translation = Translation(1, 0, 0)
-monkey = load_mesh(gl_context, "examples/meshes/monkey.obj")
+monkey = upload_mesh(gl_context, "examples/meshes/monkey.obj")
 monkey = @set monkey.pose.translation = Translation(0, 0, 0)
 camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2) |> Camera
 camera = @set camera.pose.translation = Translation(1.3 * sin(π / 4), 1.3 * cos(π / 4), 0)

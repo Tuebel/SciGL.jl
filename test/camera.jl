@@ -25,7 +25,7 @@ cube_mesh = scale(load(cube_path))
 
 # Helper tro transfer the mesh and set the position
 function load_cube(gl_context)
-    cube = load_mesh(gl_context, cube_mesh)
+    cube = upload_mesh(gl_context, cube_mesh)
     cube = @set cube.pose.translation = Translation(0.2, 0.2, 0.7)
 end
 

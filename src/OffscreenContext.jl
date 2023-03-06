@@ -47,8 +47,8 @@ end
 
 # Forward methods
 destroy_context(context::OffscreenContext) = destroy_context(context.window)
-load_mesh(context::OffscreenContext, mesh_file::AbstractString) = load_mesh(context.shader_program, mesh_file)
-load_mesh(context::OffscreenContext, mesh::Mesh) = load_mesh(context.shader_program, mesh)
+upload_mesh(context::OffscreenContext, mesh_file::AbstractString) = upload_mesh(context.shader_program, mesh_file)
+upload_mesh(context::OffscreenContext, mesh::Mesh) = upload_mesh(context.shader_program, mesh)
 
 # Base methods
 Base.show(io::IO, context::OffscreenContext{T}) where {T} = print(io, "OffscreenContext{$(T)}\n$(context.framebuffer)\nRender Data: $(typeof(context.render_data))")
