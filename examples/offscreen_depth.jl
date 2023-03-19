@@ -52,7 +52,7 @@ seconds = @elapsed for _ in 1:200
     end
     # Simplified interface, performance only slightly worse
     # NOTE monkey upside down is correct since OpenCV uses X=right, Y=down, Z=forward convention
-    imshow(canvas, img)
+    imshow(canvas, img |> transpose)
     sleep(1e-6)
     loops += 1
 end

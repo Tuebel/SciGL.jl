@@ -3,6 +3,7 @@
 # All rights reserved. 
 
 using Accessors
+using CUDA
 using SciGL
 using ImageView
 
@@ -16,7 +17,11 @@ HEIGHT = 600
 # depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Create the GLFW window. This sets all the hints and makes the context current.
-gl_context = color_offscreen_context(WIDTH, HEIGHT)
+gl_context = if cuda_interop_available()
+    color_offscreen_context(WIDTH, HEIGHT, 1, CuArray)
+else
+    color_offscreen_context(WIDTH, HEIGHT, 1, Array)
+end
 # create ImageView
 guidict = imshow(rand(HEIGHT, WIDTH))
 canvas = guidict["gui"]["canvas"]
@@ -43,7 +48,7 @@ seconds = @elapsed for _ in 1:200
     @reset scene.camera.pose.translation = Translation(1.3 * cos(2 * π * time() / 5), 1.3 * sin(2 * π * time() / 5), 0)
     @reset scene.camera.pose.rotation = lookat(scene.camera, monkey, [0, 0, 1])
     img = draw(gl_context, scene)
-    imshow(canvas, img)
+    imshow(canvas, img |> Array |> transpose)
     sleep(1e-6)
     loops += 1
 end
