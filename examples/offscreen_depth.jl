@@ -37,25 +37,26 @@ GLFW.SetKeyCallback(gl_context.window, (win, key, scancode, action, mods) -> beg
     println("Registered $key")
 end)
 
-# Draw until we receive a close event
-while !GLFW.WindowShouldClose(gl_context.window)
+loops = UInt128(0)
+seconds = @elapsed for _ in 1:200
     # events
     GLFW.PollEvents()
     # draw
     imgs = draw(gl_context, scenes)
     if floor(Int, time() / 2) % 3 == 0
-        img = imgs[:, :, 1]
+        img = @view imgs[:, :, 1]
     elseif floor(Int, time() / 5) % 3 == 1
-        img = imgs[:, :, 2]
+        img = @view imgs[:, :, 2]
     else
-        img = imgs[:, :, 3]
+        img = @view imgs[:, :, 3]
     end
     # Simplified interface, performance only slightly worse
     # NOTE monkey upside down is correct since OpenCV uses X=right, Y=down, Z=forward convention
-    imshow(canvas, transpose(img))
-    sleep(0.05)
+    imshow(canvas, img)
+    sleep(1e-6)
+    loops += 1
 end
-@benchmark draw(gl_context, scenes)
+println("Average fps: $(loops / seconds)")
 
 # needed if you're running this from the REPL
 destroy_context(gl_context)

@@ -41,7 +41,8 @@ end
 @testset "OffscreenContext draw one" begin
     img = draw(gl_context, scene1)
     @test img isa SubArray{Float32}
-    @test size(img) == (WIDTH, HEIGHT)
+    # Julia image convention differs from OpenGL: (y, x) vs. (x, y)
+    @test size(img) == (HEIGHT, WIDTH)
     # Anything rendered? And different values per scene?
     @test !iszero(img)
 end
@@ -49,7 +50,8 @@ end
 @testset "OffscreenContext draw two" begin
     imgs = draw(gl_context, scenes)
     @test imgs isa SubArray{Float32}
-    @test size(imgs) == (WIDTH, HEIGHT, 2)
+    # Julia image convention differs from OpenGL: (y, x) vs. (x, y)
+    @test size(imgs) == (HEIGHT, WIDTH, 2)
     # Anything rendered? And different values per scene?
     @test !iszero(imgs)
     @test @views imgs[:, :, 1] != imgs[:, :, 2]

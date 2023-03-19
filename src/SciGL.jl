@@ -76,6 +76,7 @@ export activate_layer
 export PersistentBuffer
 
 # Context
+export color_offscreen_context
 export context_fullscreen
 export context_offscreen
 export context_window

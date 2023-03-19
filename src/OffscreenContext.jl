@@ -5,6 +5,7 @@
 """
     OffscreenContext
 Keep everything required for offscreen rendering and transfer to a `(Cu)Array` in one place.
+Also uses Julia image conventions so the returned data layout is (y,x,z) vs. (x,y,z).
 
 **High level API** `draw(context, scenes...)`: Synchronously draws and transfers the scenes to the `(Cu)Array`.
 During construction the context's framebuffer is bound once. Make sure to bind it again if you unbind it.
@@ -24,10 +25,29 @@ struct OffscreenContext{T,F<:GLAbstraction.FrameBuffer,C<:AbstractArray{T},P<:GL
     shader_program::P
 end
 
+
+"""
+    color_offscreen_context(width, height, [depth=1, array_type=Array, shaders=(SimpleVert, NormalFrag)])
+Simplified generation of an OpenGL context for rendering images of a specific size.
+Batched rendering is enabled by generating a 3D Texture of RGBA pixels with size (width, height, depth).
+Specify the `array_type` as `Array` or `CuArray`.
+"""
+function color_offscreen_context(width::Integer, height::Integer, depth::Integer=1, ::Type{T}=Array, shaders=(SimpleVert, NormalFrag)) where {T}
+    window = context_offscreen(width, height)
+    # Do not use RBO which only supports 2D shapes.
+    framebuffer = color_framebuffer(width, height, depth)
+    GLAbstraction.bind(framebuffer)
+    texture = first(GLAbstraction.color_attachments(framebuffer))
+    gl_buffer = PersistentBuffer(texture)
+    render_data = T(gl_buffer)
+    program = GLAbstraction.Program(shaders...)
+    OffscreenContext(window, framebuffer, gl_buffer, render_data, program)
+end
+
 """
     depth_offscreen_context(width, height, [depth=1, array_type=Array])
 Simplified generation of an OpenGL context for rendering depth images of a specific size.
-Batched rendering is enabled by generating a 3D Texture of Float32 with size (width, height, layer).
+Batched rendering is enabled by generating a 3D Texture of Float32 with size (width, height, depth).
 Specify the `array_type` as `Array` or `CuArray`.
 
 The resulting `OffscreenContext`'s `render_data` has the `array_type{Float32}` which allows seamless transfer from the depth texture. 
@@ -40,7 +60,6 @@ function depth_offscreen_context(width::Integer, height::Integer, depth::Integer
     texture = first(GLAbstraction.color_attachments(framebuffer))
     gl_buffer = PersistentBuffer(texture)
     render_data = T(gl_buffer)
-    # TODO color_offscreen_context would require more flexible shaders
     program = GLAbstraction.Program(SimpleVert, DepthFrag)
     OffscreenContext(window, framebuffer, gl_buffer, render_data, program)
 end
@@ -91,7 +110,7 @@ function draw_framebuffer(context::OffscreenContext, scene::Scene, layer_id=1::I
 end
 
 """
-    transfer(context, depth)
+    transfer(context, [depth])
 Synchronously transfer the image from OpenGL to the `render_data`.
 Returns a view of of size (width, height, depth).
 
@@ -100,20 +119,18 @@ WARN: Overwrites the data in the context, copy it if you need it to persist!
 function transfer(context::OffscreenContext, depth)
     start_transfer(context, depth)
     wait_transfer(context)
-    @view context.render_data[:, :, 1:depth]
+    # Julia image convention is (y,x) vs. OpenGL (x,y)
+    permuted = PermutedDimsArray(context.render_data, (2, 1, 3))
+    @view permuted[:, :, 1:depth]
 end
 
-"""
-    transfer(context)
-Synchronously transfer the image from OpenGL to the `render_data`.
-Returns a view of of size (width, height).
-
-WARN: Overwrites the data in the context, copy it if you need it to persist!
-"""
+# TODO How to implement it with less copy and pasting?
 function transfer(context::OffscreenContext)
     start_transfer(context)
     wait_transfer(context)
-    @view context.render_data[:, :, 1]
+    # Julia image convention is (y,x) vs. OpenGL (x,y)
+    permuted = PermutedDimsArray(context.render_data, (2, 1, 3))
+    @view permuted[:, :, 1]
 end
 
 """
