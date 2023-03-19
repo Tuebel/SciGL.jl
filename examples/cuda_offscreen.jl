@@ -46,7 +46,8 @@ set_clear_color()
 GLAbstraction.bind(framebuffer)
 
 # Draw until we receive a close event
-while !GLFW.WindowShouldClose(window)
+loops = UInt128(0)
+seconds = @elapsed for _ in 1:200
     # events
     GLFW.PollEvents()
     # Camera rotates around mathematically positive Z
@@ -70,8 +71,10 @@ while !GLFW.WindowShouldClose(window)
     unsafe_copyto!(cu_array, texture)
     img = Array(cu_array)[:, end:-1:1]
     imshow(canvas, cu_array |> Array |> transpose)
-    sleep(0.05)
+    sleep(1e-6)
+    loops += 1
 end
+println("Average fps: $(loops / seconds)")
 
 # needed if you're running this from the REPL
 GLFW.DestroyWindow(window)
