@@ -5,7 +5,6 @@
 """
     OffscreenContext
 Keep everything required for offscreen rendering and transfer to a `(Cu)Array` in one place.
-Also uses Julia image conventions so the returned data layout is (y,x,z) vs. (x,y,z).
 
 **High level API** `draw(context, scenes...)`: Synchronously draws and transfers the scenes to the `(Cu)Array`.
 During construction the context's framebuffer is bound once. Make sure to bind it again if you unbind it.
@@ -15,6 +14,9 @@ During construction the context's framebuffer is bound once. Make sure to bind i
 * `start_transfer` to asynchronously transfer `framebuffer` → `gl_buffer` / `render_data`
 * `wait_transfer` to wait for the transfer to finish
 * Create a view via `@view render_data[:, :, 1:n_images]` which now contains the n_images renderings.
+
+**WARN** Does not obey Julia image conventions but returns (x,y,z) instead (y,x,z) coordinates.
+PermutedDimsArrays are not CUDA compatible due to scalar indexing and transposing via permutedims is quite expensive.
 """
 struct OffscreenContext{T,F<:GLAbstraction.FrameBuffer,C<:AbstractArray{T},P<:GLAbstraction.AbstractProgram}
     window::GLFW.Window
@@ -119,18 +121,14 @@ WARN: Overwrites the data in the context, copy it if you need it to persist!
 function transfer(context::OffscreenContext, depth)
     start_transfer(context, depth)
     wait_transfer(context)
-    # Julia image convention is (y,x) vs. OpenGL (x,y)
-    permuted = PermutedDimsArray(context.render_data, (2, 1, 3))
-    @view permuted[:, :, 1:depth]
+    @view context.render_data[:, :, 1:depth]
 end
 
 # TODO How to implement it with less copy and pasting?
 function transfer(context::OffscreenContext)
     start_transfer(context)
     wait_transfer(context)
-    # Julia image convention is (y,x) vs. OpenGL (x,y)
-    permuted = PermutedDimsArray(context.render_data, (2, 1, 3))
-    @view permuted[:, :, 1]
+    @view context.render_data[:, :, 1]
 end
 
 """

@@ -42,8 +42,7 @@ full_img = draw(gl_context, scene) |> copy
 
 # Sanity checks to hint errors
 @testset "Full camera " begin
-    # Julia image convention differs from OpenGL: (y, x) vs. (x, y)
-    @test size(full_img) == (HEIGHT, WIDTH)
+    @test size(full_img) == (WIDTH, HEIGHT)
     @test !iszero(full_img)
     # Cube of size 0.2 at distance 0.7 → closest point at 0.6, furthest at 0.8
     @test minimum(full_img[full_img.>0]) ≈ 0.6
@@ -67,8 +66,7 @@ crop_img = draw(gl_context, crop_scene) |> copy
 
 # Sanity checks to hint errors
 @testset "Cropped camera" begin
-    # Julia image convention differs from OpenGL: (y, x) vs. (x, y)
-    @test size(crop_img) == (CROP_BOTTOM - CROP_TOP + 1, CROP_RIGHT - CROP_LEFT + 1)
+    @test size(crop_img) == (CROP_RIGHT - CROP_LEFT + 1, CROP_BOTTOM - CROP_TOP + 1)
     @test !iszero(crop_img)
     # Cube of size 0.2 at distance 0.7 → closest point at 0.6, furthest at 0.8
     @test minimum(crop_img[crop_img.>0]) ≈ 0.6
@@ -78,7 +76,7 @@ crop_img = draw(gl_context, crop_scene) |> copy
     @test crop_img[begin, begin] == 0
     @test crop_img[end, end] ≈ 0.6
     # Array view should be the same as OpenGL crop. Equality fails for some CPU/GPU combinations, thus approx.
-    @test crop_img ≈ full_img[CROP_TOP:CROP_BOTTOM, CROP_LEFT:CROP_RIGHT]
+    @test crop_img ≈ full_img[CROP_LEFT:CROP_RIGHT, CROP_TOP:CROP_BOTTOM,]
 end
 
 destroy_context(gl_context)

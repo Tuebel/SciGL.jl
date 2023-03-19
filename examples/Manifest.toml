@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.4"
+julia_version = "1.8.5"
 manifest_format = "2.0"
 project_hash = "621d0480805fe452e092e5533a4cfc24dc8abe9f"
 
@@ -773,7 +773,7 @@ version = "0.7.0"
 deps = ["CUDA", "ColorTypes", "CoordinateTransformations", "FileIO", "FixedPointNumbers", "GLAbstraction", "GLFW", "GeometryBasics", "LinearAlgebra", "Logging", "MeshIO", "ModernGL", "Reexport", "Rotations", "StaticArrays"]
 path = ".."
 uuid = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
-version = "0.3.4"
+version = "0.3.5"
 
 [[deps.Scratch]]
 deps = ["Dates"]
