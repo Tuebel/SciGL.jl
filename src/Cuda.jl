@@ -14,12 +14,10 @@ using CUDA:
     Mem
 
 function cuda_interop_available()
+    gl_context = context_offscreen(1, 1)
     vendor_str = glGetString(GL_VENDOR)
-    if vendor_str == C_NULL
-        @warn "Null pointer for GL_VENDOR. Is an OpenGL context initialized?"
-        return false
-    end
     vendor = unsafe_string(vendor_str) |> uppercase
+    destroy_context(gl_context)
     CUDA.functional() && contains(vendor, "NVIDIA")
 end
 
