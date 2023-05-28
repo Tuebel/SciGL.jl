@@ -81,6 +81,7 @@ export context_fullscreen
 export context_offscreen
 export context_window
 export depth_offscreen_context
+export distance_offscreen_context
 export destroy_context
 export OffscreenContext
 
