@@ -52,7 +52,7 @@ Simplified generation of an OpenGL context for rendering depth images of a speci
 Batched rendering is enabled by generating a 3D Texture of Float32 with size (width, height, depth).
 Specify the `array_type` as `Array` or `CuArray`.
 
-The resulting `OffscreenContext`'s `render_data` has the `array_type{Float32}` which allows seamless transfer from the depth texture. 
+The resulting `OffscreenContext`'s `render_data` has the `array_type{Float32}` which allows seamless a transfer of the depth values from the texture. 
 """
 function depth_offscreen_context(width::Integer, height::Integer, depth::Integer=1, ::Type{T}=Array) where {T}
     window = context_offscreen(width, height)
@@ -63,6 +63,27 @@ function depth_offscreen_context(width::Integer, height::Integer, depth::Integer
     gl_buffer = PersistentBuffer(texture)
     render_data = T(gl_buffer)
     program = GLAbstraction.Program(SimpleVert, DepthFrag)
+    OffscreenContext(window, framebuffer, gl_buffer, render_data, program)
+end
+
+"""
+    distance_offscreen_context(width, height, [depth=1, array_type=Array])
+Simplified generation of an OpenGL context for rendering distance maps of a specific size.
+While depth images simply contain the z coordinate, distance maps contain the euclidean distance of the point from the camera.
+Batched rendering is enabled by generating a 3D Texture of Float32 with size (width, height, depth).
+Specify the `array_type` as `Array` or `CuArray`.
+
+The resulting `OffscreenContext`'s `render_data` has the `array_type{Float32}` which allows seamless a transfer of the distance values from the texture. 
+"""
+function distance_offscreen_context(width::Integer, height::Integer, depth::Integer=1, ::Type{T}=Array) where {T}
+    window = context_offscreen(width, height)
+    # Do not use RBO which only supports 2D shapes.
+    framebuffer = depth_framebuffer(width, height, depth)
+    GLAbstraction.bind(framebuffer)
+    texture = first(GLAbstraction.color_attachments(framebuffer))
+    gl_buffer = PersistentBuffer(texture)
+    render_data = T(gl_buffer)
+    program = GLAbstraction.Program(SimpleVert, DistanceFrag)
     OffscreenContext(window, framebuffer, gl_buffer, render_data, program)
 end
 
