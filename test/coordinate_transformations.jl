@@ -3,6 +3,7 @@
 # All rights reserved. 
 
 using CoordinateTransformations
+using Rotations
 using SciGL
 using StaticArrays
 using Test

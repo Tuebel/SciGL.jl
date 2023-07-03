@@ -101,7 +101,7 @@ using Reexport
     import GLAbstraction: color_attachments, gpu_data
     import GLFW
     import ModernGL: glGetError
-    using Rotations
+    import Rotations: Rotation, QuatRotation
 end
 
 # Aliases
