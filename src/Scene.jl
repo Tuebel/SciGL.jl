@@ -15,11 +15,15 @@ abstract type AbstractCamera end
 """
     Pose{N}
 Orientation and position of a scene object with dimensionality N.
+
+This type is callable and acts like an AffineMap from CoordinateTransformations.jl.
 """
 struct Pose{N,T<:Translation{<:SVector{N}},R<:Rotation{N}}
     translation::T
     rotation::R
 end
+
+(p::Pose)(x) = AffineMap(p)(x)
 
 """
     Pose(t_xyz, r)
