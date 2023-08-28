@@ -3,7 +3,7 @@
 # All rights reserved. 
 
 """
-    upload_mesh(mesh, program)
+    upload_mesh(program, mesh)
 Upload a Mesh to the GPU as VertexArray.
 """
 function upload_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
