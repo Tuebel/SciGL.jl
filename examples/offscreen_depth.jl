@@ -60,3 +60,4 @@ println("Average fps: $(loops / seconds)")
 
 # needed if you're running this from the REPL
 destroy_context(gl_context)
+ImageView.closeall()

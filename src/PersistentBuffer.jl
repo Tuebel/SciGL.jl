@@ -24,9 +24,12 @@ mutable struct PersistentBuffer{T,N}
     context::GLAbstraction.Context
     # Might change during async_copyto! + finalizer, thus mutable
     fence::GLsync
+    cu_resource::Base.RefValue{Ptr{CUDA.CUgraphicsResource_st}}
 
     function PersistentBuffer{T}(id::GLuint, dims::Dims{N}, buffertype::GLenum, flags::GLenum, context::GLAbstraction.Context, fence::GLsync) where {T,N}
-        obj = new{T,N}(id, dims, buffertype, flags, context, fence)
+        cu_resource = Ref{CUDA.CUgraphicsResource}()
+        cu_resource[] = C_NULL
+        obj = new{T,N}(id, dims, buffertype, flags, context, fence, cu_resource)
         finalizer(GLAbstraction.free!, obj)
         obj
     end
@@ -65,9 +68,15 @@ PersistentBuffer(texture::GLAbstraction.Texture{T}; buffertype=GL_PIXEL_PACK_BUF
 PersistentBuffer(texture::GLAbstraction.Texture{Gray{T}}; buffertype=GL_PIXEL_PACK_BUFFER, flags=GL_MAP_READ_BIT) where {T} = PersistentBuffer(T, texture; buffertype=buffertype, flags=flags)
 
 
-function GLAbstraction.free!(x::PersistentBuffer)
-    glDeleteSync(x.fence)
-    GLAbstraction.context_command(() -> glDeleteBuffers(1, [x.id]), x.context)
+function GLAbstraction.free!(buffer::PersistentBuffer)
+    # Unmap and unregister resource
+    glDeleteSync(buffer.fence)
+    GLAbstraction.context_command(() -> glDeleteBuffers(1, [buffer.id]), buffer.context)
+    # Only non-null if registered
+    if buffer.cu_resource[] != C_NULL
+        CUDA.cuGraphicsUnmapResources(1, buffer.cu_resource, C_NULL)
+        CUDA.cuGraphicsUnregisterResource(buffer.cu_resource[])
+    end
 end
 
 Base.eltype(::PersistentBuffer{T}) where {T} = T
@@ -161,19 +170,18 @@ The internal CuPtr should stays the same, so it has to be called only once.
 """
 function CUDA.CuArray(buffer::PersistentBuffer{T}) where {T}
     # Fetch the CUDA resource for it
-    resource = Ref{CUgraphicsResource}()
     if is_readonly(buffer)
         flags = CU_GRAPHICS_REGISTER_FLAGS_READ_ONLY
     else
         flags = CU_GRAPHICS_REGISTER_FLAGS_NONE
     end
-    CUDA.cuGraphicsGLRegisterBuffer(resource, buffer.id, flags)
-    CUDA.cuGraphicsMapResources(1, resource, C_NULL)
+    CUDA.cuGraphicsGLRegisterBuffer(buffer.cu_resource, buffer.id, flags)
+    CUDA.cuGraphicsMapResources(1, buffer.cu_resource, C_NULL)
     # Get the CuPtr to the buffer object
     cu_device_ptr = Ref{CUDA.CUdeviceptr}()
     num_bytes = Ref{Csize_t}()
     # dereference resource via []
-    CUDA.cuGraphicsResourceGetMappedPointer_v2(cu_device_ptr, num_bytes, resource[])
+    CUDA.cuGraphicsResourceGetMappedPointer_v2(cu_device_ptr, num_bytes, buffer.cu_resource[])
     cu_ptr = Base.unsafe_convert(CuPtr{T}, cu_device_ptr[])
     cu_array = unsafe_wrap(CuArray, cu_ptr, size(buffer))
     cu_array

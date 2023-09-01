@@ -88,7 +88,11 @@ function distance_offscreen_context(width::Integer, height::Integer, depth::Inte
 end
 
 # Forward methods
-destroy_context(context::OffscreenContext) = destroy_context(context.window)
+function destroy_context(context::OffscreenContext)
+    GLAbstraction.free!(context.gl_buffer)
+    destroy_context(context.window)
+    GLAbstraction.clear_context!()
+end
 upload_mesh(context::OffscreenContext, mesh_file::AbstractString) = upload_mesh(context.shader_program, mesh_file)
 upload_mesh(context::OffscreenContext, mesh::Mesh) = upload_mesh(context.shader_program, mesh)
 
@@ -133,7 +137,7 @@ function draw_framebuffer(context::OffscreenContext, scene::Scene, layer_id=1::I
 end
 
 """
-    transfer(context, [depth])
+    transfer(context, depth)
 Synchronously transfer the image from OpenGL to the `render_data`.
 Returns a view of of size (width, height, depth).
 
@@ -145,12 +149,15 @@ function transfer(context::OffscreenContext, depth)
     @view context.render_data[:, :, 1:depth]
 end
 
-# TODO How to implement it with less copy and pasting?
-function transfer(context::OffscreenContext)
-    start_transfer(context)
-    wait_transfer(context)
-    @view context.render_data[:, :, 1]
-end
+"""
+    transfer(context)
+Synchronously transfer the image from OpenGL to the `render_data`.
+Returns a view of of size (width, height).
+
+WARN: Overwrites the data in the context, copy it if you need it to persist!
+"""
+transfer(context::OffscreenContext) = @view transfer(context, 1)[:, :, 1]
+
 
 """
     start_transfer(context, [depth=1])

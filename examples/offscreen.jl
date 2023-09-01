@@ -9,6 +9,7 @@ using ImageView
 
 WIDTH = 801
 HEIGHT = 600
+DEPTH = 300
 
 # TODO
 # Compile shader program
@@ -18,9 +19,9 @@ HEIGHT = 600
 
 # Create the GLFW window. This sets all the hints and makes the context current.
 gl_context = if cuda_interop_available()
-    color_offscreen_context(WIDTH, HEIGHT, 1, CuArray)
+    color_offscreen_context(WIDTH, HEIGHT, DEPTH, CuArray)
 else
-    color_offscreen_context(WIDTH, HEIGHT, 1, Array)
+    color_offscreen_context(WIDTH, HEIGHT, DEPTH, Array)
 end
 # create ImageView
 guidict = imshow(rand(HEIGHT, WIDTH))
@@ -56,3 +57,4 @@ println("Average fps: $(loops / seconds)")
 
 # needed if you're running this from the REPL
 destroy_context(gl_context)
+ImageView.closeall()
