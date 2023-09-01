@@ -76,6 +76,8 @@ function GLAbstraction.free!(buffer::PersistentBuffer)
     if buffer.cu_resource[] != C_NULL
         CUDA.cuGraphicsUnmapResources(1, buffer.cu_resource, C_NULL)
         CUDA.cuGraphicsUnregisterResource(buffer.cu_resource[])
+        # avoid double unmap and unregister
+        buffer.cu_resource[] = C_NULL
     end
 end
 

@@ -82,6 +82,7 @@ export context_offscreen
 export context_window
 export depth_offscreen_context
 export distance_offscreen_context
+# TODO rename to destroy_context!
 export destroy_context
 export OffscreenContext
 

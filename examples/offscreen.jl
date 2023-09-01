@@ -18,10 +18,10 @@ DEPTH = 300
 # depth_prog = GLAbstraction.Program(SimpleVert, DepthFrag)
 
 # Create the GLFW window. This sets all the hints and makes the context current.
-gl_context = if cuda_interop_available()
-    color_offscreen_context(WIDTH, HEIGHT, DEPTH, CuArray)
+if cuda_interop_available()
+    gl_context = color_offscreen_context(WIDTH, HEIGHT, DEPTH, CuArray)
 else
-    color_offscreen_context(WIDTH, HEIGHT, DEPTH, Array)
+    gl_context = color_offscreen_context(WIDTH, HEIGHT, DEPTH, Array)
 end
 # create ImageView
 guidict = imshow(rand(HEIGHT, WIDTH))

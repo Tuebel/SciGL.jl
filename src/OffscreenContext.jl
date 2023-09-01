@@ -89,9 +89,15 @@ end
 
 # Forward methods
 function destroy_context(context::OffscreenContext)
-    GLAbstraction.free!(context.gl_buffer)
-    destroy_context(context.window)
-    GLAbstraction.clear_context!()
+    # Avoid destroying the window twice
+    if (context.window.handle == GLFW.GetCurrentContext().handle)
+        GLAbstraction.free!(context.gl_buffer)
+        destroy_context(context.window)
+        GLAbstraction.clear_context!()
+        @info "OpenGL context destroyed"
+    else
+        @warn "OpenGL context already destroyed - ignoring destroy call"
+    end
 end
 upload_mesh(context::OffscreenContext, mesh_file::AbstractString) = upload_mesh(context.shader_program, mesh_file)
 upload_mesh(context::OffscreenContext, mesh::Mesh) = upload_mesh(context.shader_program, mesh)
