@@ -28,7 +28,7 @@ Transfers the view and projection matrices to the OpenGL program
 function to_gpu(program::GLAbstraction.AbstractProgram, scene_camera::SceneObject{<:AbstractCamera})
     GLAbstraction.bind(program)
     GLAbstraction.gluniform(program, :view_matrix, view_matrix(scene_camera))
-    GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(scene_camera.object))
+    GLAbstraction.gluniform(program, :projection_matrix, projection_matrix(scene_camera))
     GLAbstraction.unbind(program)
 end
 
@@ -38,7 +38,7 @@ A Camera parametrized like OpenCV.
 The convention is as in OpenCV: x-right, **y-down**, **z-forward**.
 Construct a `Camera` from it to be used in the shaders
 """
-struct CvCamera
+struct CvCamera <: AbstractCamera
     # horizontal resolution [pixel]
     width::Int
     # vertical resolution in [pixel]
@@ -179,3 +179,7 @@ crop_size(left, right, top, bottom) = length.((left:right, top:bottom))
 
 # AbstractCamera interface
 projection_matrix(camera::Camera) = camera.projection_matrix
+# Default projection matrix for CvCamera
+projection_matrix(camera::CvCamera) = camera |> Camera |> projection_matrix
+# Automatic unwrap
+projection_matrix(camera::SceneObject{<:AbstractCamera}) = projection_matrix(camera.object)

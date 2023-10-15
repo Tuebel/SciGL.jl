@@ -22,7 +22,7 @@ depth_prog = compile_shader(SimpleVert, DepthFrag)
 dist_prog = compile_shader(SimpleVert, DistanceFrag)
 
 # Init scene with normal_prog as it uses most attributes
-camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2) |> Camera
+camera = CvCamera(WIDTH, HEIGHT, 1.2 * WIDTH, 1.2 * WIDTH, WIDTH / 2, HEIGHT / 2)
 scale = Scale(0.1, 0.3, 0.5)
 cube_mesh = load("examples/meshes/cube.obj")
 cube = upload_mesh(normal_prog, scale(cube_mesh))

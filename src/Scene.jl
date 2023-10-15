@@ -65,6 +65,8 @@ struct Scene{C<:SceneObject{<:AbstractCamera},U<:SceneObject{<:GLAbstraction.Ver
     camera::C
     meshes::Vector{U}
 end
+# Automatic wrap
+Scene(camera::AbstractCamera, meshes) = Scene(SceneObject(camera), meshes)
 
 """
     draw(program, scene)
