@@ -182,3 +182,9 @@ Wait for the transfer started in `start_transfer` to finish.
 Allows to set the timeout in nanoseconds of the `glClientWaitSync` call in the sync loop.
 """
 wait_transfer(context::OffscreenContext, timeout_ns=1) = sync_buffer(context.gl_buffer, timeout_ns)
+
+"""
+    to_device(context, A)
+Transfer A to the device of the render data, e.g. Array or CuArray
+"""
+to_device(::OffscreenContext{<:Any,<:Any,T}, A::AbstractArray) = Base.typename(T).wrapper(A)

@@ -1,7 +1,7 @@
 name = "SciGL"
 uuid = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
 authors = ["Tim Redick <t.redick@irt.rwth-aachen.de>"]
-version = "0.3.12"
+version = "0.3.13"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
