@@ -187,4 +187,4 @@ wait_transfer(context::OffscreenContext, timeout_ns=1) = sync_buffer(context.gl_
     to_device(context, A)
 Transfer A to the device of the render data, e.g. Array or CuArray
 """
-to_device(::OffscreenContext{<:Any,<:Any,T}, A::AbstractArray) = Base.typename(T).wrapper(A)
+to_device(::OffscreenContext{<:Any,<:Any,T}, A::AbstractArray) where {T} = Base.typename(T).wrapper(A)
