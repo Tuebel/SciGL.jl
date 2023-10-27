@@ -188,3 +188,83 @@ wait_transfer(context::OffscreenContext, timeout_ns=1) = sync_buffer(context.gl_
 Transfer A to the device of the render data, e.g. Array or CuArray
 """
 to_device(::OffscreenContext{<:Any,<:Any,T}, A::AbstractArray) where {T} = Base.typename(T).wrapper(A)
+
+# TODO much copy pasting - use AbstractType?
+struct CopyOffscreenContext{T,F<:GLAbstraction.FrameBuffer,C<:AbstractArray{T},P<:GLAbstraction.AbstractProgram}
+    window::GLFW.Window
+    # Preallocate a CPU Array or GPU CuArray, this also avoids having to pass a device flag
+    framebuffer::F
+    render_data::C
+    shader_program::P
+end
+
+"""
+    depth_copy_offscreen_context(width, height, [depth=1, array_type=Array])
+Simplified generation of an OpenGL context for rendering depth images of a specific size.
+Batched rendering is enabled by generating a 3D Texture of Float32 with size (width, height, depth).
+Specify the `array_type` as `Array` or `CuArray`.
+
+The resulting `OffscreenContext`'s `render_data` has the `array_type{Float32}` which allows seamless a transfer of the depth values from the texture. 
+"""
+function depth_copy_offscreen_context(width::Integer, height::Integer, depth::Integer=1, ::Type{T}=Array) where {T}
+    window = context_offscreen(width, height)
+    # Do not use RBO which only supports 2D shapes.
+    framebuffer = depth_framebuffer(width, height, depth)
+    GLAbstraction.bind(framebuffer)
+    render_data = T{Float32}(undef, width, height, depth)
+    program = GLAbstraction.Program(SimpleVert, DepthFrag)
+    CopyOffscreenContext(window, framebuffer, render_data, program)
+end
+
+"""
+    draw_framebuffer(context, scene, [layer_id=1])
+Render the scene to the framebuffer of the context.
+"""
+function draw_framebuffer(context::CopyOffscreenContext, scene::Scene, layer_id=1::Integer)
+    # Draw to framebuffer
+    activate_layer(context.framebuffer, layer_id)
+    clear_buffers()
+    draw(context.shader_program, scene)
+end
+
+
+"""
+    draw(context, scenes)
+Synchronously draw the scenes into the layers of the contxt's framebuffer and transfer it to the render_data of the context.
+Returns a view of of size (width, height, length(scenes)).
+
+WARN: Overwrites the data in the context, copy it if you need it to persist!
+"""
+function draw(context::CopyOffscreenContext, scenes::AbstractArray{<:Scene})
+    for (idx, scene) in enumerate(scenes)
+        draw_framebuffer(context, scene, idx)
+    end
+    unsafe_copyto!(context.render_data, context.framebuffer)
+    @view context.render_data[:, :, 1:length(scenes)]
+end
+
+"""
+    draw(context, scene)
+Synchronously transfer the image with the given `depth` from OpenGL to the `render_data`.
+Returns a view of of size (width, height).
+"""
+function draw(context::CopyOffscreenContext, scene::Scene)
+    draw_framebuffer(context, scene)
+    unsafe_copyto!(context.render_data, context.framebuffer)
+    @view context.render_data[:, :, 1]
+end
+
+# Forward methods
+function destroy_context(context::CopyOffscreenContext)
+    # Avoid destroying the window twice
+    if (context.window.handle == GLFW.GetCurrentContext().handle)
+        GLAbstraction.free!(context.gl_buffer)
+        destroy_context(context.window)
+        GLAbstraction.clear_context!()
+        @info "OpenGL context destroyed"
+    else
+        @warn "OpenGL context already destroyed - ignoring destroy call"
+    end
+end
+upload_mesh(context::CopyOffscreenContext, mesh_file::AbstractString) = upload_mesh(context.shader_program, mesh_file)
+upload_mesh(context::CopyOffscreenContext, mesh::Mesh) = upload_mesh(context.shader_program, mesh)
