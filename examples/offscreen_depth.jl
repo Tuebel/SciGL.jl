@@ -3,6 +3,7 @@
 # All rights reserved. 
 
 using Accessors
+using CUDA
 using SciGL
 using ImageView
 
@@ -10,7 +11,7 @@ WIDTH = 801
 HEIGHT = 600
 
 # Create the GLFW window. This sets all the hints and makes the context current.
-gl_context = depth_offscreen_context(WIDTH, HEIGHT, 3)
+gl_context = depth_copy_offscreen_context(WIDTH, HEIGHT, 3, CuArray)
 # create ImageView
 guidict = imshow(rand(HEIGHT, WIDTH))
 canvas = guidict["gui"]["canvas"]

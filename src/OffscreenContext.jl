@@ -164,7 +164,6 @@ WARN: Overwrites the data in the context, copy it if you need it to persist!
 """
 transfer(context::OffscreenContext) = @view transfer(context, 1)[:, :, 1]
 
-
 """
     start_transfer(context, [depth=1])
 Start the asynchronous transfer the image with the given `depth` from OpenGL to the `render_data`.
@@ -188,6 +187,7 @@ wait_transfer(context::OffscreenContext, timeout_ns=1) = sync_buffer(context.gl_
 Transfer A to the device of the render data, e.g. Array or CuArray
 """
 to_device(::OffscreenContext{<:Any,<:Any,T}, A::AbstractArray) where {T} = Base.typename(T).wrapper(A)
+
 
 # TODO much copy pasting - use AbstractType?
 struct CopyOffscreenContext{T,F<:GLAbstraction.FrameBuffer,C<:AbstractArray{T},P<:GLAbstraction.AbstractProgram}
@@ -268,3 +268,9 @@ function destroy_context(context::CopyOffscreenContext)
 end
 upload_mesh(context::CopyOffscreenContext, mesh_file::AbstractString) = upload_mesh(context.shader_program, mesh_file)
 upload_mesh(context::CopyOffscreenContext, mesh::Mesh) = upload_mesh(context.shader_program, mesh)
+
+"""
+    to_device(context, A)
+Transfer A to the device of the render data, e.g. Array or CuArray
+"""
+to_device(::CopyOffscreenContext{<:Any,<:Any,T}, A::AbstractArray) where {T} = Base.typename(T).wrapper(A)
