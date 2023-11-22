@@ -4,4 +4,4 @@
 
 using Documenter, SciGL
 
-makedocs(sitename="SciGL.jl", repo=GitLab("diss", "scigl.jl")
+makedocs(sitename="SciGL.jl", repo=GitLab("diss", "scigl.jl"))
