@@ -5,4 +5,4 @@
 using Documenter, SciGL
 import Documenter.Remotes: GitLab
 
-makedocs(sitename="SciGL.jl", repo=GitLab("https://git-ce.rwth-aachen.de", "diss", "scigl.jl"))
+makedocs(sitename="SciGL.jl", repo=GitLab("git-ce.rwth-aachen.de", "diss", "scigl.jl"))
