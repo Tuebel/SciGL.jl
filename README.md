@@ -1,3 +1,7 @@
+[![Run Tests](https://github.com/rwth-irt/SciGL.jl/actions/workflows/run_tests.yml/badge.svg)](https://github.com/rwth-irt/SciGL.jl/actions/workflows/run_tests.yml)
+[![Documenter](https://github.com/rwth-irt/SciGL.jl/actions/workflows/documenter.yml/badge.svg)](https://github.com/rwth-irt/SciGL.jl/actions/workflows/documenter.yml)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://rwth-irt.github.io/SciGL.jl)
+
 # SciGL.jl
 Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to julia.
 
