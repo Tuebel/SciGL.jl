@@ -5,7 +5,7 @@
 # About
 This code has been produced during while writing my Ph.D. (Dr.-Ing.) thesis at the institut of automatic control, RWTH Aachen University.
 If you find it helpful for your research please cite this:
-> T. Redick, „Bayesian inference for CAD-based pose estimation on depth images for robotic manipulation“, RWTH Aachen University, 2024. doi: 10.18154/RWTH-2024-04533.
+> T. Redick, „Bayesian inference for CAD-based pose estimation on depth images for robotic manipulation“, RWTH Aachen University, 2024. doi: [10.18154/RWTH-2024-04533](https://doi.org/10.18154/RWTH-2024-04533).
 
 # SciGL.jl
 Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to julia.
