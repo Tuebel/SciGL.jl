@@ -37,7 +37,7 @@ const default_window_hints = [
     (GLFW.FOCUSED, false),
     (GLFW.CONTEXT_VERSION_MAJOR, 4),
     # Persistent mapping & glGetTextureSubImage
-    (GLFW.CONTEXT_VERSION_MINOR, 5),
+    (GLFW.CONTEXT_VERSION_MINOR, 2),
     (GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)]
 
 # Pipeable, set some sane defaults to avoid black screens by default

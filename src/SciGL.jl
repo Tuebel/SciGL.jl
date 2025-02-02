@@ -5,6 +5,7 @@
 module SciGL
 
 # Dependencies
+using Accessors
 using ColorTypes: AbstractRGBA, RGB, RGBA, Gray, red, blue, green, alpha
 using CoordinateTransformations
 # TODO maybe create another package SciCuGL which has CUDA in its dependencies and precompiles it

@@ -6,13 +6,19 @@
     upload_mesh(program, mesh)
 Upload a Mesh to the GPU as VertexArray.
 """
-function upload_mesh(program::GLAbstraction.AbstractProgram, mesh::Mesh)
+function upload_mesh(program::GLAbstraction.AbstractProgram, mesh::AbstractMesh)
+    # Take care of MetaMeshes
+    mesh = Mesh(mesh)
+    # OpenGL requires common length for the attributes which MeshIO does not provide since v0.5
+    mesh = expand_faceviews(mesh)
     # Avoid transferring unavailable attributes
     program_attributes = tuple(getproperty.(GLAbstraction.attributes(program), :name)...)
+    # Use OpenGL Float32 types
     mesh_attributes = (;
-        position=mesh.position,
-        normal=normals(mesh),
-        tex_coordinates=texturecoordinates(mesh))
+        # Attribute must exist
+        position=Point3f.(coordinates(mesh)),
+        normal=isnothing(normals(mesh)) ? nothing : Vec3f.(normals(mesh)),
+        tex_coordinates=isnothing(texturecoordinates(mesh)) ? nothing : Vec2f.(texturecoordinates(mesh)))
     intersect_attributes = NamedTuple{program_attributes}(mesh_attributes)
     @debug "Attributes unavailable in shader program: $(Base.structdiff(mesh_attributes, intersect_attributes) |> keys)"
     # finds the order of the variables in the shader program and automatically assigns them correctly
