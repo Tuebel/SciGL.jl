@@ -1,5 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+GLAbstraction = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
 SciGL = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
 
 [sources]
