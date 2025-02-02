@@ -1,7 +1,7 @@
 name = "SciGL"
 uuid = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
 authors = ["Tim Redick <t.redick@irt.rwth-aachen.de>"]
-version = "0.3.13"
+version = "0.3.14"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -23,6 +23,9 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [extras]
 Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[sources]
+GLAbstraction = {url="https://github.com/Tuebel/GLAbstraction.jl.git"}
 
 [targets]
 test = ["Accessors", "Test"]
