@@ -3,8 +3,9 @@
 # All rights reserved. 
 
 using Accessors
-using SciGL
 using Images
+using ImageShow
+using SciGL
 
 WIDTH = 801
 HEIGHT = 600
@@ -29,9 +30,9 @@ scene3 = @set scene3.camera.pose.rotation = lookat(scene3.camera, monkey, [0, 0,
 scenes = [scene1, scene2, scene3]
 
 imgs = draw(gl_context, scenes) .|> Gray
-view(imgs, :, :, 1) |> transpose |> simshow
-view(imgs, :, :, 2) |> transpose |> simshow
-view(imgs, :, :, 3) |> transpose |> simshow
+view(imgs, :, :, 1) |> transpose |> simshow |> display
+view(imgs, :, :, 2) |> transpose |> simshow |> display
+view(imgs, :, :, 3) |> transpose |> simshow |> display
 # Simplified interface, performance only slightly worse
 # needed if you're running this from the REPL
 destroy_context(gl_context)

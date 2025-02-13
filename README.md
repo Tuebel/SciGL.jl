@@ -12,7 +12,11 @@ Port of [scigl_render](https://gitlab.com/rwth-irt-public/flirt/scigl_render) to
 
 The primary goal is to enable efficient rendering of multiple scenes and transferring the images to a compute device (CPU or CUDA) for **Sci**entific calculations.
 
-# Design decisions
+## examples
+To run the examples, you need to activate the `examples` environment!
+I do not want to contaminate the main environment with the `Images.jl` packages.
+
+# Design Choices
 I try to incorporate existing Julia packages wherever possible.
 The next section contains a list and use cases of the packages.
 
@@ -58,15 +62,14 @@ Moreover, you can trick vscode that this file is the julia executable via the se
 
 > **Tipp:** If you get an unknown CUDA Error (999) during OpenGL interop, you probably render to the integrated device instead of the NVIDIA
 
-# OpenGL.jl devcontainer
+# Devcontainer
 Recommended: Install the vscode [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) plugin and load the [devcontainer](https://code.visualstudio.com/docs/remote/containers).
-Alternatively install julia locally, activate and instantia the SciGL.jl environment.
+Alternatively install julia locally, activate and instantiate the SciGL.jl environment.
 
-## Docker + GPU
+## Switching GPUs
 On Ubuntu 20.04 and other recent Linux distros, NVIDIA allows for on-demand switching between dedicated and integrated graphics.
-This allows to save electricity by only using the dedicated GPU when required.
-A choice of Intel or NVIDIA GPUs can be made by (un)commenting the specific lines of the `runArgs` and `containerEnv` in [devcontainer.json](.devcontainer/devcontainer.json).
-Alternatively, you could run julia with the environment variables set:
+Rendering on the NVIDIA GPU is mandatory if OpenGL-CUDA interop is required.
+You can run julia with the environment variables set:
 ```shell
 # NVIDIA GPU
 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia julia script.
@@ -86,7 +89,6 @@ You can switch between the GPUs by setting the following environment variable:
 MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA julia
 MESA_D3D12_DEFAULT_ADAPTER_NAME=Intel julia
 ```
-
 
 ## Debug in vscode
 Later versions of the Julia extension seem to have fixed the issue.

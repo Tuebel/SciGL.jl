@@ -6,12 +6,11 @@ FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 GLAbstraction = "ca6e7d0a-b0c9-59ca-8aba-aebf11497e1c"
 GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 MeshIO = "7269a6da-0436-5bbc-96c2-40638cbb6118"
 ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
 SciGL = "e33cfb9f-2574-42f7-bc46-3c25fa028886"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [sources]
-GLAbstraction = {url="https://github.com/Tuebel/GLAbstraction.jl"}
-# ] develop . (for SciGL)
-# SciGL = {url="https://github.com/rwth-irt/SciGL.jl"}
+GLAbstraction = {url = "https://github.com/Tuebel/GLAbstraction.jl"}

@@ -1,43 +1,46 @@
 # @license BSD-3 https://opensource.org/licenses/BSD-3-Clause
-# Copyright (c) 2020, Tim Redick
-# All rights reserved. 
+# Copyright (c) 2025, Tim Redick
+# All rights reserved.
 
-# Multi Stage Build: First pull julia image and copy the artifacts to the cudagl image
-FROM julia:buster AS julia_img
+# # Mutlistage build for Julia
+FROM docker.io/julia:1.11.3-bookworm AS julia-stage
 
-# CudaGL
-FROM nvidia/opengl:1.2-glvnd-devel
-ENV JULIA_PATH /usr/local/julia
-ENV PATH $JULIA_PATH/bin:$PATH
-COPY --from=julia_img $JULIA_PATH $JULIA_PATH
+# CUDA
+FROM docker.io/nvidia/cuda:12.8.0-runtime-ubuntu22.04
 
-# dev tools
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
-RUN apt-get update && apt-get install -y curl git git-lfs
+# System packages: dev tools, OpenGL demo
+RUN apt-get update && apt-get install -y curl git mesa-utils
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && \
+    apt-get install -y git-lfs
 
-# Non-root-user to avoid file permission problems
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+
+# Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    # Add sudo support
     && apt-get update \
     && apt-get install -y sudo \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# Copy Julia from the julia-stage
+COPY --from=julia-stage /usr/local/julia /usr/local/julia
+# Add Julia binaries to PATH
+ENV PATH="/usr/local/julia/bin:${PATH}"
+
+# Set the default user
 USER $USERNAME
 
-# IJUlia for non-root user
-RUN curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
-    && sh /tmp/miniconda.sh -b -p /home/vscode/miniconda \
-    && rm /tmp/miniconda.sh
-ENV PATH="/home/vscode/miniconda/bin:${PATH}"
-RUN conda init bash
-RUN conda install -c conda-forge -y jupyterlab 
-COPY install_packages.jl /tmp/install_packages.jl
-RUN julia /tmp/install_packages.jl
+# Install some common Julia packages
+RUN julia -e 'import Pkg; Pkg.add(["ImageShow", "OhMyREPL", "Revise"]); Pkg.instantiate(); Pkg.precompile()'
 
-# Convenient Julia packages and config
-COPY install_packages.jl /tmp/install_packages.jl
-COPY startup.jl /home/vscode/.julia/config/startup.jl
-RUN julia /tmp/install_packages.jl
+# Copy startup.jl to Julia config directory
+COPY --chown=$USERNAME:$USERNAME .devcontainer/startup.jl /home/$USERNAME/.julia/config/startup.jl
+COPY --chown=$USERNAME:$USERNAME *.toml /home/$USERNAME/workspace/
+
+# Setup environment from Manifest.toml
+RUN julia --project=/home/$USERNAME/workspace -e 'import Pkg; Pkg.instantiate()'

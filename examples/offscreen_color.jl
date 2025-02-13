@@ -3,9 +3,9 @@
 # All rights reserved. 
 
 using Accessors
-using CUDA
-using SciGL
 using Images
+using ImageShow
+using SciGL
 
 WIDTH = 801
 HEIGHT = 600
@@ -45,7 +45,7 @@ seconds = @elapsed for frame_number in 1:n_frames
     images[frame_number] = transpose(draw(gl_context, scene))
 end
 println("Average fps: $(n_frames / seconds)")
-ImageShow.gif(images; fps=fps)
+ImageShow.gif(images; fps=fps) |> display
 
 # needed if you're running this from the REPL
 destroy_context(gl_context)
