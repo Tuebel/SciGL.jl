@@ -34,7 +34,7 @@ scene = Scene(camera, [cube, monkey])
 # for gif
 fps = 60
 # for fps benchmark
-n_frames = 500
+n_frames = 200
 images = Array{Array{RGB{N0f8},2}}(undef, n_frames)
 seconds = @elapsed for frame_number in 1:n_frames
     # events
