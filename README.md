@@ -16,6 +16,10 @@ The primary goal is to enable efficient rendering of multiple scenes and transfe
 I try to incorporate existing Julia packages wherever possible.
 The next section contains a list and use cases of the packages.
 
+For performance, I use *Persistent mapping* and `glGetTextureSubImage` to transfer data between the GPU and CPU.
+These functions require **OpenGL 4.5**, but I set the minimum version to **4.1** to support WSL2.
+It seems like the drivers support the functions nevertheless.
+
 ## Package Dependencies
 - [CoordinateTransformations](https://github.com/JuliaGeometry/CoordinateTransformations.jl): Representing and chaining transformations like rotations, translations, and perspective transformations.
   [Rotations](https://github.com/JuliaGeometry/Rotations.jl) are handled by the equally named package.
@@ -33,7 +37,6 @@ For convenience commonly used symbols are reexported:
 - GLAbstraction
 - GLFW
 - Rotations: all symbols
-
 
 # HPC on Headless Server with VirtualGL
 Install [TurboVNC](https://turbovnc.org/Documentation/Documentation) on the server which will be used to instantiate a render context without an attached display.
@@ -75,40 +78,15 @@ You can verify whether the NVIDIA GPU is used in a Julia program by the followin
 nvidia-smi | grep julia
 ```
 
-## Docker + GUI in Windows
-[Install](https://docs.docker.com/docker-for-windows/wsl/) Docker with the Windows Subsystem for Linux (WSL2) backend.
-Unfortunately [GPU support for WSL2](https://www.docker.com/blog/wsl-2-gpu-support-is-here/) is only available for Windows Insiders.
-Thus, you will need to install an x-server, for example [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
-
-- Make sure that VcXsrv can communicate through the firewall.
-- Uncheck "native opengl"
-- Check "Disable Access Control"
-
-Moreover, you will have to modify [.devcontainer/devcontainer.json] since GPU passthrough is not possible:
-```json
-"runArgs": [
-  // Graphics devices only work on native Linux host, comment on Windows
-  // Intel
-  // "--device=/dev/dri:/dev/dri",
-  // Comment if nvidia-docker is unavailable
-  // "--gpus=all",
-  // Write to X11 server of host
-  // "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
-],
-"containerEnv": {
-  // Native Linux host
-  // "DISPLAY": "${localEnv:DISPLAY}",
-  // Windows host
-  "DISPLAY": "host.docker.internal:0.0",
-  "LIBGL_ALWAYS_INDIRECT": "0",
-
-  "QT_X11_NO_MITSHM": "1",
-  // If NVIDIA Prime Profile On-Demand is active, uncomment both to use NVIDIA GPU
-  // Integrated graphics are used otherwise
-  "__NV_PRIME_RENDER_OFFLOAD": "1",
-  "__GLX_VENDOR_LIBRARY_NAME": "nvidia",
-},
+## Windows Subsystem for Linux (WSL2)
+Microsoft [added](https://devblogs.microsoft.com/commandline/d3d12-gpu-video-acceleration-in-the-windows-subsystem-for-linux-now-available/) the Direct3D backend to the mesa driver in WSL2.
+One drawback is that the driver version is not the latest, e.g., 4.2 for NVIDIA and 4.1 for Intel at the time of writing.
+You can switch between the GPUs by setting the following environment variable:
+```shell
+MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA julia
+MESA_D3D12_DEFAULT_ADAPTER_NAME=Intel julia
 ```
+
 
 ## Debug in vscode
 Later versions of the Julia extension seem to have fixed the issue.
