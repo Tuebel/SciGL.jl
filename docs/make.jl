@@ -6,4 +6,4 @@ using Documenter, SciGL
 import Documenter.Remotes: GitLab
 
 makedocs(sitename="SciGL")
-deploydocs(repo="github.com/rwth-irt/SciGL.jl.git")
+deploydocs(repo="github.com/Tuebel/SciGL.jl.git")
